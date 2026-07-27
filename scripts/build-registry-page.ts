@@ -141,6 +141,7 @@ const html = `<!doctype html>
     <span class="brand">Ingot</span>
     <a href="index.html">Scanner</a>
     <a href="about.html">About</a>
+    <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
   </div>
 </nav>
 

@@ -2,6 +2,10 @@
 
 **Is the benchmark you are quoting inside the data you trained on?**
 
+[Run it in your browser](https://vaishak-v-nair.github.io/Ingot/) ·
+[the registry](https://vaishak-v-nair.github.io/Ingot/registry.html) ·
+[how every number was measured](docs/measurements.md)
+
 Ingot answers that with evidence rather than a score: it shows the matching text, side by
 side with its surroundings, so you can judge each match yourself. It runs on your machine —
 in a browser tab or on the command line — and nothing is uploaded, because there is nowhere

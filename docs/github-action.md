@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: OWNER/REPO@v1        # replace with this repository once published
+      - uses: vaishak-v-nair/Ingot@main       # pin to a tag once one is cut
         with:
           corpus: data/sft-mix.jsonl
           index: gsm8k
@@ -47,10 +47,10 @@ MMLU is 5.35 MB and does not ship inside the package, so point `index` at the pu
 file:
 
 ```yaml
-      - uses: OWNER/REPO@v1
+      - uses: vaishak-v-nair/Ingot@main
         with:
           corpus: data/sft-mix.jsonl
-          index: https://OWNER.github.io/REPO/indexes/mmlu.idx.bin.gz
+          index: https://vaishak-v-nair.github.io/Ingot/indexes/mmlu.idx.bin.gz
 ```
 
 Indexes carry one-way hashes and item ids, never benchmark text.
@@ -61,7 +61,7 @@ Useful for a first run against an existing corpus, where you want the picture be
 want the gate:
 
 ```yaml
-      - uses: OWNER/REPO@v1
+      - uses: vaishak-v-nair/Ingot@main
         id: ingot
         with:
           corpus: data/sft-mix.jsonl
