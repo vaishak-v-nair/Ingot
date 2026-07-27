@@ -7,7 +7,12 @@ reports/
 
 # Build artifacts from scripts/build-web.ts
 web/ingot.js
-web/indexes/
+# Note the trailing /*, not /. Excluding the directory itself makes the negation below
+# unreachable: git never descends into an ignored directory to reconsider a file.
+web/indexes/*
+# HumanEval is 233 KB of one-way hashes with no benchmark text, so it ships. A fresh clone
+# can run the sample scan, and test/sample-corpus.test.ts can assert it still matches.
+!web/indexes/humaneval.idx.json
 
 # Node
 node_modules/

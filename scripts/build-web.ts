@@ -14,6 +14,9 @@ import { DEFAULT_N } from '../src/contamination/types.ts';
 
 const BENCHES = ['gsm8k', 'humaneval', 'mmlu'];
 
+/** Indexes need the benchmark files; the bundle does not. CI builds the bundle alone. */
+const bundleOnly = process.argv.includes('--bundle-only');
+
 process.stdout.write('\n  building browser bundle\n');
 execFileSync(
   'npx',
@@ -21,6 +24,11 @@ execFileSync(
    '--outfile=web/ingot.js', '--platform=browser', '--target=es2022', '--minify'],
   { stdio: 'inherit', shell: true },
 );
+
+if (bundleOnly) {
+  process.stdout.write('\n  bundle only; skipping indexes\n\n');
+  process.exit(0);
+}
 
 mkdirSync(resolve('web/indexes'), { recursive: true });
 process.stdout.write('\n  building publishable indexes\n\n');
