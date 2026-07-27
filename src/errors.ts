@@ -69,3 +69,41 @@ export class ScoreComputationError extends IngotError {
     super('ScoreComputationError', `signal "${signalKey}" produced ${detail}`);
   }
 }
+
+export class BenchmarkEmptyError extends IngotError {
+  constructor(path: string) {
+    super('BenchmarkEmptyError', `${path} yielded no benchmark items with usable text`);
+  }
+}
+
+export class CorpusStreamError extends IngotError {
+  constructor(path: string, detail: string) {
+    super('CorpusStreamError', `could not stream ${path}: ${detail}`);
+  }
+}
+
+export class IndexVersionError extends IngotError {
+  constructor(found: number, expected: number) {
+    super(
+      'IndexVersionError',
+      `index format version ${found}, this build expects ${expected}. Rebuild the index; ` +
+        `comparing against a stale index silently produces a wrong answer.`,
+    );
+  }
+}
+
+export class IndexMismatchError extends IngotError {
+  constructor(detail: string) {
+    super('IndexMismatchError', detail);
+  }
+}
+
+export class PartitionTooSmallError extends IngotError {
+  constructor(partition: string, have: number, need: number) {
+    super(
+      'PartitionTooSmallError',
+      `the ${partition} partition has ${have} items, ${need} required. ` +
+        `Ingot does not report a score delta across a partition this small.`,
+    );
+  }
+}
