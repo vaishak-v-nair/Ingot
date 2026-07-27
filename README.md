@@ -8,12 +8,11 @@ in a browser tab or on the command line — and nothing is uploaded, because the
 to upload it to.
 
 ```bash
-node src/cli.ts contaminate \
-  --index web/indexes/humaneval.idx.bin.gz \
-  --corpus your-corpus.jsonl
+npx @ingot/scan contaminate --index gsm8k --corpus your-corpus.jsonl
 ```
 
-Or open `web/index.html`, drop a file, and watch the network panel stay empty.
+No clone, no benchmark download, no account. Or open the web scanner, drop a file, and
+watch the network panel stay empty.
 
 Apache-2.0. Zero runtime dependencies: Node 24 executes the TypeScript directly, with no
 build step and nothing installed at scan time.
@@ -56,8 +55,21 @@ anything.
 
 ## Quickstart
 
+`gsm8k` and `humaneval` ship with the package, so this needs nothing else:
+
 ```bash
-node --test test/*.test.ts        # 43 tests, one per defect found so far
+npx @ingot/scan contaminate --index gsm8k --corpus mine.jsonl
+```
+
+Corpus format is JSONL, one record per line. The text field is auto-detected as `text`,
+`response`, `output`, `completion`, `answer` or `content`, or pass `--text-field`. `--index`
+also takes a path to any published `.idx.bin.gz`, which is how MMLU and anything you build
+yourself are used.
+
+From a clone, with no install step at all:
+
+```bash
+node --test test/*.test.ts        # 44 tests, one per defect found so far
 
 node scripts/fetch-benchmarks.ts  # public benchmarks, normalised
 node scripts/build-web.ts         # browser bundle + publishable indexes
@@ -65,9 +77,6 @@ npx --yes serve web               # the scanner, at the root URL
 
 node src/cli.ts contaminate --index web/indexes/mmlu.idx.bin.gz --corpus mine.jsonl
 ```
-
-Corpus format is JSONL, one record per line. The text field is auto-detected as `text`,
-`response`, `output`, `completion`, `answer` or `content`, or pass `--text-field`.
 
 ## The n sweep: 13 is a poor default
 

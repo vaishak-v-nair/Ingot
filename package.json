@@ -1,13 +1,46 @@
 {
-  "name": "ingot",
+  "name": "@ingot/scan",
   "version": "0.1.0",
-  "private": true,
-  "description": "Independent verification of the AI training data supply chain. Batch in, purity report out.",
+  "description": "Is the benchmark you are quoting inside the data you trained on? Contamination scanning with the matching text shown, on your machine, nothing uploaded.",
+  "keywords": [
+    "contamination",
+    "benchmark",
+    "decontamination",
+    "training-data",
+    "evaluation",
+    "data-provenance",
+    "llm",
+    "n-gram"
+  ],
+  "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=24"
   },
+  "bin": {
+    "ingot": "dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/node.js",
+    "./browser": "./dist/browser.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "web/indexes/humaneval.idx.bin.gz",
+    "web/indexes/gsm8k.idx.bin.gz",
+    "web/sample-corpus.jsonl",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
   "scripts": {
+    "prepack": "node scripts/build-dist.ts",
+    "dist": "node scripts/build-dist.ts",
     "test": "node --test test/*.test.ts",
     "validate": "node scripts/contamination-validate.ts",
     "bench": "node scripts/bench-scan.ts",

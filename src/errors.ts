@@ -83,11 +83,14 @@ export class CorpusStreamError extends IngotError {
 }
 
 export class IndexMissingError extends IngotError {
-  constructor(path: string) {
+  constructor(path: string, available: string[] = []) {
     super(
       'IndexMissingError',
-      `no index at ${path}. Build one with "node scripts/build-web.ts", or point --index at ` +
-        `a published .idx.bin.gz. Ingot will not guess which benchmark you meant.`,
+      `no index at ${path}` +
+        (available.length > 0
+          ? `. Bundled benchmarks: ${available.join(', ')} — pass one by name, e.g. --index ${available[0]}.`
+          : `. Build one with "node scripts/build-web.ts", or point --index at a published .idx.bin.gz.`) +
+        ` Ingot will not guess which benchmark you meant.`,
     );
   }
 }

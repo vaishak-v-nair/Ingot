@@ -5,14 +5,20 @@ data/
 # Generated scan output
 reports/
 
+# Published bundle, rebuilt by prepack on every publish
+dist/
+
 # Build artifacts from scripts/build-web.ts
 web/ingot.js
 # Note the trailing /*, not /. Excluding the directory itself makes the negation below
 # unreachable: git never descends into an ignored directory to reconsider a file.
 web/indexes/*
-# HumanEval is 70 KB of one-way hashes with no benchmark text, so it ships. A fresh clone
-# can run the sample scan, and test/sample-corpus.test.ts can assert it still matches.
+# HumanEval (70 KB) and GSM8K (350 KB) are one-way hashes with no benchmark text, so they
+# ship: `npx @ingot/scan contaminate --index gsm8k` works with nothing else downloaded, and
+# test/sample-corpus.test.ts can assert the front page still matches. MMLU is 5.35 MB and
+# stays a download.
 !web/indexes/humaneval.idx.bin.gz
+!web/indexes/gsm8k.idx.bin.gz
 
 # Node
 node_modules/

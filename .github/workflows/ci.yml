@@ -29,6 +29,32 @@ jobs:
       - name: Run the test suite
         run: node --test test/*.test.ts
 
+  package:
+    name: npx works for a stranger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # The published package cannot ship raw TypeScript: Node refuses to strip types under
+      # node_modules, so a package that runs from source installs fine and then fails on
+      # first use. Only an install-and-run proves it works, so that is what this does.
+      - name: Pack, install into a clean directory, and run
+        run: |
+          set -euo pipefail
+          npm pack
+          mkdir -p /tmp/stranger && cd /tmp/stranger
+          npm init -y > /dev/null
+          npm install "$GITHUB_WORKSPACE"/ingot-scan-*.tgz
+          cp "$GITHUB_WORKSPACE/web/sample-corpus.jsonl" mine.jsonl
+          npx ingot contaminate --index humaneval --corpus mine.jsonl | tee out.txt
+          grep -q "HumanEval-78" out.txt
+          grep -q "prime numbers are 2, 3, 5, 7, 11, 13, 17" out.txt
+          grep -q "RECEIPT" out.txt
+
   validate:
     name: detection still works
     runs-on: ubuntu-latest

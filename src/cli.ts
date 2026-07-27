@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+#!/usr/bin/env node
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { loadBatch } from './loader.ts';
 import { runSignals } from './signals/index.ts';
@@ -16,16 +17,17 @@ import type { BaselinePair, ScanReport } from './types.ts';
 const USAGE = `ingot ${SCANNER_VERSION}
 Independent verification of the AI training data supply chain.
 
-  node src/cli.ts contaminate --index <index> --corpus <corpus.jsonl> [options]
+  ingot contaminate --index <benchmark|path> --corpus <corpus.jsonl> [options]
       Is a benchmark inside this training corpus? Every match is printed with the
       text around it, because a match you cannot read is not evidence.
 
-  node src/cli.ts scan <batch.jsonl> [options]
+  ingot scan <batch.jsonl> [options]
       Was this batch written by a human or generated? Batch-level, against named
       reference corpora.
 
 contaminate options
-  --index <path>         published index (.idx.bin.gz or .idx.json)
+  --index <name|path>    a bundled benchmark by name (humaneval, gsm8k), or a
+                         path to any published .idx.bin.gz or .idx.json
   --corpus <path>        JSONL corpus to scan, any size — it streams
   --bench <path>         benchmark JSONL; enables the near-duplicate tier
   --text-field <name>    field holding the document text
@@ -143,6 +145,29 @@ export function runScan(argv: string[]): number {
   return 0;
 }
 
+/** Indexes shipped with the package, so `--index humaneval` works from a bare npx. */
+const BUNDLED_INDEX_DIR = resolve(import.meta.dirname, '../web/indexes');
+
+/**
+ * Resolves --index as a file path, or as the name of a bundled benchmark.
+ *
+ * A stranger running this through npx has no idea where the package unpacked to, so
+ * requiring a path into node_modules would make the one-command promise a lie.
+ */
+function resolveIndexPath(value: string): string {
+  if (existsSync(value)) return value;
+
+  const bundled = resolve(BUNDLED_INDEX_DIR, `${value}.idx.bin.gz`);
+  if (existsSync(bundled)) return bundled;
+
+  const available = existsSync(BUNDLED_INDEX_DIR)
+    ? readdirSync(BUNDLED_INDEX_DIR)
+        .filter((f) => f.endsWith('.idx.bin.gz'))
+        .map((f) => f.replace(/\.idx\.bin\.gz$/, ''))
+    : [];
+  throw new IndexMissingError(value, available);
+}
+
 function loadIndexFile(path: string): Promise<NgramIndex> {
   const bytes = readFileSync(path);
   // The binary form is what ships; JSON stays supported because it is the specification
@@ -151,7 +176,7 @@ function loadIndexFile(path: string): Promise<NgramIndex> {
   return loadIndexFromBytes(bytes);
 }
 
-function contaminationSummary(report: ContaminationReport, indexPath: string): string {
+function contaminationSummary(report: ContaminationReport, indexLabel: string): string {
   const exact = report.tiers.find((t) => t.tier === 'exact')!;
   const near = report.tiers.find((t) => t.tier === 'near')!;
   const r = report.receipt;
@@ -197,7 +222,7 @@ function contaminationSummary(report: ContaminationReport, indexPath: string): s
 
   lines.push('  RECEIPT — everything needed to reproduce this');
   lines.push(`    scanner        ${r.scannerVersion}, index format ${r.indexFormatVersion}`);
-  lines.push(`    index          ${indexPath}`);
+  lines.push(`    index          ${indexLabel}`);
   lines.push(`                   ${r.benchmark} · n=${r.n} · stride ${r.stride} · ${r.indexGrams.toLocaleString()} grams`);
   lines.push(`    benchmark hash ${r.benchmarkHash}`);
   lines.push(`    corpus         ${r.corpus} · ${r.corpusBytes.toLocaleString()} bytes · ${r.corpusDocs.toLocaleString()} docs`);
@@ -213,14 +238,14 @@ function contaminationSummary(report: ContaminationReport, indexPath: string): s
 
 export async function runContaminate(argv: string[]): Promise<number> {
   const { flags } = parseArgs(argv);
-  const indexPath = flags.get('index');
+  const indexArg = flags.get('index');
   const corpusPath = flags.get('corpus');
 
-  if (!indexPath || !corpusPath) {
+  if (!indexArg || !corpusPath) {
     process.stdout.write(USAGE);
     return 2;
   }
-  if (!existsSync(indexPath)) throw new IndexMissingError(indexPath);
+  const indexPath = resolveIndexPath(indexArg);
   if (!existsSync(corpusPath)) throw new CorpusStreamError(basename(corpusPath), 'file not found');
 
   const index = await loadIndexFile(indexPath);
@@ -240,7 +265,7 @@ export async function runContaminate(argv: string[]): Promise<number> {
   }
 
   const command =
-    `node src/cli.ts contaminate --index ${indexPath} --corpus ${corpusPath}` +
+    `npx @ingot/scan contaminate --index ${indexArg} --corpus ${corpusPath}` +
     (benchPath ? ` --bench ${benchPath}` : '') +
     (maxDocFreq !== undefined ? ` --max-doc-freq ${maxDocFreq}` : '');
 
@@ -259,13 +284,16 @@ export async function runContaminate(argv: string[]): Promise<number> {
   }
 
   if (!flags.has('quiet')) {
-    process.stdout.write(contaminationSummary(report, indexPath));
+    // The argument, not the resolved path: an absolute path into node_modules is noise in
+    // a receipt whose whole job is to be re-typed by someone else.
+    const label = indexPath === indexArg ? indexArg : `${indexArg} (bundled)`;
+    process.stdout.write(contaminationSummary(report, label));
     if (jsonPath) process.stdout.write(`  report: ${resolve(jsonPath)}\n\n`);
   }
   return 0;
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const command = argv.find((a) => !a.startsWith('--')) ?? '';
 
