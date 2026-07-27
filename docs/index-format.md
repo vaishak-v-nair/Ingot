@@ -131,10 +131,15 @@ n=13, 6.8% of a typical benchmark is unmatchable.
     "maxItemsPerGram": 3,
     "uncheckableItems": 28
   },
-  "createdAt": "2026-07-27T15:00:00.000Z",
   "scannerVersion": "ingot-0.1.0"
 }
 ```
+
+**There is no build timestamp, deliberately.** An index is a pure function of its benchmark
+and its build options, so the same inputs must produce the same bytes — which is what lets
+anyone verify a published index by rebuilding it and comparing hashes. A `createdAt` field
+made every rebuild show as a change and defeated exactly that. When a timestamp is needed
+it belongs to the scan, not the index; identity here is `benchmarkHash`.
 
 `keys` and `items` are parallel arrays of equal length. Order is not significant; readers
 build a map.
@@ -277,6 +282,7 @@ produces the same set of `(benchmarkItemId, corpusDocId)` matches as the referen
 
 | formatVersion | Change |
 |---|---|
+| 3 | Removed `createdAt`, making an index byte-reproducible from its inputs |
 | 2 | Added `stride` and `droppedStride` to `stats` |
 | 1 | Initial |
 

@@ -321,7 +321,6 @@ export class NgramIndex {
       items,
       uncheckableItemIds: this.uncheckableItemIds,
       stats: this.stats,
-      createdAt: new Date().toISOString(),
       scannerVersion: SCANNER_VERSION,
     };
   }

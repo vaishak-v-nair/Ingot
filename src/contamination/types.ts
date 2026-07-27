@@ -1,6 +1,6 @@
 /** Contamination scanning: does benchmark text appear inside a training corpus. */
 
-export const INDEX_FORMAT_VERSION = 2;
+export const INDEX_FORMAT_VERSION = 3;
 
 /**
  * Keep one gram in every `stride` positions of a benchmark item.
@@ -101,7 +101,12 @@ export type NgramIndexData = {
   items: number[][];
   uncheckableItemIds: string[];
   stats: IndexStats;
-  createdAt: string;
+  /**
+   * No build timestamp, deliberately. An index is a pure function of its benchmark and its
+   * build options, so the same inputs must produce the same bytes — otherwise every rebuild
+   * shows as a change, and a published index cannot be checked by rebuilding it. When a
+   * report needs a time, it is the scan that has one. Identity is benchmarkHash.
+   */
   scannerVersion: string;
 };
 

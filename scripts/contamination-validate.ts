@@ -223,12 +223,7 @@ for (const stride of [1, 2, 3, 4, 6, 8]) {
   const checkable = plantedItems.filter((b) => !uncheckable.has(b.id)).length;
   const verbatim = planted.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
   const para = paraphrase.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
-  // A serialized index embeds createdAt. Same length every run, different digits, and gzip
-  // compresses different digits to different lengths — which is how a size measurement ends
-  // up wobbling by a byte between runs. Pinned so the figure means only what it claims to.
-  const data = index.serialize();
-  data.createdAt = '1970-01-01T00:00:00.000Z';
-  const encoded = encodeIndex(data);
+  const encoded = encodeIndex(index.serialize());
   const bytes = gzippedSize(encoded);
 
   strideRows.push({
