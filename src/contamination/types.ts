@@ -53,6 +53,7 @@ export type NgramIndexData = {
   /** Parallel arrays: keys[i] is a 53-bit composite gram hash, items[i] indexes itemIds. */
   keys: number[];
   items: number[][];
+  uncheckableItemIds: string[];
   stats: IndexStats;
   createdAt: string;
   scannerVersion: string;
@@ -65,6 +66,15 @@ export type IndexStats = {
   droppedStoplist: number;
   droppedNonDiscriminative: number;
   maxItemsPerGram: number;
+  /**
+   * Items with no surviving n-gram, so nothing can ever match them. Either they are
+   * shorter than n tokens, or every gram they had was filtered as boilerplate.
+   *
+   * This must be reported. A benchmark with short items otherwise returns "no
+   * contamination found" while part of it was never checked at all, which is the
+   * silent failure this whole scanner exists to avoid.
+   */
+  uncheckableItems: number;
 };
 
 export type ContaminationTier = 'exact' | 'near' | 'semantic';
@@ -132,6 +142,8 @@ export type ContaminationReport = {
   contaminatedItemIds: string[];
   scoreImpact?: ScoreImpact;
   indexStats: IndexStats;
+  /** Benchmark items nothing could match, named so a reader knows what was NOT checked. */
+  uncheckableItemIds: string[];
   elapsedMs: number;
   scannerVersion: string;
   generatedAt: string;

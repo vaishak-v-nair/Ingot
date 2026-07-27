@@ -42,6 +42,44 @@ the figure is CPU rather than disk. Reproduce with `node scripts/bench-scan.ts`.
 Indexes serialize to one-way hashes and item ids with **no benchmark text**, so an index
 can be published for benchmarks whose licence forbids redistributing the data.
 
+### The n sweep: 13 is a poor default
+
+Everyone uses 13-gram matching because GPT-3 (Brown et al., 2020) used it. We could find
+no systematic re-derivation since. Running 8 through 13 on 1,000 alpaca items planted in
+6,000 dolly documents, verbatim and again with one word in eleven dropped:
+
+| n | verbatim recall | paraphrase recall | false positives | unscannable items |
+|---|---|---|---|---|
+| 8 | 100% | 100% | 5 / 1000 | 2 / 1000 |
+| 9 | 100% | 100% | 3 / 1000 | 2 / 1000 |
+| **10** | **100%** | **100%** | **2 / 1000** | **3 / 1000** |
+| 11 | 100% | 98.2% | 1 / 1000 | 31 / 1000 |
+| 12 | 100% | 8.8% | 0 | 57 / 1000 |
+| 13 | 100% | 3.5% | 0 | 68 / 1000 |
+
+Two findings, both against the default:
+
+- **n=13 misses 96.5% of lightly edited copies.** Dropping one word in eleven changes no
+  meaning and defeats 13-gram detection almost entirely. n=10 catches all of it.
+- **n=13 leaves 6.8% of the benchmark unscannable**, because items shorter than 13 tokens
+  produce no 13-grams and can never match anything. At n=10 that falls to 0.3%.
+
+n=10 matches n=13 on verbatim recall, is 28x better on edited copies, and scans 20x more
+of the benchmark, for two false positives per thousand items — and those are inspectable,
+because every hit displays its matching text.
+
+Caveats stated first: one corpus pair, both 2023-era, and paraphrase is simulated by
+deterministic word dropping rather than a model rewriting the text. Real paraphrase will
+be harder than this.
+
+### What was NOT checked
+
+Every report names the benchmark items that produced no surviving n-gram, either because
+they are shorter than n tokens or because all their grams were filtered as boilerplate.
+Nothing can ever match those items, so a clean result that stays silent about them hides
+the part of the benchmark that was never examined. Reproduce with
+`node scripts/contamination-validate.ts`.
+
 ## What the provenance scanner measures
 
 | Signal | What it looks at | Separation on the reference pair |

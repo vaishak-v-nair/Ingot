@@ -238,6 +238,7 @@ export async function scanCorpus(
     tiers,
     contaminatedItemIds: [...contaminated].sort(),
     indexStats: index.stats,
+    uncheckableItemIds: index.uncheckableItemIds,
     elapsedMs: Date.now() - started,
     scannerVersion: SCANNER_VERSION,
     generatedAt: new Date().toISOString(),

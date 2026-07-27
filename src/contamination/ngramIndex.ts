@@ -131,6 +131,8 @@ export class NgramIndex {
   readonly itemIds: string[];
   readonly itemSubjects: (string | undefined)[];
   readonly stats: IndexStats;
+  /** Items nothing can ever match. See IndexStats.uncheckableItems. */
+  readonly uncheckableItemIds: string[];
   private readonly map: Map<number, number[]>;
 
   private constructor(
@@ -141,7 +143,9 @@ export class NgramIndex {
     itemSubjects: (string | undefined)[],
     map: Map<number, number[]>,
     stats: IndexStats,
+    uncheckableItemIds: string[] = [],
   ) {
+    this.uncheckableItemIds = uncheckableItemIds;
     this.n = n;
     this.benchmark = benchmark;
     this.benchmarkHash = benchmarkHash;
@@ -229,6 +233,11 @@ export class NgramIndex {
       }
     }
 
+    const covered = new Set<number>();
+    for (const owners of map.values()) for (const o of owners) covered.add(o);
+    const uncheckableIdx: number[] = [];
+    for (let i = 0; i < items.length; i++) if (!covered.has(i)) uncheckableIdx.push(i);
+
     const stats: IndexStats = {
       itemCount: items.length,
       gramsSeen,
@@ -236,6 +245,7 @@ export class NgramIndex {
       droppedStoplist,
       droppedNonDiscriminative,
       maxItemsPerGram: options.disableDiscriminativeFilter ? Number.POSITIVE_INFINITY : maxItemsPerGram,
+      uncheckableItems: uncheckableIdx.length,
     };
 
     const built = new NgramIndex(
@@ -246,6 +256,7 @@ export class NgramIndex {
       items.map((it) => it.subject),
       map,
       stats,
+      uncheckableIdx.map((i) => items[i].id),
     );
     return built;
   }
@@ -277,6 +288,7 @@ export class NgramIndex {
       itemSubjects: this.itemSubjects,
       keys,
       items,
+      uncheckableItemIds: this.uncheckableItemIds,
       stats: this.stats,
       createdAt: new Date().toISOString(),
       scannerVersion: SCANNER_VERSION,
@@ -297,6 +309,7 @@ export class NgramIndex {
       data.itemSubjects,
       map,
       data.stats,
+      data.uncheckableItemIds ?? [],
     );
     return loaded;
   }
