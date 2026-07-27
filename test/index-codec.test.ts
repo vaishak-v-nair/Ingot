@@ -112,6 +112,29 @@ test('gzip round trips, and unzipping plain bytes leaves them alone', async () =
   assert.deepEqual(await gunzipIfNeeded(original), original);
 });
 
+/**
+ * The index and the scan must tokenize identically. They did not: the index used
+ * tokenize(), the scan used hashTokens(), and U+0130 lowercases to two characters — so
+ * "İstanbul" was indexed as ["i", "stanbul"] and scanned as one token. Any benchmark item
+ * containing it was unmatchable, silently.
+ */
+test('text the two tokenizers once disagreed about is still found', async () => {
+  const { scanFile } = await import('../src/contamination/browserScan.ts');
+  const tricky = 'İstanbul ve İzmir arasında çalışan tren her sabah tam olarak altıda kalkar ve akşam döner';
+  const items: BenchmarkItem[] = [
+    { id: 'tr-1', text: tricky },
+    ...Array.from({ length: 20 }, (_, i) => ({ id: `pad-${i}`, text: bench(1, 40, 500 + i)[0].text })),
+  ];
+  const index = NgramIndex.build('turkish', items);
+
+  const corpus = new File(
+    [`${JSON.stringify({ id: 'doc-1', text: `some preamble here. ${tricky} and some more text after it.` })}\n`],
+    'tr.jsonl',
+  );
+  const report = await scanFile(index, corpus);
+  assert.deepEqual(report.contaminatedItemIds, ['tr-1']);
+});
+
 test('stride keeps every item findable while shrinking the index', () => {
   const items = bench(150, 80, 21);
   const full = NgramIndex.build('stride-1', items, { stride: 1 });

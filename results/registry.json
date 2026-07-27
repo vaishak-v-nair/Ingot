@@ -48,8 +48,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 452,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 496,
       "samples": []
     },
     {
@@ -63,8 +63,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 124,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 102,
       "samples": []
     },
     {
@@ -78,8 +78,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 455,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 465,
       "samples": []
     },
     {
@@ -93,8 +93,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 111,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 99,
       "samples": []
     },
     {
@@ -108,8 +108,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 281,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 331,
       "samples": [
         {
           "tier": "exact",
@@ -151,8 +151,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 94,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 141,
       "samples": [
         {
           "tier": "exact",
@@ -176,8 +176,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 297,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 292,
       "samples": []
     },
     {
@@ -191,8 +191,8 @@
       "uncheckableItems": 0,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 103,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 107,
       "samples": []
     },
     {
@@ -206,8 +206,8 @@
       "uncheckableItems": 28,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 2180,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 2561,
       "samples": [
         {
           "tier": "exact",
@@ -249,8 +249,8 @@
       "uncheckableItems": 28,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 941,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 868,
       "samples": []
     },
     {
@@ -264,8 +264,8 @@
       "uncheckableItems": 237,
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
-      "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 2594,
+      "corpusHash": "d051a258433bdde731149b5af8311ee0",
+      "elapsedMs": 2746,
       "samples": []
     },
     {
@@ -279,8 +279,8 @@
       "uncheckableItems": 237,
       "corpusDocs": 7208,
       "corpusTokens": 628087,
-      "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 1071,
+      "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
+      "elapsedMs": 1090,
       "samples": []
     }
   ]

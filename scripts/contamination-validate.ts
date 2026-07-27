@@ -18,8 +18,9 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { loadBatch } from '../src/loader.ts';
 import { mulberry32 } from '../src/text.ts';
+import { gzipSync } from 'node:zlib';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
-import { encodeIndex, gzipBytes } from '../src/contamination/indexCodec.ts';
+import { encodeIndex } from '../src/contamination/indexCodec.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
 import { DEFAULT_N, LEGACY_N, MAX_N, MIN_N } from '../src/contamination/types.ts';
 import { SCANNER_VERSION } from '../src/types.ts';
@@ -191,11 +192,23 @@ for (let n = MIN_N; n <= MAX_N; n++) {
 type StrideRow = {
   stride: number;
   grams: number;
+  indexBytes: number;
   indexBytesGz: number;
   verbatimRecall: number;
   paraphraseRecall: number;
   controlFalsePositives: number;
 };
+
+/**
+ * gzipSync at a pinned level, not the CompressionStream the library ships with.
+ *
+ * CompressionStream produced output that varied by a byte between runs on identical input,
+ * which is fine for a download and not fine for a number CI compares against a committed
+ * file. A published figure that moves on its own trains everyone to ignore the check.
+ */
+function gzippedSize(bytes: Uint8Array): number {
+  return gzipSync(bytes, { level: 9 }).length;
+}
 
 const strideRows: StrideRow[] = [];
 process.stdout.write(`\n  STRIDE SWEEP (n=${DEFAULT_N}) — index size against recall\n`);
@@ -210,11 +223,18 @@ for (const stride of [1, 2, 3, 4, 6, 8]) {
   const checkable = plantedItems.filter((b) => !uncheckable.has(b.id)).length;
   const verbatim = planted.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
   const para = paraphrase.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
-  const bytes = (await gzipBytes(encodeIndex(index.serialize()))).length;
+  // A serialized index embeds createdAt. Same length every run, different digits, and gzip
+  // compresses different digits to different lengths — which is how a size measurement ends
+  // up wobbling by a byte between runs. Pinned so the figure means only what it claims to.
+  const data = index.serialize();
+  data.createdAt = '1970-01-01T00:00:00.000Z';
+  const encoded = encodeIndex(data);
+  const bytes = gzippedSize(encoded);
 
   strideRows.push({
     stride,
     grams: index.size,
+    indexBytes: encoded.length,
     indexBytesGz: bytes,
     verbatimRecall: verbatim,
     paraphraseRecall: para,

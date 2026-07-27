@@ -1,4 +1,4 @@
-import { tokenize } from '../text.ts';
+import { hashTokens } from './fastTokens.ts';
 import { portableHash } from './portableHash.ts';
 import { BenchmarkEmptyError, IndexVersionError } from '../errors.ts';
 import { SCANNER_VERSION } from '../types.ts';
@@ -172,7 +172,22 @@ export class NgramIndex {
     }
 
     const maxItemsPerGram = options.maxItemsPerGram ?? DEFAULT_MAX_ITEMS_PER_GRAM;
-    const tokenized = items.map((it) => tokenize(it.text));
+
+    // Tokenized by exactly the routine the scan uses, not by an equivalent one.
+    //
+    // The index used tokenize() while the scan used hashTokens(), and the two disagreed on
+    // a handful of code points: "İstanbul" indexed as ["i", "stanbul"] — U+0130 lowercases
+    // to two characters and the combining dot is not a letter — while the scan read it as
+    // one token. A benchmark item containing that character could never be matched, and
+    // nothing would have said so. Sharing the routine makes the class of bug impossible
+    // rather than fixed.
+    //
+    // hashTokens reuses its buffers, so each item's hashes are copied out before the next
+    // call overwrites them.
+    const tokenized = items.map((it) => {
+      const { hashes, count } = hashTokens(it.text);
+      return hashes.slice(0, count);
+    });
 
     // Stoplist is derived from this benchmark, not a hardcoded English list, so it works
     // for code and non-English benchmarks too.
@@ -181,10 +196,12 @@ export class NgramIndex {
     // vocabulary lands in the stoplist, every gram is dropped, and the scan reports zero
     // contamination while looking like it worked. Document frequency is the guard: a
     // stopword is a token most items contain, not merely a token seen often.
-    const stop = new Set<string>();
+    // Keyed by token hash rather than token string: the hash is what the scan compares, so
+    // a stoplist keyed by anything else is a second opinion about what a token is.
+    const stop = new Set<number>();
     if (!options.disableStoplist && items.length >= STOPLIST_MIN_ITEMS) {
-      const freq = new Map<string, number>();
-      const docFreq = new Map<string, number>();
+      const freq = new Map<number, number>();
+      const docFreq = new Map<number, number>();
       for (const toks of tokenized) {
         for (const t of toks) freq.set(t, (freq.get(t) ?? 0) + 1);
         for (const t of new Set(toks)) docFreq.set(t, (docFreq.get(t) ?? 0) + 1);
@@ -206,7 +223,7 @@ export class NgramIndex {
       // Per item, a gram counts once. A benchmark item that repeats a phrase should not
       // weight that phrase more heavily.
       const seenInItem = new Set<number>();
-      forEachNgram(toks, n, (key, offset) => {
+      forEachNgramHashed(toks, toks.length, n, (key, offset) => {
         gramsSeen++;
         // Sampled by position rather than by hash, so the kept grams stay evenly spread
         // across the item. Hash sampling would leave whole passages uncovered by luck.

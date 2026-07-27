@@ -97,7 +97,8 @@
     {
       "stride": 1,
       "grams": 53023,
-      "indexBytesGz": 366626,
+      "indexBytes": 434870,
+      "indexBytesGz": 366579,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.8148148148148148,
       "controlFalsePositives": 2
@@ -105,7 +106,8 @@
     {
       "stride": 2,
       "grams": 26788,
-      "indexBytesGz": 191317,
+      "indexBytes": 231999,
+      "indexBytesGz": 191278,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.8047138047138047,
       "controlFalsePositives": 2
@@ -113,7 +115,8 @@
     {
       "stride": 3,
       "grams": 18016,
-      "indexBytesGz": 131783,
+      "indexBytes": 163097,
+      "indexBytesGz": 131736,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.7811447811447811,
       "controlFalsePositives": 1
@@ -121,7 +124,8 @@
     {
       "stride": 4,
       "grams": 13667,
-      "indexBytesGz": 101688,
+      "indexBytes": 128796,
+      "indexBytesGz": 101641,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.7744107744107744,
       "controlFalsePositives": 2
@@ -129,7 +133,8 @@
     {
       "stride": 6,
       "grams": 9261,
-      "indexBytesGz": 71439,
+      "indexBytes": 93985,
+      "indexBytesGz": 71393,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.7441077441077442,
       "controlFalsePositives": 1
@@ -137,7 +142,8 @@
     {
       "stride": 8,
       "grams": 7086,
-      "indexBytesGz": 56192,
+      "indexBytes": 76860,
+      "indexBytesGz": 56152,
       "verbatimRecall": 1,
       "paraphraseRecall": 0.6936026936026936,
       "controlFalsePositives": 1
