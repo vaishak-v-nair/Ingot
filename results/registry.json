@@ -49,7 +49,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 288,
+      "elapsedMs": 452,
       "samples": []
     },
     {
@@ -64,7 +64,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 104,
+      "elapsedMs": 124,
       "samples": []
     },
     {
@@ -79,7 +79,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 258,
+      "elapsedMs": 455,
       "samples": []
     },
     {
@@ -94,7 +94,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 86,
+      "elapsedMs": 111,
       "samples": []
     },
     {
@@ -109,7 +109,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 202,
+      "elapsedMs": 281,
       "samples": [
         {
           "tier": "exact",
@@ -152,7 +152,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 71,
+      "elapsedMs": 94,
       "samples": [
         {
           "tier": "exact",
@@ -177,7 +177,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 194,
+      "elapsedMs": 297,
       "samples": []
     },
     {
@@ -192,7 +192,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 69,
+      "elapsedMs": 103,
       "samples": []
     },
     {
@@ -207,7 +207,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 481,
+      "elapsedMs": 2180,
       "samples": [
         {
           "tier": "exact",
@@ -250,7 +250,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 171,
+      "elapsedMs": 941,
       "samples": []
     },
     {
@@ -265,7 +265,7 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "3aa484c503f2f5b552c3b3c6bff640c5",
-      "elapsedMs": 4758,
+      "elapsedMs": 2594,
       "samples": []
     },
     {
@@ -280,7 +280,7 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "d6aa6c257c726b23c52faa43e124e52f",
-      "elapsedMs": 1428,
+      "elapsedMs": 1071,
       "samples": []
     }
   ]
