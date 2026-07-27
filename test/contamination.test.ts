@@ -278,6 +278,49 @@ test('consecutive hits merge into one span rather than one per n-gram', async ()
   assert.equal(exact.itemsHit, 1);
 });
 
+test('text common across the corpus is dropped as ordinary language, not reported', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `g${i}`,
+    text: words(50, 30000 + i),
+  }));
+  const index = NgramIndex.build('generic-bench', bench, { n: N });
+
+  // The same benchmark text appears in 12 different corpus documents. That is what
+  // canonical text looks like: a prime sequence, a famous quotation, a stock definition.
+  const rows = Array.from({ length: 12 }, (_, i) => ({
+    id: `common-${i}`,
+    text: `${words(20, 31000 + i)} ${bench[0].text} ${words(20, 32000 + i)}`,
+  }));
+  const corpusPath = writeCorpus('generic.jsonl', rows);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  assert.equal(exact.totalHits, 0, 'text appearing in 12 documents is not evidence');
+  assert.ok((exact.droppedGeneric ?? 0) > 0, 'the drop must be counted, not silent');
+  assert.equal(report.contaminatedItemIds.length, 0);
+});
+
+test('a distinctive passage appearing once still counts, after the frequency filter', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `d${i}`,
+    text: words(50, 40000 + i),
+  }));
+  const index = NgramIndex.build('distinct-bench', bench, { n: N });
+
+  const rows = [
+    { id: 'leak', text: `${words(20, 41000)} ${bench[5].text} ${words(20, 42000)}` },
+    ...Array.from({ length: 20 }, (_, i) => ({ id: `other-${i}`, text: words(70, 43000 + i) })),
+  ];
+  const corpusPath = writeCorpus('distinct.jsonl', rows);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  assert.equal(exact.itemsHit, 1, 'a one-off verbatim copy is exactly what should survive');
+  assert.ok(report.contaminatedItemIds.includes('d5'));
+});
+
 test('a clean corpus produces no findings and still reports its content hash', async () => {
   const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
     id: `c${i}`,

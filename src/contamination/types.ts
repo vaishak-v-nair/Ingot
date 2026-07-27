@@ -42,6 +42,20 @@ export const STOPLIST_MIN_DOC_RATIO = 0.5;
 /** Below this many items, document frequency is not estimable, so the stoplist is skipped. */
 export const STOPLIST_MIN_ITEMS = 4;
 
+/**
+ * A matched n-gram appearing in more than this many distinct corpus documents is
+ * ordinary language, not evidence.
+ *
+ * The benchmark-side discriminative filter cannot catch this. "Martin Luther King Jr.'s
+ * I Have a Dream speech" sits in exactly one MMLU item, passes that filter, and matches
+ * any document discussing the subject. The first registry run produced six findings and
+ * all six were of this kind: prime sequences, digit sequences, stock definitions.
+ *
+ * Real contamination is a distinctive passage appearing once or twice. Canonical text
+ * appears everywhere, and its document frequency says so.
+ */
+export const DEFAULT_MAX_CORPUS_DOC_FREQUENCY = 5;
+
 /** Score-impact partitions below this are not reported, consistent with the provenance scorer. */
 export const MIN_PARTITION_ITEMS = 30;
 
@@ -116,6 +130,8 @@ export type TierResult = {
   totalHits: number;
   /** Capped sample retained for display. totalHits is the real count. */
   hits: ContaminationHit[];
+  /** Matches discarded as ordinary language by corpus document frequency. */
+  droppedGeneric?: number;
   /** Set when the tier could not run. */
   unavailableReason?: string;
 };

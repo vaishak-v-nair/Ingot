@@ -7,6 +7,7 @@ import { CorpusStreamError } from '../errors.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import { hashTokens } from './fastTokens.ts';
 import { forEachNgramHashed, NgramIndex } from './ngramIndex.ts';
+import { DEFAULT_MAX_CORPUS_DOC_FREQUENCY } from './types.ts';
 import type { BenchmarkItem, ContaminationHit, ContaminationReport, TierResult } from './types.ts';
 
 /** Stored hits per tier. totalHits keeps the true count; this only bounds what we render. */
@@ -18,6 +19,9 @@ const CONTEXT_TOKENS = 12;
 /** MinHash Jaccard estimate at or above this counts as a near-duplicate. */
 const NEAR_THRESHOLD = 0.55;
 
+/** Runs buffered for the document-frequency pass. Overflow is counted and surfaced, never silent. */
+const MAX_PROVISIONAL_RUNS = 200_000;
+
 export type ScanOptions = {
   textField?: string;
   idField?: string;
@@ -27,23 +31,35 @@ export type ScanOptions = {
    * deliberately carries no text.
    */
   benchmarkItems?: BenchmarkItem[];
+  /**
+   * A matched gram in more than this many distinct corpus documents is ordinary
+   * language rather than evidence. See DEFAULT_MAX_CORPUS_DOC_FREQUENCY.
+   */
+  maxCorpusDocFrequency?: number;
   onProgress?: (docs: number, tokens: number) => void;
 };
 
-type RawHit = { itemIdx: number; offset: number };
+type RawHit = { itemIdx: number; offset: number; key: number };
+
+type Run = { itemIdx: number; start: number; end: number; keys: number[] };
+
+/** Distinct gram keys retained per run, enough to find the rarest one without unbounded memory. */
+const MAX_KEYS_PER_RUN = 16;
 
 /** Merges runs of consecutive n-gram hits into one span. A 100-token verbatim copy is one match, not 88. */
-function mergeRuns(hits: RawHit[]): { itemIdx: number; start: number; end: number }[] {
+function mergeRuns(hits: RawHit[]): Run[] {
   if (hits.length === 0) return [];
   const sorted = hits.slice().sort((a, b) => a.itemIdx - b.itemIdx || a.offset - b.offset);
-  const runs: { itemIdx: number; start: number; end: number }[] = [];
-  let cur = { itemIdx: sorted[0].itemIdx, start: sorted[0].offset, end: sorted[0].offset };
+  const runs: Run[] = [];
+  let cur: Run = { itemIdx: sorted[0].itemIdx, start: sorted[0].offset, end: sorted[0].offset, keys: [sorted[0].key] };
   for (let i = 1; i < sorted.length; i++) {
     const h = sorted[i];
-    if (h.itemIdx === cur.itemIdx && h.offset <= cur.end + 1) cur.end = h.offset;
-    else {
+    if (h.itemIdx === cur.itemIdx && h.offset <= cur.end + 1) {
+      cur.end = h.offset;
+      if (cur.keys.length < MAX_KEYS_PER_RUN) cur.keys.push(h.key);
+    } else {
       runs.push(cur);
-      cur = { itemIdx: h.itemIdx, start: h.offset, end: h.offset };
+      cur = { itemIdx: h.itemIdx, start: h.offset, end: h.offset, keys: [h.key] };
     }
   }
   runs.push(cur);
@@ -59,9 +75,19 @@ export async function scanCorpus(
   const n = index.n;
   const hasher = createHash('sha256');
 
+  const maxDocFrequency = options.maxCorpusDocFrequency ?? DEFAULT_MAX_CORPUS_DOC_FREQUENCY;
+
+  // Matches are held until the whole corpus has been read, because whether a match is
+  // evidence depends on how common its text turns out to be across the corpus.
+  const provisional: { run: Run; hit: ContaminationHit | null }[] = [];
+  const gramDocCount = new Map<number, number>();
+  const seenGramsInDoc = new Set<number>();
+  let truncatedRuns = 0;
+
   const exactHits: ContaminationHit[] = [];
   const exactItemsHit = new Set<number>();
   let exactTotal = 0;
+  let droppedGeneric = 0;
 
   const nearHits: ContaminationHit[] = [];
   const nearItemsHit = new Set<number>();
@@ -122,20 +148,32 @@ export async function scanCorpus(
       forEachNgramHashed(hashes, count, n, (key, offset) => {
         const owners = index.lookup(key);
         if (!owners) return;
-        for (const itemIdx of owners) raw.push({ itemIdx, offset });
+        // Document frequency of the MATCHED gram, counted once per document. Only
+        // matching grams are tracked, so this stays small.
+        if (!seenGramsInDoc.has(key)) {
+          seenGramsInDoc.add(key);
+          gramDocCount.set(key, (gramDocCount.get(key) ?? 0) + 1);
+        }
+        for (const itemIdx of owners) raw.push({ itemIdx, offset, key });
       });
+      seenGramsInDoc.clear();
 
       if (raw.length > 0) {
         // Copy boundaries before any further hashTokens call reuses the shared buffers.
         const runs = mergeRuns(raw);
         for (const run of runs) {
-          exactTotal++;
-          exactItemsHit.add(run.itemIdx);
-          if (exactHits.length < MAX_STORED_HITS) {
+          if (provisional.length >= MAX_PROVISIONAL_RUNS) {
+            truncatedRuns++;
+            continue;
+          }
+          // Evidence is captured now, because the document text is only available on this
+          // pass. Whether it survives is decided after document frequencies are known.
+          let hit: ContaminationHit | null = null;
+          if (provisional.length < MAX_STORED_HITS * 4) {
             const last = Math.min(count - 1, run.end + n - 1);
             const ctxFirst = Math.max(0, run.start - CONTEXT_TOKENS);
             const ctxLast = Math.min(count - 1, last + CONTEXT_TOKENS);
-            exactHits.push({
+            hit = {
               tier: 'exact',
               benchmarkItemId: index.itemIds[run.itemIdx],
               corpusDocId: docId,
@@ -145,8 +183,9 @@ export async function scanCorpus(
               matchedText: text.slice(starts[run.start], ends[last]),
               contextBefore: text.slice(starts[ctxFirst], starts[run.start]),
               contextAfter: text.slice(ends[last], ends[ctxLast]),
-            });
+            };
           }
+          provisional.push({ run, hit });
         }
       }
 
@@ -189,6 +228,21 @@ export async function scanCorpus(
     stream.close();
   }
 
+  // Corpus-side document frequency filter. A run survives if its RAREST gram is rare:
+  // one distinctive phrase inside a passage is enough to make the passage evidence,
+  // while text that is common end to end is ordinary language.
+  for (const { run, hit } of provisional) {
+    let rarest = Number.POSITIVE_INFINITY;
+    for (const key of run.keys) rarest = Math.min(rarest, gramDocCount.get(key) ?? 1);
+    if (rarest > maxDocFrequency) {
+      droppedGeneric++;
+      continue;
+    }
+    exactTotal++;
+    exactItemsHit.add(run.itemIdx);
+    if (hit && exactHits.length < MAX_STORED_HITS) exactHits.push(hit);
+  }
+
   const itemsTotal = index.itemIds.length;
 
   const tiers: TierResult[] = [
@@ -199,6 +253,7 @@ export async function scanCorpus(
       rate: itemsTotal === 0 ? 0 : exactItemsHit.size / itemsTotal,
       totalHits: exactTotal,
       hits: exactHits,
+      droppedGeneric,
     },
     {
       tier: 'near',
