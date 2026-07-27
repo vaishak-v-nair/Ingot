@@ -45,28 +45,34 @@ can be published for benchmarks whose licence forbids redistributing the data.
 ### The n sweep: 13 is a poor default
 
 Everyone uses 13-gram matching because GPT-3 (Brown et al., 2020) used it. We could find
-no systematic re-derivation since. Running 8 through 13 on 1,000 alpaca items planted in
-6,000 dolly documents, verbatim and again with one word in eleven dropped:
+no systematic re-derivation since. Running 8 through 13 on a 1,000-item benchmark with 300
+items planted in 6,000 dolly documents, verbatim and again with roughly one word in eleven
+dropped:
 
-| n | verbatim recall | paraphrase recall | false positives | unscannable items |
+| n | verbatim recall | edited-copy recall | false positives | unscannable items |
 |---|---|---|---|---|
-| 8 | 100% | 100% | 5 / 1000 | 2 / 1000 |
-| 9 | 100% | 100% | 3 / 1000 | 2 / 1000 |
-| **10** | **100%** | **100%** | **2 / 1000** | **3 / 1000** |
-| 11 | 100% | 98.2% | 1 / 1000 | 31 / 1000 |
-| 12 | 100% | 8.8% | 0 | 57 / 1000 |
-| 13 | 100% | 3.5% | 0 | 68 / 1000 |
+| 8 | 100% | 90.9% | 5 / 1000 | 2 / 1000 |
+| 9 | 100% | 85.9% | 3 / 1000 | 2 / 1000 |
+| **10** | **100%** | **81.5%** | **2 / 1000** | **3 / 1000** |
+| 11 | 100% | 79.7% | 1 / 1000 | 31 / 1000 |
+| 12 | 100% | 75.0% | 0 | 57 / 1000 |
+| 13 | 100% | 69.6% | 0 | 68 / 1000 |
 
 Two findings, both against the default:
 
-- **n=13 misses 96.5% of lightly edited copies.** Dropping one word in eleven changes no
-  meaning and defeats 13-gram detection almost entirely. n=10 catches all of it.
 - **n=13 leaves 6.8% of the benchmark unscannable**, because items shorter than 13 tokens
-  produce no 13-grams and can never match anything. At n=10 that falls to 0.3%.
+  produce no 13-grams and can never match anything. At n=10 that falls to 0.3%. This one is
+  structural rather than statistical, and it is the stronger of the two.
+- **n=13 recovers 69.6% of lightly edited copies against 81.5% at n=10.** At 300 planted
+  items the standard error is about 2.3 points, so the gap is real, and recall falls
+  monotonically as n grows.
 
-n=10 matches n=13 on verbatim recall, is 28x better on edited copies, and scans 20x more
-of the benchmark, for two false positives per thousand items — and those are inspectable,
-because every hit displays its matching text.
+Both find every verbatim copy. n=10 costs two false positives per thousand items against
+zero at n=13, and those are inspectable, because every hit displays its matching text.
+
+An earlier version of this table claimed 100% against 3.5%. That gap was an artifact of a
+test fixture that deleted words on a fixed lattice, which decided in advance which values
+of n could survive. `docs/measurements.md` has the full account.
 
 **What the false positives actually are.** Both n=10 control hits are canonical facts with
 one natural phrasing:

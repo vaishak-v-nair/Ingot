@@ -19,13 +19,20 @@ import { tmpdir } from 'node:os';
 import { loadBatch } from '../src/loader.ts';
 import { mulberry32 } from '../src/text.ts';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
+import { encodeIndex, gzipBytes } from '../src/contamination/indexCodec.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
 import { DEFAULT_N, LEGACY_N, MAX_N, MIN_N } from '../src/contamination/types.ts';
 import { SCANNER_VERSION } from '../src/types.ts';
 import type { BenchmarkItem } from '../src/contamination/types.ts';
 
 const BENCH_ITEMS = 1000;
-const PLANTED = 60;
+
+/**
+ * 300, not 60. At 60 planted items one item is 1.7 percentage points, the standard error
+ * on a recall near 80% is about 5 points, and adjacent values of n differ by less than
+ * that — so the first version of this sweep was reporting noise as a ranking.
+ */
+const PLANTED = 300;
 const CORPUS_DOCS = 6000;
 const SEED = 0xc0d;
 
@@ -57,17 +64,30 @@ const plantedIds = new Set(plantedItems.map((b) => b.id));
 
 /**
  * Light editing that a person might do when reusing text: drop the occasional word and
- * add the occasional filler. Deterministic, and enough to break a run of 13 identical
- * tokens without changing what the passage says.
+ * add the occasional filler. Deterministic given the seed, and enough to break a run of
+ * identical tokens without changing what the passage says.
+ *
+ * Independent draws, NOT `i % 11`. A fixed modulus puts every deletion on the same lattice
+ * in every item, and a lattice does not perturb — it decides in advance which n survive.
+ * With deletions at 11, 22, 33 …, a 10-gram at offset 0 spans tokens 0-9 and can never be
+ * touched, while a 13-gram at offset 0 spans 0-12 and is always broken. Measured on this
+ * fixture: offset 0 survived for 60 of 60 items at n=10 and for 0 of 60 at n=13.
+ *
+ * That made the first published paraphrase numbers — 100% at n=10 against 3.5% at n=13 —
+ * a property of the test fixture rather than of n. Same class of defect as the seeded
+ * corpus that manufactured 26 false positives; see docs/measurements.md.
  */
+const DROP_RATE = 1 / 11;
+const INSERT_RATE = 1 / 17;
+
 function perturb(text: string, seed: number): string {
   const r = mulberry32(seed);
   const words = text.split(/\s+/);
   const out: string[] = [];
   for (let i = 0; i < words.length; i++) {
-    if (i > 0 && i % 11 === 0) continue; // drop roughly one word in eleven
+    if (r() < DROP_RATE) continue;
     out.push(words[i]);
-    if (i > 0 && i % 17 === 0) out.push(r() < 0.5 ? 'really' : 'actually');
+    if (r() < INSERT_RATE) out.push(r() < 0.5 ? 'really' : 'actually');
   }
   return out.join(' ');
 }
@@ -162,6 +182,54 @@ for (let n = MIN_N; n <= MAX_N; n++) {
   );
 }
 
+/**
+ * Stride sweep. A published index costs a download before anyone sees an answer, and
+ * MMLU is 773,421 grams. Keeping one gram in every `stride` positions shrinks it in
+ * proportion — the question is what that costs in recall, which is measured here rather
+ * than assumed.
+ */
+type StrideRow = {
+  stride: number;
+  grams: number;
+  indexBytesGz: number;
+  verbatimRecall: number;
+  paraphraseRecall: number;
+  controlFalsePositives: number;
+};
+
+const strideRows: StrideRow[] = [];
+process.stdout.write(`\n  STRIDE SWEEP (n=${DEFAULT_N}) — index size against recall\n`);
+
+for (const stride of [1, 2, 3, 4, 6, 8]) {
+  const index = NgramIndex.build(`stride-${stride}`, bench, { n: DEFAULT_N, stride });
+  const planted = await scanCorpus(index, plantedCorpus);
+  const paraphrase = await scanCorpus(index, paraphraseCorpus);
+  const control = await scanCorpus(index, controlCorpus);
+
+  const uncheckable = new Set(index.uncheckableItemIds);
+  const checkable = plantedItems.filter((b) => !uncheckable.has(b.id)).length;
+  const verbatim = planted.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
+  const para = paraphrase.contaminatedItemIds.filter((id) => plantedIds.has(id)).length / Math.max(1, checkable);
+  const bytes = (await gzipBytes(encodeIndex(index.serialize()))).length;
+
+  strideRows.push({
+    stride,
+    grams: index.size,
+    indexBytesGz: bytes,
+    verbatimRecall: verbatim,
+    paraphraseRecall: para,
+    controlFalsePositives: control.contaminatedItemIds.length,
+  });
+
+  process.stdout.write(
+    `    stride ${stride}  grams ${index.size.toLocaleString().padStart(7)}  ` +
+      `index ${(bytes / 1024).toFixed(0).padStart(4)} KB  ` +
+      `verbatim ${(verbatim * 100).toFixed(1).padStart(5)}%  ` +
+      `paraphrase ${(para * 100).toFixed(1).padStart(5)}%  ` +
+      `FPs ${String(control.contaminatedItemIds.length).padStart(2)}\n`,
+  );
+}
+
 // Ablation: does the discriminative filter change what we would report?
 const withFilter = NgramIndex.build('ablate-on', bench, { n: DEFAULT_N });
 const withoutFilter = NgramIndex.build('ablate-off', bench, { n: DEFAULT_N, disableDiscriminativeFilter: true });
@@ -214,6 +282,7 @@ writeFileSync(
       planted: PLANTED,
       seed: SEED,
       rows,
+      strideRows,
       ablation: {
         withFilterGrams: withFilter.size,
         withoutFilterGrams: withoutFilter.size,

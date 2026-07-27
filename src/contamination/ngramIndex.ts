@@ -5,6 +5,7 @@ import { SCANNER_VERSION } from '../types.ts';
 import {
   DEFAULT_MAX_ITEMS_PER_GRAM,
   DEFAULT_N,
+  DEFAULT_STRIDE,
   INDEX_FORMAT_VERSION,
   MAX_N,
   MIN_N,
@@ -115,6 +116,8 @@ export const contentHash = portableHash;
 
 export type BuildOptions = {
   n?: number;
+  /** Keep one gram in every `stride` positions. See DEFAULT_STRIDE. */
+  stride?: number;
   maxItemsPerGram?: number;
   /** Disable the discriminative filter, for the ablation in the validation harness. */
   disableDiscriminativeFilter?: boolean;
@@ -163,6 +166,11 @@ export class NgramIndex {
     }
     if (items.length === 0) throw new BenchmarkEmptyError(benchmark);
 
+    const stride = options.stride ?? DEFAULT_STRIDE;
+    if (!Number.isInteger(stride) || stride < 1) {
+      throw new RangeError(`stride must be a positive integer, got ${stride}`);
+    }
+
     const maxItemsPerGram = options.maxItemsPerGram ?? DEFAULT_MAX_ITEMS_PER_GRAM;
     const tokenized = items.map((it) => tokenize(it.text));
 
@@ -192,6 +200,7 @@ export class NgramIndex {
     const map = new Map<number, number[]>();
     let gramsSeen = 0;
     let droppedStoplist = 0;
+    let droppedStride = 0;
 
     tokenized.forEach((toks, itemIdx) => {
       // Per item, a gram counts once. A benchmark item that repeats a phrase should not
@@ -199,6 +208,12 @@ export class NgramIndex {
       const seenInItem = new Set<number>();
       forEachNgram(toks, n, (key, offset) => {
         gramsSeen++;
+        // Sampled by position rather than by hash, so the kept grams stay evenly spread
+        // across the item. Hash sampling would leave whole passages uncovered by luck.
+        if (stride > 1 && offset % stride !== 0) {
+          droppedStride++;
+          return;
+        }
         if (seenInItem.has(key)) return;
 
         let allStop = true;
@@ -241,6 +256,8 @@ export class NgramIndex {
       gramsKept: map.size,
       droppedStoplist,
       droppedNonDiscriminative,
+      droppedStride,
+      stride,
       maxItemsPerGram: options.disableDiscriminativeFilter ? Number.POSITIVE_INFINITY : maxItemsPerGram,
       uncheckableItems: uncheckableIdx.length,
     };

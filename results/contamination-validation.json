@@ -2,7 +2,7 @@
   "scanner": "ingot-0.1.0",
   "benchmarkItems": 1000,
   "corpusDocs": 6000,
-  "planted": 60,
+  "planted": 300,
   "seed": 3085,
   "rows": [
     {
@@ -10,10 +10,10 @@
       "indexGrams": 54973,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 60,
-      "plantedUncheckable": 0,
+      "checkablePlanted": 298,
+      "plantedUncheckable": 2,
       "verbatimRecall": 1,
-      "paraphraseRecall": 1,
+      "paraphraseRecall": 0.9093959731543624,
       "controlFalsePositives": 5,
       "controlHitIds": [
         "alpaca-11757",
@@ -28,10 +28,10 @@
       "indexGrams": 54004,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 60,
-      "plantedUncheckable": 0,
+      "checkablePlanted": 298,
+      "plantedUncheckable": 2,
       "verbatimRecall": 1,
-      "paraphraseRecall": 1,
+      "paraphraseRecall": 0.8590604026845637,
       "controlFalsePositives": 3,
       "controlHitIds": [
         "alpaca-11757",
@@ -44,10 +44,10 @@
       "indexGrams": 53023,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 60,
-      "plantedUncheckable": 0,
+      "checkablePlanted": 297,
+      "plantedUncheckable": 3,
       "verbatimRecall": 1,
-      "paraphraseRecall": 1,
+      "paraphraseRecall": 0.8148148148148148,
       "controlFalsePositives": 2,
       "controlHitIds": [
         "alpaca-4838",
@@ -59,10 +59,10 @@
       "indexGrams": 52039,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 57,
-      "plantedUncheckable": 3,
+      "checkablePlanted": 291,
+      "plantedUncheckable": 9,
       "verbatimRecall": 1,
-      "paraphraseRecall": 0.9824561403508771,
+      "paraphraseRecall": 0.7972508591065293,
       "controlFalsePositives": 1,
       "controlHitIds": [
         "alpaca-4838"
@@ -73,10 +73,10 @@
       "indexGrams": 51080,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 57,
-      "plantedUncheckable": 3,
+      "checkablePlanted": 284,
+      "plantedUncheckable": 16,
       "verbatimRecall": 1,
-      "paraphraseRecall": 0.08771929824561403,
+      "paraphraseRecall": 0.75,
       "controlFalsePositives": 0,
       "controlHitIds": []
     },
@@ -85,12 +85,62 @@
       "indexGrams": 50143,
       "droppedStoplist": 0,
       "droppedNonDiscriminative": 0,
-      "checkablePlanted": 57,
-      "plantedUncheckable": 3,
+      "checkablePlanted": 280,
+      "plantedUncheckable": 20,
       "verbatimRecall": 1,
-      "paraphraseRecall": 0.03508771929824561,
+      "paraphraseRecall": 0.6964285714285714,
       "controlFalsePositives": 0,
       "controlHitIds": []
+    }
+  ],
+  "strideRows": [
+    {
+      "stride": 1,
+      "grams": 53023,
+      "indexBytesGz": 366626,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.8148148148148148,
+      "controlFalsePositives": 2
+    },
+    {
+      "stride": 2,
+      "grams": 26788,
+      "indexBytesGz": 191317,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.8047138047138047,
+      "controlFalsePositives": 2
+    },
+    {
+      "stride": 3,
+      "grams": 18016,
+      "indexBytesGz": 131783,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.7811447811447811,
+      "controlFalsePositives": 1
+    },
+    {
+      "stride": 4,
+      "grams": 13667,
+      "indexBytesGz": 101688,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.7744107744107744,
+      "controlFalsePositives": 2
+    },
+    {
+      "stride": 6,
+      "grams": 9261,
+      "indexBytesGz": 71439,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.7441077441077442,
+      "controlFalsePositives": 1
+    },
+    {
+      "stride": 8,
+      "grams": 7086,
+      "indexBytesGz": 56192,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.6936026936026936,
+      "controlFalsePositives": 1
     }
   ],
   "ablation": {

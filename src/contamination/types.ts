@@ -1,17 +1,34 @@
 /** Contamination scanning: does benchmark text appear inside a training corpus. */
 
-export const INDEX_FORMAT_VERSION = 1;
+export const INDEX_FORMAT_VERSION = 2;
+
+/**
+ * Keep one gram in every `stride` positions of a benchmark item.
+ *
+ * An MMLU item yields 55 grams on average, and a published index pays for every one of
+ * them. Detection only needs a single surviving gram to land inside the copied span, so
+ * sampling is a size lever — but it is also a recall lever, and which one dominates is a
+ * measurement, not an opinion. `scripts/contamination-validate.ts` sweeps it.
+ *
+ * The default is 1, meaning no sampling, because the measured cost of stride 2 was a real
+ * drop in recall on lightly edited copies and the honest default is the one that finds
+ * the most. Publishers who need a smaller index can raise it and see exactly what it costs.
+ */
+export const DEFAULT_STRIDE = 1;
 
 /**
  * 10, not the field's inherited 13.
  *
  * GPT-3 (Brown et al. 2020) used 13-gram matching and everyone followed, with no
- * systematic re-derivation since. Measured on 1,000 items planted in 6,000 documents
- * (`scripts/contamination-validate.ts`), 13 misses 96.5% of copies edited by dropping one
- * word in eleven, and leaves 6.8% of a benchmark unscannable because items shorter than
- * 13 tokens produce no grams at all. 10 matches 13 on verbatim recall, catches 100% of
- * those edited copies, and scans 20x more of the benchmark, for two false positives per
- * thousand items — each inspectable, because every hit displays its matching text.
+ * systematic re-derivation since. Measured on 1,000 items with 300 planted in 6,000
+ * documents (`scripts/contamination-validate.ts`): both find every verbatim copy, but 13
+ * leaves 6.8% of a benchmark unscannable — items shorter than 13 tokens produce no grams
+ * at all — against 0.3% at n=10. On copies edited by dropping one word in eleven, 10
+ * recovers 81.5% against 69.6%.
+ *
+ * The size of that second gap was overstated at first by a test fixture that deleted words
+ * on a fixed lattice; see docs/measurements.md. The unscannable figure is structural and
+ * was never in doubt, and it is the stronger of the two arguments.
  *
  * Reports quote n=13 alongside, so findings stay comparable with prior published work.
  */
@@ -94,6 +111,9 @@ export type IndexStats = {
   gramsKept: number;
   droppedStoplist: number;
   droppedNonDiscriminative: number;
+  /** Grams skipped by position sampling. Zero at the default stride of 1. */
+  droppedStride: number;
+  stride: number;
   maxItemsPerGram: number;
   /**
    * Items with no surviving n-gram, so nothing can ever match them. Either they are

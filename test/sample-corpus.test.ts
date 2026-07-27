@@ -4,8 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
-import { scanFile } from '../src/contamination/browserScan.ts';
-import type { NgramIndexData } from '../src/contamination/types.ts';
+import { loadIndexFromBytes, scanFile } from '../src/contamination/browserScan.ts';
 
 /**
  * The front page ships a "try a sample corpus" button. What it produces is a claim made to
@@ -15,12 +14,11 @@ import type { NgramIndexData } from '../src/contamination/types.ts';
  * If this test ever fails, the front page is teaching the wrong lesson.
  */
 
-const indexPath = resolve(import.meta.dirname, '../web/indexes/humaneval.idx.json');
+const indexPath = resolve(import.meta.dirname, '../web/indexes/humaneval.idx.bin.gz');
 const samplePath = resolve(import.meta.dirname, '../web/sample-corpus.jsonl');
 
-function loadIndex(): NgramIndex {
-  const data = JSON.parse(readFileSync(indexPath, 'utf8')) as NgramIndexData;
-  return NgramIndex.load(data);
+function loadIndex(): Promise<NgramIndex> {
+  return loadIndexFromBytes(readFileSync(indexPath));
 }
 
 function sampleFile(): File {
@@ -28,7 +26,7 @@ function sampleFile(): File {
 }
 
 test('the sample corpus still matches HumanEval, and only where documented', async () => {
-  const report = await scanFile(loadIndex(), sampleFile());
+  const report = await scanFile(await loadIndex(), sampleFile());
   const exact = report.tiers.find((t) => t.tier === 'exact')!;
 
   assert.equal(report.corpusDocs, 5);
@@ -56,8 +54,8 @@ test('the browser bundle produces the same result as the sources', async (t) => 
   }
 
   const bundle = await import(pathToFileURL(bundlePath).href);
-  const data = JSON.parse(readFileSync(indexPath, 'utf8'));
-  const report = await bundle.scanFile(bundle.NgramIndex.load(data), sampleFile());
+  const index = await bundle.loadIndexFromBytes(readFileSync(indexPath));
+  const report = await bundle.scanFile(index, sampleFile());
   const exact = report.tiers.find((tier: { tier: string }) => tier.tier === 'exact');
 
   assert.deepEqual(report.contaminatedItemIds, ['HumanEval-78']);

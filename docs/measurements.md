@@ -61,34 +61,102 @@ An unstable benchmark does not merely fail to help. It produces confident wrong 
 
 ## The n sweep: 13 is a poor default
 
-1,000 alpaca items planted in 6,000 dolly documents, verbatim and again with one word in
-eleven dropped. Full output in `results/contamination-validation.json`.
+A 1,000-item benchmark drawn from alpaca, 300 of those items planted in 6,000 dolly
+documents, verbatim and again with roughly one word in eleven dropped and the occasional
+filler word inserted. Full output in `results/contamination-validation.json`.
 
-| n | verbatim recall | paraphrase recall | false positives | unscannable items |
+| n | verbatim recall | edited-copy recall | false positives | unscannable items |
 |---|---|---|---|---|
-| 8 | 100% | 100% | 5 / 1000 | 2 / 1000 |
-| 9 | 100% | 100% | 3 / 1000 | 2 / 1000 |
-| **10** | **100%** | **100%** | **2 / 1000** | **3 / 1000** |
-| 11 | 100% | 98.2% | 1 / 1000 | 31 / 1000 |
-| 12 | 100% | 8.8% | 0 | 57 / 1000 |
-| 13 | 100% | 3.5% | 0 | 68 / 1000 |
+| 8 | 100% | 90.9% | 5 / 1000 | 2 / 1000 |
+| 9 | 100% | 85.9% | 3 / 1000 | 2 / 1000 |
+| **10** | **100%** | **81.5%** | **2 / 1000** | **3 / 1000** |
+| 11 | 100% | 79.7% | 1 / 1000 | 31 / 1000 |
+| 12 | 100% | 75.0% | 0 | 57 / 1000 |
+| 13 | 100% | 69.6% | 0 | 68 / 1000 |
 
 Everyone uses 13-gram matching because GPT-3 (Brown et al., 2020) used it. We could find
-no systematic re-derivation since. Dropping one word in eleven changes no meaning and
-defeats n=13 96.5% of the time, and n=13 leaves 6.8% of the benchmark unscannable because
-items shorter than 13 tokens produce no 13-grams at all.
+no systematic re-derivation since. Two things separate the values of n:
 
-n=10 matches n=13 on verbatim recall, is 28x better on edited copies, and scans 20x more
-of the benchmark, for two false positives per thousand items — both inspectable, because
-every hit displays its matching text.
+- **Unscannable items.** n=13 leaves 6.8% of the benchmark unscannable, because an item
+  shorter than 13 tokens produces no 13-grams and nothing can ever match it. At n=10 that
+  is 0.3%. This is structural, not statistical, and it is the stronger argument.
+- **Edited copies.** 81.5% at n=10 against 69.6% at n=13. With 300 planted items the
+  standard error is about 2.3 points, so a 12-point gap is real, and the curve falls
+  monotonically with n as it should.
 
-Caveats, stated first: one corpus pair, both 2023-era, and paraphrase is simulated by
-deterministic word dropping rather than a model rewriting the text. Real paraphrase will
-be harder than this. The direction is not subtle, but the constant is not settled either.
+The cost of n=10 is two false positives per thousand items, against zero at n=13 — and
+both are inspectable, because every hit displays its matching text.
+
+### The first version of this table was wrong
+
+It reported 100% at n=10 against 3.5% at n=13, and that gap was an artifact of the test
+fixture rather than a property of n.
+
+The perturbation dropped word *i* whenever `i % 11 == 0`, which puts every deletion on the
+same lattice in every item. Deletions at 11, 22, 33 … mean a 10-gram at offset 0 spans
+tokens 0-9 and can never be touched, while a 13-gram at offset 0 spans 0-12 and is always
+broken. Measured directly on that fixture: the offset-0 gram survived for 60 of 60 items at
+n=10 and 0 of 60 at n=13. The sweep was reporting the phase of the deletion pattern.
+
+The fix is independent draws at the same rate, which removes the lattice. The planted
+sample also went from 60 items to 300, because at 60 the standard error is about 5 points
+and adjacent values of n differ by less than that — the old table was ranking noise.
+
+Same class of defect as the seeded corpus generator that manufactured 26 false positives.
+Both were fixtures with a constant step, and both produced confident, wrong, publishable
+numbers.
+
+Caveats, stated first: one corpus pair, both 2023-era, and edited copies are simulated by
+random word dropping rather than a model rewriting the text. Real paraphrase will be
+harder than this.
+
+## Index size against recall
+
+A published index is a download that happens before anyone sees a result, so its size is a
+product decision. Keeping one gram in every `stride` positions shrinks it in proportion.
+Measured at n=10 on the same fixture:
+
+| stride | grams | index (gzipped) | verbatim | edited copies | false positives |
+|---|---|---|---|---|---|
+| **1** | 53,023 | 358 KB | 100% | 81.5% | 2 |
+| 2 | 26,788 | 187 KB | 100% | 80.5% | 2 |
+| 3 | 18,016 | 129 KB | 100% | 78.1% | 1 |
+| 4 | 13,667 | 99 KB | 100% | 77.4% | 2 |
+| 6 | 9,261 | 70 KB | 100% | 74.4% | 1 |
+| 8 | 7,086 | 55 KB | 100% | 69.4% | 1 |
+
+Verbatim recall is unaffected at every stride, because a whole copied item contains all of
+its grams and only one of them has to be kept. Recall on edited copies falls, slowly at
+first: halving the index costs about one point.
+
+**Published indexes ship at stride 1 anyway.** A smaller index that detects slightly less
+would make the website and the command line disagree, and "the same code gives the same
+numbers" is worth more than 2 MB. The lever is documented and measured for anyone
+publishing their own.
+
+## The wire format
+
+The JSON form of an index is the specification and stays legible, but it costs about 25
+bytes per gram — a 53-bit key printed as sixteen decimal digits, plus punctuation.
+
+| benchmark | grams | JSON | binary, gzipped | load |
+|---|---|---|---|---|
+| humaneval | 10,277 | 0.23 MB | 0.07 MB | 27 ms |
+| gsm8k | 49,866 | 1.17 MB | 0.35 MB | 13 ms |
+| mmlu | 773,421 | 19.37 MB | 5.35 MB | 277 ms |
+
+Three things do the work: keys are sorted and delta-encoded as varints; a bitmap marks the
+5% of grams owned by more than one benchmark item, so the rest do not pay for a count; and
+everything small stays JSON, which compresses well.
+
+Sorted uniform 53-bit keys have an information floor near 4.36 bytes each — log2(2^53 /
+count) plus about 1.44 bits — and the delta varints land at 5.03. Closing that last 15%
+would mean bit-packing; shortening the hash would close much more, and would trade download
+size for false matches, which is not a trade an audit tool can make.
 
 ## Defects found by measurement
 
-Each one is now a guard in the code and a test in `test/guards.test.ts`.
+Each one is now a guard in the code and a test under `test/`.
 
 1. **Baseline calibrated at the wrong batch size.** Near-duplicate rate and type-token
    ratio move with batch size regardless of provenance. Size-sensitive signals now decline
@@ -126,7 +194,9 @@ Each one is now a guard in the code and a test in `test/guards.test.ts`.
     kind this project exists to prevent. The index now tracks every item with no surviving
     n-gram, and every report names them. Recall is measured over checkable items with the
     uncheckable count beside it, never folded in.
-11. **The registry's first findings were all false positives.** Six n=10 findings, every
+11. **The paraphrase fixture deleted words on a lattice** — above. It made the project's
+    headline finding look four times larger than it is.
+12. **The registry's first findings were all false positives.** Six n=10 findings, every
     one canonical text: prime and digit sequences, "I Have a Dream", a stock definition of
     capitalism. The discriminative filter drops grams shared across many *benchmark* items
     but could not tell that a gram is ubiquitous in ordinary writing. A corpus-side

@@ -164,27 +164,32 @@
 
     <h3 style="margin-top:2.5rem">The field's 13-gram default is wrong</h3>
     <p class="sub">Everyone matches on 13-grams because GPT-3 did in 2020. We could find no
-    systematic re-derivation since. Running 8 through 13 over 1,000 items planted in 6,000
-    documents, verbatim and again with one word in eleven dropped:</p>
+    systematic re-derivation since. Running 8 through 13 over a 1,000-item benchmark with 300
+    items planted in 6,000 documents, verbatim and again with roughly one word in eleven
+    dropped:</p>
     <div class="scroll">
       <table>
         <tr><th class="num">n</th><th class="num">verbatim</th><th class="num">edited copies</th><th class="num">false positives</th><th class="num">unscannable</th></tr>
-        <tr><td class="num">8</td><td class="num">100%</td><td class="num">100%</td><td class="num">5 / 1000</td><td class="num">2 / 1000</td></tr>
-        <tr><td class="num">9</td><td class="num">100%</td><td class="num">100%</td><td class="num">3 / 1000</td><td class="num">2 / 1000</td></tr>
-        <tr class="win"><td class="num"><strong>10</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>2 / 1000</strong></td><td class="num"><strong>3 / 1000</strong></td></tr>
-        <tr><td class="num">11</td><td class="num">100%</td><td class="num">98.2%</td><td class="num">1 / 1000</td><td class="num">31 / 1000</td></tr>
-        <tr><td class="num">12</td><td class="num">100%</td><td class="num">8.8%</td><td class="num">0</td><td class="num">57 / 1000</td></tr>
-        <tr><td class="num">13</td><td class="num">100%</td><td class="num">3.5%</td><td class="num">0</td><td class="num">68 / 1000</td></tr>
+        <tr><td class="num">8</td><td class="num">100%</td><td class="num">90.9%</td><td class="num">5 / 1000</td><td class="num">2 / 1000</td></tr>
+        <tr><td class="num">9</td><td class="num">100%</td><td class="num">85.9%</td><td class="num">3 / 1000</td><td class="num">2 / 1000</td></tr>
+        <tr class="win"><td class="num"><strong>10</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>81.5%</strong></td><td class="num"><strong>2 / 1000</strong></td><td class="num"><strong>3 / 1000</strong></td></tr>
+        <tr><td class="num">11</td><td class="num">100%</td><td class="num">79.7%</td><td class="num">1 / 1000</td><td class="num">31 / 1000</td></tr>
+        <tr><td class="num">12</td><td class="num">100%</td><td class="num">75.0%</td><td class="num">0</td><td class="num">57 / 1000</td></tr>
+        <tr><td class="num">13</td><td class="num">100%</td><td class="num">69.6%</td><td class="num">0</td><td class="num">68 / 1000</td></tr>
       </table>
     </div>
-    <p class="sub" style="margin-top:1.2rem"><strong>n=13 misses 96.5% of lightly edited copies</strong>
-    — dropping one word in eleven changes no meaning and defeats it almost entirely — and it leaves
-    <strong>6.8% of the benchmark unscannable</strong>, because items shorter than 13 tokens produce no
-    13-grams and can never match anything. n=10 matches it on verbatim recall, is 28x better on edited
-    copies, scans 20x more of the benchmark, and costs two false positives per thousand items that you
-    can read and dismiss in a second.</p>
-    <p class="sub">Caveats first: one corpus pair, both 2023-era, and paraphrase simulated by
-    deterministic word dropping rather than a model rewriting text. Real paraphrase will be harder.</p>
+    <p class="sub" style="margin-top:1.2rem"><strong>n=13 leaves 6.8% of the benchmark
+    unscannable</strong>, because items shorter than 13 tokens produce no 13-grams and nothing can
+    ever match them. At n=10 that is 0.3%. That one is structural rather than statistical, and it is
+    the stronger argument. On lightly edited copies n=10 recovers 81.5% against 69.6% — a real gap at
+    300 planted items, where the standard error is about 2.3 points — and it costs two false positives
+    per thousand that you can read and dismiss in a second.</p>
+    <p class="sub">An earlier version of this table claimed 100% against 3.5%. That gap was an
+    artifact of a test fixture that deleted words on a fixed lattice, which decided in advance which
+    values of n could survive. It is written up in <code>docs/measurements.md</code>, because a tool
+    that audits other people's numbers cannot quietly restate its own.</p>
+    <p class="sub">Caveats first: one corpus pair, both 2023-era, and edited copies simulated by
+    random word dropping rather than a model rewriting text. Real paraphrase will be harder.</p>
   </div>
 </section>
 
@@ -253,7 +258,7 @@
 </footer>
 
 <script type="module">
-import { NgramIndex, scanFile } from './ingot.js';
+import { loadIndexFromBytes, scanFile } from './ingot.js';
 
 const INDEXES = [
   { id: 'gsm8k', label: 'GSM8K (1,319 items)' },
@@ -285,12 +290,15 @@ let loading = null;
 async function loadIndex(id) {
   index = null;
   $('benchmeta').textContent = 'loading index…';
-  const res = await fetch(`./indexes/${id}.idx.json`);
+  const started = performance.now();
+  const res = await fetch(`./indexes/${id}.idx.bin.gz`);
   if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
-  const data = await res.json();
-  index = NgramIndex.load(data);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  index = await loadIndexFromBytes(bytes);
+  const secs = ((performance.now() - started) / 1000).toFixed(1);
   $('benchmeta').textContent =
-    `${index.itemIds.length.toLocaleString()} items · n=${index.n} · hashes only, no benchmark text`;
+    `${index.itemIds.length.toLocaleString()} items · n=${index.n} · ` +
+    `${(bytes.length / 1e6).toFixed(1)} MB in ${secs}s · hashes only, no benchmark text`;
   return index;
 }
 

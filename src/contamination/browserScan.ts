@@ -1,4 +1,5 @@
 import { NgramIndex } from './ngramIndex.ts';
+import { decodeIndex, gunzipIfNeeded } from './indexCodec.ts';
 import { parseCorpusLine, ScanSession } from './scanSession.ts';
 import type { ContaminationReport, NgramIndexData } from './types.ts';
 
@@ -31,6 +32,16 @@ async function sha256Hex(chunks: string[]): Promise<string> {
 
 export function loadIndexFromJson(data: NgramIndexData): NgramIndex {
   return NgramIndex.load(data);
+}
+
+/**
+ * Loads a published index from its wire form: the compact binary, gzipped.
+ *
+ * The JSON form is the specification and stays supported, but MMLU is 19.4 MB as JSON and
+ * 5.3 MB this way, and the download happens before the user sees anything at all.
+ */
+export async function loadIndexFromBytes(bytes: Uint8Array): Promise<NgramIndex> {
+  return NgramIndex.load(decodeIndex(await gunzipIfNeeded(bytes)));
 }
 
 /**
@@ -95,5 +106,5 @@ export async function scanFile(
   return session.finish(file.name, hash, Math.round(performance.now() - started));
 }
 
-export { NgramIndex };
+export { NgramIndex, decodeIndex, gunzipIfNeeded };
 export type { ContaminationReport, NgramIndexData };
