@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ingot — check your training data, without uploading it</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --ink: #16150f; --paper: #fbfaf7; --dim: #6d6a5c; --line: #ddd9cc; --card: #fff;
+    --gold: #9a6a00; --hot: #ff9d1f; --ok: #2f6b34; --bad: #8f2f22;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f; --card: #16150f;
+            --gold: #e0aa3e; --ok: #7fbf85; --bad: #e2887a; }
+  }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 54rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  .brand { font-family: var(--mono); font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+  h1 { font-size: clamp(1.9rem, 5vw, 3rem); line-height: 1.05; margin: .6rem 0 .5rem; letter-spacing: -.02em; }
+  .lede { color: var(--dim); max-width: 44ch; margin: 0 0 .6rem; }
+  .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .78rem;
+             border: 1px solid var(--line); border-radius: 999px; padding: .45rem .8rem; background: var(--card); }
+  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
+
+  .drop { margin: 2rem 0 1rem; border: 2px dashed var(--line); border-radius: 14px; padding: 2.5rem 1.5rem;
+          text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
+  .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--hot) 8%, var(--card)); }
+  .drop p { margin: .4rem 0; color: var(--dim); font-size: .92rem; }
+  .drop strong { font-size: 1.05rem; color: var(--ink); }
+  input[type=file] { display: none; }
+  .btn { display: inline-block; margin-top: .9rem; border: 1px solid var(--line); background: var(--paper);
+         color: var(--ink); border-radius: 8px; padding: .55rem 1.1rem; cursor: pointer; font: inherit; font-size: .92rem; }
+  .btn:hover { border-color: var(--gold); }
+  select { font: inherit; font-size: .92rem; padding: .45rem .6rem; border-radius: 8px; border: 1px solid var(--line);
+           background: var(--card); color: var(--ink); }
+  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .muted { color: var(--dim); font-size: .86rem; }
+
+  progress { width: 100%; height: .5rem; }
+  #status { font-family: var(--mono); font-size: .82rem; color: var(--dim); min-height: 1.4em; }
+
+  .verdict { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 1.5rem; margin: 1.25rem 0; }
+  .big { font-family: var(--mono); font-size: 2.6rem; line-height: 1; font-weight: 600; }
+  .big.clean { color: var(--ok); } .big.dirty { color: var(--bad); }
+  .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
+  h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin: 2rem 0 .6rem; }
+  .hit { border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; margin-bottom: .6rem; background: var(--card); }
+  .hit code { font-family: var(--mono); font-size: .78rem; color: var(--dim); }
+  .quote { margin-top: .45rem; font-size: .92rem; }
+  mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
+  td.num { font-family: var(--mono); }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Ingot</div>
+  <h1>Is your benchmark inside your training data?</h1>
+  <p class="lede">Drop a JSONL file. It is scanned here, in this tab, on your machine.</p>
+  <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; open devtools and watch</span></p>
+
+  <div class="row" style="margin-top:1.5rem">
+    <label for="bench" class="muted">Check against</label>
+    <select id="bench"></select>
+    <span class="muted" id="benchmeta"></span>
+  </div>
+
+  <div class="drop" id="drop">
+    <strong>Drop your corpus here</strong>
+    <p>JSONL, one record per line, with a <code>text</code> field. Any size.</p>
+    <label class="btn" for="file">Choose a file</label>
+    <input type="file" id="file" accept=".jsonl,.json,.txt">
+  </div>
+
+  <progress id="bar" max="100" value="0" hidden></progress>
+  <div id="status"></div>
+  <div id="out"></div>
+
+  <footer>
+    Ingot runs entirely in your browser. The scanning code is the same code the command line
+    uses, so the same file gives the same numbers either way.
+  </footer>
+</div>
+
+<script type="module">
+import { NgramIndex, scanFile } from './ingot.js';
+
+const INDEXES = [
+  { id: 'gsm8k', label: 'GSM8K (1,319 items)' },
+  { id: 'humaneval', label: 'HumanEval (164 items)' },
+  { id: 'mmlu', label: 'MMLU (14,042 items)' },
+];
+
+const $ = (id) => document.getElementById(id);
+const benchSel = $('bench');
+for (const b of INDEXES) {
+  const o = document.createElement('option');
+  o.value = b.id; o.textContent = b.label;
+  benchSel.appendChild(o);
+}
+
+let index = null;
+let loading = null;
+
+async function loadIndex(id) {
+  $('benchmeta').textContent = 'loading index…';
+  const res = await fetch(`./indexes/${id}.idx.json`);
+  if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
+  const data = await res.json();
+  index = NgramIndex.load(data);
+  $('benchmeta').textContent =
+    `${index.itemIds.length.toLocaleString()} items · n=${index.n} · hashes only, no benchmark text`;
+  return index;
+}
+
+loading = loadIndex(benchSel.value).catch((e) => { $('benchmeta').textContent = String(e.message); });
+benchSel.addEventListener('change', () => { loading = loadIndex(benchSel.value); });
+
+const drop = $('drop');
+for (const ev of ['dragenter', 'dragover']) {
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); });
+}
+for (const ev of ['dragleave', 'drop']) {
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); });
+}
+drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) run(e.dataTransfer.files[0]); });
+$('file').addEventListener('change', (e) => { if (e.target.files[0]) run(e.target.files[0]); });
+
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+async function run(file) {
+  $('out').innerHTML = '';
+  $('bar').hidden = false;
+  $('bar').value = 0;
+  $('status').textContent = `reading ${file.name} (${(file.size / 1e6).toFixed(1)} MB)…`;
+
+  try {
+    await loading;
+    if (!index) throw new Error('no index loaded');
+
+    const report = await scanFile(index, file, {
+      onProgress: (docs, tokens, bytes) => {
+        $('bar').value = Math.min(100, (bytes / file.size) * 100);
+        $('status').textContent =
+          `${docs.toLocaleString()} documents · ${tokens.toLocaleString()} tokens · ${(bytes / 1e6).toFixed(0)} MB`;
+      },
+    });
+
+    $('bar').hidden = true;
+    render(report, file);
+  } catch (err) {
+    $('bar').hidden = true;
+    $('status').textContent = '';
+    $('out').innerHTML = `<div class="verdict"><strong>Could not scan.</strong><div class="muted">${esc(String(err.message || err))}</div></div>`;
+  }
+}
+
+function render(report, file) {
+  const exact = report.tiers.find((t) => t.tier === 'exact');
+  const hitCount = exact.itemsHit;
+  const clean = hitCount === 0;
+
+  $('status').textContent =
+    `${report.corpusDocs.toLocaleString()} documents · ${report.corpusTokens.toLocaleString()} tokens · ` +
+    `${(report.elapsedMs / 1000).toFixed(1)}s · nothing left this machine`;
+
+  const uncheckable = report.uncheckableItemIds.length;
+
+  let html = `
+    <div class="verdict">
+      <div class="big ${clean ? 'clean' : 'dirty'}">${hitCount}</div>
+      <div class="label">${clean ? 'benchmark items found in your data' : `of ${exact.itemsTotal.toLocaleString()} benchmark items appear in your data`}</div>
+      <p style="margin:.9rem 0 0">${
+        clean
+          ? 'No verbatim overlap found. That is a real result, not an absence of one: every item that could be checked was checked.'
+          : 'Read the matches below before concluding anything. Some overlaps are canonical facts with one natural phrasing rather than leakage.'
+      }</p>
+    </div>
+
+    <h2>What was checked</h2>
+    <div class="scroll"><table>
+      <tr><th>benchmark</th><td class="num">${esc(report.benchmark)}, ${exact.itemsTotal.toLocaleString()} items at n=${report.n}</td></tr>
+      <tr><th>your file</th><td class="num">${esc(file.name)} · ${report.corpusDocs.toLocaleString()} docs</td></tr>
+      <tr><th>matches kept</th><td class="num">${exact.totalHits}</td></tr>
+      <tr><th>dropped as ordinary language</th><td class="num">${exact.droppedGeneric ?? 0}</td></tr>
+      <tr><th>could not be checked</th><td class="num">${uncheckable} item${uncheckable === 1 ? '' : 's'} shorter than ${report.n} tokens</td></tr>
+      <tr><th>content hash</th><td class="num">${esc(report.corpusHash)}</td></tr>
+    </table></div>`;
+
+  if (exact.hits.length > 0) {
+    html += `<h2>Evidence — judge it yourself</h2>`;
+    for (const h of exact.hits.slice(0, 25)) {
+      html += `
+        <div class="hit">
+          <code>${esc(h.benchmarkItemId)} &rarr; ${esc(h.corpusDocId)}</code>
+          <div class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</div>
+        </div>`;
+    }
+  }
+
+  if (uncheckable > 0) {
+    html += `<h2>Not checked</h2><p class="muted">${uncheckable} benchmark item${uncheckable === 1 ? ' is' : 's are'}
+      shorter than ${report.n} tokens, so nothing could ever match ${uncheckable === 1 ? 'it' : 'them'}.
+      A clean result that stayed silent about that would be hiding the part of the benchmark nobody looked at.</p>`;
+  }
+
+  $('out').innerHTML = html;
+}
+</script>
+</body>
+</html>

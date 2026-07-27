@@ -1,5 +1,5 @@
-import { createHash } from 'node:crypto';
 import { tokenize } from '../text.ts';
+import { portableHash } from './portableHash.ts';
 import { BenchmarkEmptyError, IndexVersionError } from '../errors.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import {
@@ -110,11 +110,8 @@ export function forEachNgram(
   forEachNgramHashed(hashes, tokens.length, n, visit);
 }
 
-export function contentHash(parts: Iterable<string>): string {
-  const h = createHash('sha256');
-  for (const p of parts) h.update(p).update('\u0000');
-  return h.digest('hex').slice(0, 32);
-}
+/** Index identity, portable across Node and browser. See portableHash for why not SHA-256. */
+export const contentHash = portableHash;
 
 export type BuildOptions = {
   n?: number;
