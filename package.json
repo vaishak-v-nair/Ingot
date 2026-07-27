@@ -8,10 +8,15 @@
     "node": ">=24"
   },
   "scripts": {
+    "test": "node --test test/*.test.ts",
+    "validate": "node scripts/contamination-validate.ts",
+    "bench": "node scripts/bench-scan.ts",
+    "registry": "node scripts/registry-scan.ts",
+    "web": "node scripts/build-web.ts && npx --yes serve web",
     "fetch": "node scripts/fetch-corpora.ts",
+    "fetch:bench": "node scripts/fetch-benchmarks.ts",
     "baselines": "node scripts/build-baselines.ts",
     "spike": "node scripts/spike.ts",
-    "scan": "node src/cli.ts",
-    "test": "node --test test/*.test.ts"
+    "scan": "node src/cli.ts"
   }
 }

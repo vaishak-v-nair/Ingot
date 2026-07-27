@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Upstream corpora can change under us. A weekly run turns "the published numbers no
+  # longer reproduce" into a notification rather than something a reader discovers.
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # Built first so the bundle test runs for real instead of skipping. The page loads
+      # the bundle, and a bundling regression passes every other test in the suite.
+      - name: Build the browser bundle
+        run: node scripts/build-web.ts --bundle-only
+
+      - name: Run the test suite
+        run: node --test test/*.test.ts
+
+  validate:
+    name: detection still works
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Cache reference corpora
+        id: corpora
+        uses: actions/cache@v4
+        with:
+          path: ingot-data
+          key: corpora-v1
+
+      - name: Fetch reference corpora
+        if: steps.corpora.outputs.cache-hit != 'true'
+        run: |
+          node scripts/fetch-corpora.ts
+          cp -r data ingot-data
+
+      - name: Restore cached corpora
+        if: steps.corpora.outputs.cache-hit == 'true'
+        run: cp -r ingot-data data
+
+      # The harness exits non-zero when planted verbatim recall is below 100%. That is a
+      # pass/fail assertion, not a metric: a verbatim copy that the scanner misses is a bug.
+      - name: Planted recall, false positives, n sweep
+        run: node scripts/contamination-validate.ts
+
+      # Every number published in the README and on the site comes out of this file. If a
+      # change moves them, the change updates them here in the same commit, or the claims
+      # on the front page stop being true.
+      - name: Published numbers still reproduce
+        run: |
+          if ! git diff --exit-code --stat results/contamination-validation.json; then
+            echo
+            echo "::error::The validation output no longer matches results/contamination-validation.json."
+            echo "Re-run 'node scripts/contamination-validate.ts', read the diff, and update"
+            echo "README.md, docs/measurements.md and web/index.html to match before committing."
+            git diff results/contamination-validation.json
+            exit 1
+          fi
