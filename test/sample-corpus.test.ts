@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { loadIndexFromBytes, scanFile } from '../src/contamination/browserScan.ts';
+import { renderContaminationReport, reportFileName } from '../src/contamination/reportHtml.ts';
 
 /**
  * The front page ships a "try a sample corpus" button. What it produces is a claim made to
@@ -40,6 +41,35 @@ test('the sample corpus still matches HumanEval, and only where documented', asy
   const matched = exact.hits.map((h) => h.matchedText).join(' | ');
   assert.match(matched, /prime numbers are 2, 3, 5, 7, 11, 13, 17/);
   assert.match(matched, /digits are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9/);
+});
+
+/**
+ * The downloadable report is the artifact Ingot exists to produce, and it has to open
+ * years later from an email attachment on a machine with no network. Anything it loads
+ * from elsewhere is a way for it to stop working, or to phone home.
+ */
+test('the downloadable report is self-contained and carries its evidence', async () => {
+  const report = await scanFile(await loadIndex(), sampleFile());
+  const html = renderContaminationReport(report);
+
+  assert.match(html, /^<!doctype html>/);
+  assert.match(html, /HumanEval-78/);
+  assert.match(html, /prime numbers are 2, 3, 5, 7, 11, 13, 17/);
+  assert.match(html, /<mark>/, 'matches are highlighted, not just listed');
+  assert.match(html, /Receipt/);
+  assert.match(html, new RegExp(report.receipt.corpusHash));
+  assert.match(html, /What was not checked/);
+
+  // No scripts, and nothing fetched from anywhere.
+  assert.doesNotMatch(html, /<script/i);
+  assert.doesNotMatch(html, /\b(src|href)="(?!#)/i);
+  assert.doesNotMatch(html, /https?:\/\//i);
+
+  // Nothing left unrendered.
+  assert.doesNotMatch(html, /\$\{/);
+  assert.doesNotMatch(html, /undefined|NaN/);
+
+  assert.equal(reportFileName(report, 'html'), `ingot-humaneval-vs-sample-corpus.jsonl-${report.corpusHash.slice(0, 8)}.html`);
 });
 
 /**

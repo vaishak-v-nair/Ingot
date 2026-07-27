@@ -53,6 +53,11 @@ hash, n, stride, gram count, corpus name, size, document count, corpus hash, and
 command. A third party reproduces any published number from it without asking us for
 anything.
 
+Both surfaces produce the same **self-contained HTML report** — `--out report.html` on the
+command line, a download button in the browser. No scripts, no external requests: it opens
+from an email attachment on a machine with no network, which is the point of an artifact
+you can hand to a reviewer.
+
 ## Quickstart
 
 `gsm8k` and `humaneval` ship with the package, so this needs nothing else:

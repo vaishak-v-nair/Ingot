@@ -104,4 +104,5 @@ export async function scanFile(
 }
 
 export { NgramIndex, decodeIndex, gunzipIfNeeded };
+export { renderContaminationReport, reportFileName } from './reportHtml.ts';
 export type { ContaminationReport, NgramIndexData };

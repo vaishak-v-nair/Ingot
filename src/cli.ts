@@ -10,6 +10,7 @@ import { SCANNER_VERSION } from './types.ts';
 import { NgramIndex } from './contamination/ngramIndex.ts';
 import { loadIndexFromBytes } from './contamination/browserScan.ts';
 import { scanCorpus } from './contamination/scan.ts';
+import { renderContaminationReport } from './contamination/reportHtml.ts';
 import { CONTAMINATION_CLAIM_SCOPE } from './contamination/types.ts';
 import type { ContaminationReport } from './contamination/types.ts';
 import type { BaselinePair, ScanReport } from './types.ts';
@@ -34,6 +35,7 @@ contaminate options
   --id-field <name>      field holding the document id
   --max-doc-freq <n>     a matched gram in more than n corpus documents is
                          ordinary language, not evidence   (default 5)
+  --out <path>           self-contained HTML report you can hand to a reviewer
   --json <path>          machine-readable report, including the receipt
 
 scan options
@@ -283,12 +285,20 @@ export async function runContaminate(argv: string[]): Promise<number> {
     writeFileSync(resolve(jsonPath), JSON.stringify(report, null, 2), 'utf8');
   }
 
+  const htmlPath = flags.get('out');
+  if (htmlPath) {
+    mkdirSync(dirname(resolve(htmlPath)), { recursive: true });
+    writeFileSync(resolve(htmlPath), renderContaminationReport(report), 'utf8');
+  }
+
   if (!flags.has('quiet')) {
     // The argument, not the resolved path: an absolute path into node_modules is noise in
     // a receipt whose whole job is to be re-typed by someone else.
     const label = indexPath === indexArg ? indexArg : `${indexArg} (bundled)`;
     process.stdout.write(contaminationSummary(report, label));
-    if (jsonPath) process.stdout.write(`  report: ${resolve(jsonPath)}\n\n`);
+    if (htmlPath) process.stdout.write(`  report: ${resolve(htmlPath)}\n`);
+    if (jsonPath) process.stdout.write(`  json:   ${resolve(jsonPath)}\n`);
+    if (htmlPath || jsonPath) process.stdout.write('\n');
   }
   return 0;
 }

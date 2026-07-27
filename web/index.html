@@ -258,7 +258,7 @@
 </footer>
 
 <script type="module">
-import { loadIndexFromBytes, scanFile } from './ingot.js';
+import { loadIndexFromBytes, renderContaminationReport, reportFileName, scanFile } from './ingot.js';
 
 const INDEXES = [
   { id: 'gsm8k', label: 'GSM8K (1,319 items)' },
@@ -429,6 +429,15 @@ function render(report, file, isSample) {
 
   const r = report.receipt;
   html += `
+    <h2>Take it with you</h2>
+    <p class="muted">A scan that only exists in this tab is not evidence. Both files are built
+    here, on your machine, from the result you are looking at — the HTML one is self-contained
+    and opens with no network at all.</p>
+    <div class="btns" style="justify-content:flex-start">
+      <button class="btn primary" id="dl-html" type="button">Download report (HTML)</button>
+      <button class="btn" id="dl-json" type="button">Download data (JSON)</button>
+    </div>
+
     <h2>Receipt — reproduce this without asking us</h2>
     <p class="muted">Everything needed to re-derive this exact result on your own machine. The
     corpus hash is computed the same way on the command line, so the two reports name the
@@ -447,6 +456,30 @@ ${esc(r.command)}</pre>
     full SHA-256, which does. That limit is written down rather than implied away.</p>`;
 
   $('out').innerHTML = html;
+
+  // Wired after the HTML lands, since innerHTML replaces the nodes each render.
+  $('dl-html').addEventListener('click', () =>
+    download(renderContaminationReport(report), reportFileName(report, 'html'), 'text/html'),
+  );
+  $('dl-json').addEventListener('click', () =>
+    download(JSON.stringify(report, null, 2), reportFileName(report, 'json'), 'application/json'),
+  );
+}
+
+/**
+ * Saves a file the browser built. Still no upload: the bytes go from this tab to the
+ * download folder without touching a network, which is the same promise the scan makes.
+ */
+function download(text, filename, type) {
+  const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Revoked on the next tick: revoking immediately can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 </script>
 </body>
