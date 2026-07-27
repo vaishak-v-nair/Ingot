@@ -1,17 +1,35 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { NgramIndex, forEachNgram } from '../src/contamination/ngramIndex.ts';
+import { scanCorpus } from '../src/contamination/scan.ts';
 import { IndexVersionError } from '../src/errors.ts';
-import { tokenize } from '../src/text.ts';
+import { mulberry32, tokenize } from '../src/text.ts';
 import { INDEX_FORMAT_VERSION } from '../src/contamination/types.ts';
 import type { BenchmarkItem } from '../src/contamination/types.ts';
 
+const scratch = mkdtempSync(join(tmpdir(), 'ingot-contam-'));
+
+function writeCorpus(name: string, rows: { id: string; text: string }[]): string {
+  const p = join(scratch, name);
+  writeFileSync(p, rows.map((r) => JSON.stringify(r)).join('\n') + '\n', 'utf8');
+  return p;
+}
+
 const N = 13;
 
+/**
+ * Deterministic pseudo-text. Must use a real PRNG: an arithmetic progression like
+ * `(i * 7919 + seed * 104729) % 4001` advances by a constant step, so every seed emits
+ * the same cyclic sequence at a different offset and all items share long n-grams. That
+ * produced 26 entirely correct "false positives" before the generator was fixed.
+ */
 function words(count: number, seed = 0): string {
-  // Deterministic pseudo-text with enough variety that grams are distinct.
+  const rand = mulberry32((seed * 2654435761) >>> 0);
   const out: string[] = [];
-  for (let i = 0; i < count; i++) out.push(`w${(i * 7919 + seed * 104729) % 4001}`);
+  for (let i = 0; i < count; i++) out.push(`w${Math.floor(rand() * 100000)}`);
   return out.join(' ');
 }
 
@@ -160,6 +178,105 @@ test('n outside the supported range is rejected', () => {
   const items: BenchmarkItem[] = [{ id: 'n1', text: words(40, 41) }];
   assert.throws(() => NgramIndex.build('n', items, { n: 5 }), RangeError);
   assert.throws(() => NgramIndex.build('n', items, { n: 20 }), RangeError);
+});
+
+test('planted verbatim contamination is recalled at 100%', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 40 }, (_, i) => ({
+    id: `q${i}`,
+    text: words(60, 1000 + i),
+  }));
+  const index = NgramIndex.build('planted-bench', bench, { n: N });
+
+  // Ten benchmark items pasted verbatim into otherwise unrelated corpus documents.
+  const plantedIds = bench.slice(0, 10).map((b) => b.id);
+  const rows = [
+    ...bench.slice(0, 10).map((b, i) => ({
+      id: `dirty${i}`,
+      text: `${words(25, 7000 + i)} ${b.text} ${words(25, 8000 + i)}`,
+    })),
+    ...Array.from({ length: 30 }, (_, i) => ({ id: `clean${i}`, text: words(80, 9000 + i) })),
+  ];
+  const corpusPath = writeCorpus('planted.jsonl', rows);
+
+  const report = await scanCorpus(index, corpusPath);
+
+  assert.equal(report.corpusDocs, 40);
+  for (const id of plantedIds) {
+    assert.ok(
+      report.contaminatedItemIds.includes(id),
+      `planted item ${id} must be recalled; tier-1 recall below 100% means a bug, not a metric`,
+    );
+  }
+  assert.equal(report.contaminatedItemIds.length, plantedIds.length, 'no clean item may be flagged');
+});
+
+test('a match reports its span with surrounding context, not just a count', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `e${i}`,
+    text: words(50, 2000 + i),
+  }));
+  const index = NgramIndex.build('evidence-bench', bench, { n: N });
+  const corpusPath = writeCorpus('evidence.jsonl', [
+    { id: 'd1', text: `${words(20, 3100)} ${bench[3].text} ${words(20, 3200)}` },
+  ]);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  assert.ok(exact.hits.length > 0);
+  const hit = exact.hits[0];
+  assert.equal(hit.benchmarkItemId, 'e3');
+  assert.equal(hit.corpusDocId, 'd1');
+  assert.ok(hit.matchedText.split(' ').length >= N, 'matched span must be at least n tokens');
+  assert.ok(hit.contextBefore.length > 0, 'context before the match must be shown');
+  assert.ok(hit.contextAfter.length > 0, 'context after the match must be shown');
+});
+
+test('consecutive hits merge into one span rather than one per n-gram', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `m${i}`,
+    text: words(60, 4000 + i),
+  }));
+  const index = NgramIndex.build('merge-bench', bench, { n: N });
+  const corpusPath = writeCorpus('merge.jsonl', [{ id: 'solo', text: bench[0].text }]);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  // 60 tokens verbatim yields 48 raw n-gram hits. They describe one copied passage.
+  assert.equal(exact.totalHits, 1, 'a single copied passage must report as one match');
+  assert.equal(exact.itemsHit, 1);
+});
+
+test('a clean corpus produces no findings and still reports its content hash', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `c${i}`,
+    text: words(50, 5000 + i),
+  }));
+  const index = NgramIndex.build('clean-bench', bench, { n: N });
+  const corpusPath = writeCorpus('clean.jsonl', [
+    { id: 'a', text: words(90, 6001) },
+    { id: 'b', text: words(90, 6002) },
+  ]);
+
+  const report = await scanCorpus(index, corpusPath);
+  assert.equal(report.contaminatedItemIds.length, 0);
+  assert.equal(report.tiers.find((t) => t.tier === 'exact')!.totalHits, 0);
+  assert.match(report.corpusHash, /^[0-9a-f]{32}$/, 'a clean result still needs an attestable hash');
+});
+
+test('the near tier declines when the index carries no benchmark text', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `n${i}`,
+    text: words(50, 7500 + i),
+  }));
+  const index = NgramIndex.build('near-bench', bench, { n: N });
+  const corpusPath = writeCorpus('near.jsonl', [{ id: 'x', text: words(80, 7700) }]);
+
+  const report = await scanCorpus(index, corpusPath);
+  const near = report.tiers.find((t) => t.tier === 'near')!;
+  assert.match(near.unavailableReason ?? '', /benchmark text/);
+  assert.equal(near.totalHits, 0);
 });
 
 test('an index built at one n does not silently match grams at another', () => {
