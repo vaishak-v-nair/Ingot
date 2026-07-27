@@ -195,6 +195,8 @@ instead of trusting it. All are written up in `docs/measurements.md` and guarded
   turn taken on the way
 - `docs/threat-model.md` — what leaves your machine, what the hashes do and do not protect,
   and where a determined vendor still wins
+- `docs/index-format.md` — the index format, specified completely enough to implement
+  independently
 
 ## Licences of the reference data
 
