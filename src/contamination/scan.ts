@@ -2,11 +2,11 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { basename } from 'node:path';
 import { createInterface } from 'node:readline';
-import { tokenize } from '../text.ts';
 import { minhashSignature } from '../signals/nearDup.ts';
 import { CorpusStreamError } from '../errors.ts';
 import { SCANNER_VERSION } from '../types.ts';
-import { forEachNgram, NgramIndex } from './ngramIndex.ts';
+import { hashTokens } from './fastTokens.ts';
+import { forEachNgramHashed, NgramIndex } from './ngramIndex.ts';
 import type { BenchmarkItem, ContaminationHit, ContaminationReport, TierResult } from './types.ts';
 
 /** Stored hits per tier. totalHits keeps the true count; this only bounds what we render. */
@@ -48,10 +48,6 @@ function mergeRuns(hits: RawHit[]): { itemIdx: number; start: number; end: numbe
   }
   runs.push(cur);
   return runs;
-}
-
-function slice(tokens: string[], from: number, to: number): string {
-  return tokens.slice(Math.max(0, from), Math.min(tokens.length, to)).join(' ');
 }
 
 export async function scanCorpus(
@@ -116,30 +112,39 @@ export async function scanCorpus(
 
       corpusDocs++;
       const docId = String(row[options.idField ?? 'id'] ?? `doc${corpusDocs}`);
-      const tokens = tokenize(text);
-      corpusTokens += tokens.length;
 
-      // Tier 1: exact. This is the hot loop, one probe per token position.
+      // Fused tokenize-and-hash: no token strings are allocated on the hot path.
+      const { hashes, starts, ends, count } = hashTokens(text);
+      corpusTokens += count;
+
+      // Tier 1: exact. One probe per token position, allocation-free.
       const raw: RawHit[] = [];
-      forEachNgram(tokens, n, (key, offset) => {
+      forEachNgramHashed(hashes, count, n, (key, offset) => {
         const owners = index.lookup(key);
         if (!owners) return;
         for (const itemIdx of owners) raw.push({ itemIdx, offset });
       });
 
       if (raw.length > 0) {
-        for (const run of mergeRuns(raw)) {
+        // Copy boundaries before any further hashTokens call reuses the shared buffers.
+        const runs = mergeRuns(raw);
+        for (const run of runs) {
           exactTotal++;
           exactItemsHit.add(run.itemIdx);
           if (exactHits.length < MAX_STORED_HITS) {
+            const last = Math.min(count - 1, run.end + n - 1);
+            const ctxFirst = Math.max(0, run.start - CONTEXT_TOKENS);
+            const ctxLast = Math.min(count - 1, last + CONTEXT_TOKENS);
             exactHits.push({
               tier: 'exact',
               benchmarkItemId: index.itemIds[run.itemIdx],
               corpusDocId: docId,
               corpusOffset: run.start,
-              matchedText: slice(tokens, run.start, run.end + n),
-              contextBefore: slice(tokens, run.start - CONTEXT_TOKENS, run.start),
-              contextAfter: slice(tokens, run.end + n, run.end + n + CONTEXT_TOKENS),
+              // Sliced from the source, so evidence shows real text rather than a
+              // lowercased token join.
+              matchedText: text.slice(starts[run.start], ends[last]),
+              contextBefore: text.slice(starts[ctxFirst], starts[run.start]),
+              contextAfter: text.slice(ends[last], ends[ctxLast]),
             });
           }
         }
@@ -164,7 +169,7 @@ export async function scanCorpus(
                   benchmarkItemId: bench.id,
                   corpusDocId: docId,
                   corpusOffset: 0,
-                  matchedText: slice(tokens, 0, 40),
+                  matchedText: text.slice(0, 240),
                   contextBefore: '',
                   contextAfter: '',
                   score: jaccard,

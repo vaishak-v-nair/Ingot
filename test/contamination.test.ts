@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { NgramIndex, forEachNgram } from '../src/contamination/ngramIndex.ts';
+import { NgramIndex, forEachNgram, tokenHash } from '../src/contamination/ngramIndex.ts';
+import { hashTokens } from '../src/contamination/fastTokens.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
 import { IndexVersionError } from '../src/errors.ts';
 import { mulberry32, tokenize } from '../src/text.ts';
@@ -32,6 +33,35 @@ function words(count: number, seed = 0): string {
   for (let i = 0; i < count; i++) out.push(`w${Math.floor(rand() * 100000)}`);
   return out.join(' ');
 }
+
+test('the fused hasher agrees with tokenize + tokenHash, token for token', () => {
+  const samples = [
+    words(80, 61),
+    "Don't split contractions; keep 3.14 and ISO-8601 apart.",
+    'Mixed CASE and    irregular   whitespace\nplus newlines.',
+    'punctuation!!! everywhere??? (parens) [brackets] "quotes"',
+    'accented café naïve über Ünicode straße',
+  ];
+
+  for (const text of samples) {
+    const expected = tokenize(text).map(tokenHash);
+    const { hashes, count } = hashTokens(text);
+    assert.equal(count, expected.length, `token count differs for: ${text.slice(0, 40)}`);
+    for (let i = 0; i < count; i++) {
+      assert.equal(hashes[i], expected[i], `token ${i} hash differs for: ${text.slice(0, 40)}`);
+    }
+  }
+});
+
+test('fused token boundaries slice back to the original text', () => {
+  const text = 'The Quick brown FOX jumps over the lazy dog near café walls.';
+  const expected = tokenize(text);
+  const { starts, ends, count } = hashTokens(text);
+  assert.equal(count, expected.length);
+  for (let i = 0; i < count; i++) {
+    assert.equal(text.slice(starts[i], ends[i]).toLowerCase(), expected[i]);
+  }
+});
 
 test('rolling hash agrees with direct computation at every window', () => {
   const tokens = tokenize(words(200, 3));

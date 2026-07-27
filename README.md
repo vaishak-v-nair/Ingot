@@ -16,7 +16,33 @@ node src/cli.ts scan batch.jsonl   # scan a real batch
 node --test test/*.test.ts         # 12 guard tests
 ```
 
-## What it measures
+## Contamination scanning
+
+Does benchmark text appear inside a training corpus. Unlike provenance, this is not an
+inference: a shared 13-gram is a fact, displayed side by side with its surrounding
+context so a reader can judge it.
+
+Ingot indexes the **benchmark** and streams the corpus once. lm-eval-harness does the
+reverse, indexing the corpus, which took nine days on the Pile.
+
+```
+  phase                       best ms  delta ms       tok/sec
+  ───────────────────────────────────────────────────────────
+  A baseline (loop only)            1
+  B fused tokenize/hash           718       717    13,929,351
+  C + ngram rolling              2038      1320     4,907,396
+  D + index lookup (full)        2243       205     4,458,883
+
+  37.1 MB/sec CPU, single-threaded  →  20 GB in 9.0 minutes
+```
+
+Measured on 83.3 MB / 10.0M tokens, three repetitions, best of, corpus held in memory so
+the figure is CPU rather than disk. Reproduce with `node scripts/bench-scan.ts`.
+
+Indexes serialize to one-way hashes and item ids with **no benchmark text**, so an index
+can be published for benchmarks whose licence forbids redistributing the data.
+
+## What the provenance scanner measures
 
 | Signal | What it looks at | Separation on the reference pair |
 |---|---|---|
