@@ -1,0 +1,17 @@
+{
+  "name": "ingot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent verification of the AI training data supply chain. Batch in, purity report out.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "fetch": "node scripts/fetch-corpora.ts",
+    "baselines": "node scripts/build-baselines.ts",
+    "spike": "node scripts/spike.ts",
+    "scan": "node src/cli.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}

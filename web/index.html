@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ingot — certified purity for AI training data</title>
+<meta name="description" content="Independent verification of the AI training data supply chain. A batch goes in, a purity report comes out.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --ink: #0d0c08;
+    --paper: #f7f4ec;
+    --dim: #6f6a5b;
+    --line: #ded8c8;
+    --gold: #b57500;
+    --gold-hot: #ff9d1f;
+    --ember: #d2451e;
+    --good: #2f6b34;
+    --card: #fffdf8;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #f4efe2; --paper: #0e0d09; --dim: #9b9686; --line: #2b281f;
+      --gold: #f0b73f; --gold-hot: #ffcc5c; --ember: #ff7a4d; --good: #86c98d; --card: #16150f;
+    }
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 17px; line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 66rem; margin: 0 auto; padding: 0 1.5rem; }
+  a { color: inherit; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative; padding: 6.5rem 0 5rem; overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: -40% -20% auto -20%; height: 130%;
+    background:
+      radial-gradient(48rem 26rem at 18% 8%, color-mix(in srgb, var(--gold-hot) 30%, transparent), transparent 68%),
+      radial-gradient(38rem 22rem at 88% 22%, color-mix(in srgb, var(--ember) 22%, transparent), transparent 70%);
+    filter: blur(6px); pointer-events: none;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 7.2vw, 5.2rem); line-height: .98; margin: 1rem 0 0;
+    font-weight: 680; letter-spacing: -.03em; max-width: 30ch;
+  }
+  h1 .molten {
+    background: linear-gradient(96deg, var(--gold-hot), var(--ember) 62%, var(--gold));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1.6rem 0 0; color: var(--dim); }
+  .stamp {
+    display: inline-flex; align-items: center; gap: .6rem; margin-top: 2.2rem;
+    font-family: var(--mono); font-size: .8rem; padding: .55rem .9rem;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+  }
+  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--good); }
+
+  /* ---------- shared ---------- */
+  section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
+  h2 {
+    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: -.02em;
+    margin: 0 0 .6rem; font-weight: 640; max-width: 32ch;
+  }
+  .kicker {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 1.1rem;
+  }
+  .sub { color: var(--dim); max-width: 54ch; margin: 0 0 2.2rem; }
+
+  /* ---------- the hole ---------- */
+  .facts { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+  .fact {
+    border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem; background: var(--card);
+    position: relative; overflow: hidden;
+  }
+  .fact::after {
+    content: ""; position: absolute; inset: auto 0 0 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold-hot), transparent);
+  }
+  .fact b { display: block; font-family: var(--mono); font-size: 2rem; letter-spacing: -.04em; line-height: 1.1; }
+  .fact span { display: block; margin-top: .5rem; font-size: .9rem; color: var(--dim); }
+
+  .punch {
+    margin-top: 2.5rem; padding: 1.8rem; border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--ember) 45%, var(--line));
+    background: color-mix(in srgb, var(--ember) 7%, var(--card));
+    font-size: clamp(1.1rem, 2.6vw, 1.5rem); font-weight: 560; letter-spacing: -.01em;
+  }
+
+  /* ---------- flow ---------- */
+  .flow { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .step { border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem; background: var(--card); }
+  .step .n {
+    font-family: var(--mono); font-size: .72rem; color: var(--gold); letter-spacing: .12em;
+  }
+  .step h3 { margin: .5rem 0 .4rem; font-size: 1.05rem; font-weight: 620; }
+  .step p { margin: 0; font-size: .92rem; color: var(--dim); }
+
+  /* ---------- chart ---------- */
+  .chart-card { border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 1.6rem; }
+  .chart-scroll { overflow-x: auto; }
+  svg { display: block; max-width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.1rem; font-size: .84rem; color: var(--dim); font-family: var(--mono); }
+  .swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; vertical-align: -1px; margin-right: .4rem; }
+
+  .honest { margin-top: 2rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+  .honest div { border-left: 3px solid var(--gold); padding: .3rem 0 .3rem 1rem; }
+  .honest b { font-family: var(--mono); }
+  .honest p { margin: .3rem 0 0; font-size: .9rem; color: var(--dim); }
+
+  /* ---------- refusals ---------- */
+  .refuse { display: grid; gap: .8rem; }
+  .refuse li {
+    list-style: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 1rem 1.2rem; background: var(--card); font-size: .95rem;
+  }
+  .refuse b { color: var(--ember); }
+  ul.refuse { padding: 0; margin: 0; }
+
+  /* ---------- acts ---------- */
+  .acts { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); counter-reset: act; }
+  .act { border: 1px solid var(--line); border-radius: 14px; padding: 1.5rem; background: var(--card); }
+  .act .badge {
+    font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--paper); background: var(--ink); padding: .2rem .5rem; border-radius: 4px;
+  }
+  .act.now .badge { background: var(--gold); color: #17150d; }
+  .act h3 { margin: .9rem 0 .4rem; font-size: 1.1rem; }
+  .act p { margin: 0; color: var(--dim); font-size: .92rem; }
+
+  footer { padding: 3.5rem 0 5rem; color: var(--dim); font-family: var(--mono); font-size: .8rem; }
+  footer strong { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Ingot</div>
+    <h1>Labs pay $200 an hour for human data.<br><span class="molten">Nobody checks it was human.</span></h1>
+    <p class="lede">Ingot is the independent purity mark for AI training data. A batch goes in.
+    Evidence comes out: how far it sits from a known-human reference, which signals say so, and which records to look at.</p>
+    <div class="stamp"><span class="dot"></span>runs on your machine · no upload · no retention · no API key</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">The hole</div>
+    <h2>Nine figures of spend, certified by the seller</h2>
+    <p class="sub">Every number here is public. None of it depends on anyone's résumé.</p>
+    <div class="facts">
+      <div class="fact"><b>$1B+</b><span>discussed by a single lab for RL environments in one year, with sector spend projected to grow 3–5×</span></div>
+      <div class="fact"><b>$85–200<small>/hr</small></b><span>the going rate for credentialed expert data</span></div>
+      <div class="fact"><b>Aug 2026</b><span>EU AI Act documented-provenance requirement begins enforcement</span></div>
+      <div class="fact"><b>2–3 yrs</b><span>how far out purpose-built defences are assessed to be</span></div>
+    </div>
+    <p class="punch">Quality and neutrality now outrank price when labs choose a vendor. So vendors began publishing provenance paperwork —
+    <em>about their own labour</em>. Self-certification survives exactly as long as nobody's money is at risk.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>Six signals, none of them a vibe check</h2>
+    <p class="sub">Structural statistics measured against two named reference corpora, one human-authored and one machine-generated. No model call, no network, deterministic and reproducible.</p>
+    <div class="flow">
+      <div class="step"><div class="n">01 · LOAD</div><h3>Refuse, don't guess</h3><p>Schema mismatches, unparseable lines and zero-variance batches are reported, never silently dropped.</p></div>
+      <div class="step"><div class="n">02 · MEASURE</div><h3>Burstiness &amp; scaffolding</h3><p>Sentence-length variation, reused openings and closings, cluster tightness, duplicate rate, author fingerprints.</p></div>
+      <div class="step"><div class="n">03 · COMPARE</div><h3>Against distributions</h3><p>Each signal is weighted by its measured signal-to-noise, and declines when it sits outside its calibrated range.</p></div>
+      <div class="step"><div class="n">04 · REPORT</div><h3>Evidence, not a verdict</h3><p>A purity mark, per-signal contribution, flagged records, and every input stamped so the result can be reproduced.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Measured, not promised</div>
+    <h2>What it detects today — including what it can't</h2>
+    <p class="sub">Human-authored corpus contaminated with machine-generated records at known ratios. Batch size 1,200. Five draws per level. References calibrated on one random half, every scored record from the held-out half.</p>
+
+    <div class="chart-card">
+      <div class="chart-scroll">
+        <svg viewBox="0 0 720 340" role="img" aria-label="Purity falls as machine contamination rises: 88 at 0%, 90 at 5%, 88 at 10%, 81 at 25%, 56 at 50%. Clean human control band sits at 89.9 plus or minus 4.7.">
+          <defs>
+            <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff9d1f"/><stop offset="100%" stop-color="#d2451e"/>
+            </linearGradient>
+          </defs>
+          <!-- axes -->
+          <line x1="70" y1="20" x2="70" y2="280" stroke="currentColor" stroke-opacity=".25"/>
+          <line x1="70" y1="280" x2="690" y2="280" stroke="currentColor" stroke-opacity=".25"/>
+          <!-- y ticks: purity 0..100 mapped to y 280..20 -->
+          <g font-family="ui-monospace, monospace" font-size="11" fill="currentColor" fill-opacity=".55">
+            <text x="46" y="24">100</text><text x="52" y="154">50</text><text x="58" y="284">0</text>
+            <text x="360" y="322" text-anchor="middle" fill-opacity=".7">machine contamination</text>
+            <text x="20" y="150" transform="rotate(-90 20 150)" text-anchor="middle" fill-opacity=".7">purity</text>
+          </g>
+          <!-- clean control band: 89.9 ± 4.7  => y = 280 - p*2.6 -->
+          <rect x="70" y="34.04" width="620" height="24.44" fill="#2f6b34" fill-opacity=".14"/>
+          <line x1="70" y1="46.26" x2="690" y2="46.26" stroke="#2f6b34" stroke-opacity=".5" stroke-dasharray="5 4"/>
+          <text x="678" y="40" font-family="ui-monospace, monospace" font-size="11" fill="#2f6b34" text-anchor="end">clean human control 89.9 ± 4.7</text>
+          <!-- data: x positions for 0,5,10,25,50 -->
+          <!-- purity: 88.0, 90.2, 87.6, 81.2, 56.4  => y = 280 - p*2.6 -->
+          <polyline fill="none" stroke="url(#ink)" stroke-width="3"
+            points="110,51.2 235,45.5 360,52.2 485,68.9 610,133.4"/>
+          <g stroke="url(#ink)" stroke-width="2">
+            <line x1="110" y1="39.0" x2="110" y2="63.4"/>
+            <line x1="235" y1="28.3" x2="235" y2="62.8"/>
+            <line x1="360" y1="25.7" x2="360" y2="78.7"/>
+            <line x1="485" y1="55.9" x2="485" y2="81.9"/>
+            <line x1="610" y1="113.4" x2="610" y2="153.4"/>
+          </g>
+          <g fill="url(#ink)">
+            <circle cx="110" cy="51.2" r="5"/><circle cx="235" cy="45.5" r="5"/>
+            <circle cx="360" cy="52.2" r="5"/><circle cx="485" cy="68.9" r="5"/>
+            <circle cx="610" cy="133.4" r="7"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12" fill="currentColor" text-anchor="middle">
+            <text x="110" y="300" fill-opacity=".7">0%</text>
+            <text x="235" y="300" fill-opacity=".7">5%</text>
+            <text x="360" y="300" fill-opacity=".7">10%</text>
+            <text x="485" y="300" fill-opacity=".7">25%</text>
+            <text x="610" y="300" fill-opacity=".7">50%</text>
+            <text x="110" y="86" fill-opacity=".85">88.0</text>
+            <text x="235" y="82" fill-opacity=".85">90.2</text>
+            <text x="360" y="98" fill-opacity=".85">87.6</text>
+            <text x="485" y="102" fill-opacity=".85">81.2</text>
+            <text x="610" y="175" fill-opacity=".95">56.4</text>
+          </g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><span class="swatch" style="background:linear-gradient(120deg,#ff9d1f,#d2451e)"></span>spiked batches, mean ± sd</span>
+        <span><span class="swatch" style="background:#2f6b34;opacity:.5"></span>clean human control band</span>
+      </div>
+    </div>
+
+    <div class="honest">
+      <div><b>Detection floor: 50%</b><p>First level landing more than two control standard deviations below clean. 25% is marginal at about 1.8σ.</p></div>
+      <div><b>False positives: 13%</b><p>One of eight clean human batches would be flagged at the operating threshold. Reported, not buried.</p></div>
+      <div><b>5% and 10%: not detectable</b><p>Inside the noise on this corpus pair. Claiming otherwise would be the one unrecoverable error.</p></div>
+      <div><b>Why, and what's next</b><p>The reference pair isn't prompt-matched and the machine side is 2023-era. Regenerating identical prompts with a current model removes both problems, and that's the next run.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Discipline</div>
+    <h2>What Ingot refuses to do</h2>
+    <p class="sub">Each of these was a bug first, caught by running the experiment and reading the output instead of trusting it.</p>
+    <ul class="refuse">
+      <li><b>No per-record verdicts.</b> Batch-level evidence against named references. The per-sample detector arms race is one Ingot doesn't enter.</li>
+      <li><b>No extrapolation.</b> A batch outside the range the references span is unlike <em>both</em>. Clamping it once put a clean human batch at 34/100.</li>
+      <li><b>No absolute thresholds.</b> Missing reference file means no score, not a fallback guess.</li>
+      <li><b>No comparing across batch sizes.</b> Duplicate rate and type-token ratio move with size regardless of provenance.</li>
+      <li><b>No zero-variance division.</b> A pinned statistic isn't a perfect discriminator. Treating it as one produced NaN.</li>
+      <li><b>No silent zero.</b> Non-finite scores raise. Unparseable lines are counted and listed.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Where this goes</div>
+    <h2>One company, three acts</h2>
+    <div class="acts">
+      <div class="act now"><span class="badge">Now · built</span><h3>Batch provenance</h3><p>Verify that delivered data was produced by the human it was billed as. Run it before payment, or before training.</p></div>
+      <div class="act"><span class="badge">Act II</span><h3>Reward-signal integrity</h3><p>Red-team a reward function or rubric to find what scores high while failing the task. Same disease, one layer up.</p></div>
+      <div class="act"><span class="badge">Act III</span><h3>Provenance of record</h3><p>Third-party AI Act documentation a regulator accepts precisely because it isn't self-issued.</p></div>
+    </div>
+    <p class="punch" style="margin-top:2.5rem">Mercor will not certify Mercor. Anthropic will not ship a product that audits Anthropic's own training data.
+    The referee cannot play for a team — which is exactly why this is a company and not a feature.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <strong>Ingot</strong> · certified purity for AI training data · Bangalore<br>
+    Numbers on this page come from <strong>ingot/results/spike.json</strong> and are reproducible with
+    <strong>node scripts/spike.ts</strong>. Reference corpora: databricks-dolly-15k (CC-BY-SA-3.0),
+    stanford_alpaca (CC-BY-NC-4.0, calibration and research only).
+  </div>
+</footer>
+
+</body>
+</html>
