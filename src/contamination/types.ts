@@ -180,11 +180,41 @@ export type ScoreImpact = {
   refusal?: string;
 };
 
+/**
+ * Everything a third party needs to reproduce a published number without asking us for
+ * anything. A finding that cannot be re-derived is a claim, and this project does not
+ * make claims.
+ */
+export type Receipt = {
+  scannerVersion: string;
+  indexFormatVersion: number;
+  /** Identity of the benchmark the index was built from; a stale index fails loudly. */
+  benchmark: string;
+  benchmarkHash: string;
+  n: number;
+  stride: number;
+  indexGrams: number;
+  corpus: string;
+  corpusHash: string;
+  corpusBytes: number;
+  corpusDocs: number;
+  /**
+   * Full SHA-256 over every line. Present on the command-line path only: the browser has
+   * no streaming digest and hashes a deterministic sample instead. Absent is honest;
+   * silently substituting the weaker one would not be.
+   */
+  corpusHashFull?: string;
+  /** The exact invocation that produces this report. */
+  command: string;
+  generatedAt: string;
+};
+
 export type ContaminationReport = {
   benchmark: string;
   corpus: string;
   /** Content hash of the exact corpus scanned, so an attestation is bound to these bytes. */
   corpusHash: string;
+  receipt: Receipt;
   n: number;
   corpusDocs: number;
   corpusTokens: number;

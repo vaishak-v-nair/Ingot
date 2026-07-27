@@ -45,6 +45,20 @@ test('browser scan and node scan produce identical findings', async () => {
   assert.equal(webReport.corpusDocs, nodeReport.corpusDocs);
   assert.equal(webReport.corpusTokens, nodeReport.corpusTokens);
 
+  // Corpus identity has to match too. Two reports on the same bytes that disagree about
+  // which bytes they were cannot be compared, which defeats the point of publishing one.
+  assert.equal(webReport.corpusHash, nodeReport.corpusHash);
+  assert.equal(webReport.receipt.corpusBytes, nodeReport.receipt.corpusBytes);
+  assert.equal(webReport.receipt.benchmarkHash, nodeReport.receipt.benchmarkHash);
+  assert.equal(webReport.receipt.indexGrams, nodeReport.receipt.indexGrams);
+  assert.equal(webReport.receipt.n, nodeReport.receipt.n);
+  assert.equal(webReport.receipt.stride, nodeReport.receipt.stride);
+
+  // The full digest is the one thing the browser cannot compute. It must be absent there
+  // rather than quietly filled in with the weaker sampled hash.
+  assert.ok(nodeReport.receipt.corpusHashFull, 'the command line records a full SHA-256');
+  assert.equal(webReport.receipt.corpusHashFull, undefined);
+
   const nodeExact = nodeReport.tiers.find((t) => t.tier === 'exact')!;
   const webExact = webReport.tiers.find((t) => t.tier === 'exact')!;
   assert.equal(webExact.itemsHit, nodeExact.itemsHit);

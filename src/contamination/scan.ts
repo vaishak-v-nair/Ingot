@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto';
-import { createReadStream } from 'node:fs';
+import { createReadStream, statSync } from 'node:fs';
 import { basename } from 'node:path';
 import { createInterface } from 'node:readline';
 import { CorpusStreamError } from '../errors.ts';
+import { CorpusHasher } from './corpusHash.ts';
 import { NgramIndex } from './ngramIndex.ts';
 import { parseCorpusLine, ScanSession } from './scanSession.ts';
 import type { BenchmarkItem, ContaminationReport } from './types.ts';
@@ -23,6 +24,8 @@ export type ScanOptions = {
   benchmarkItems?: BenchmarkItem[];
   /** A matched gram in more than this many distinct corpus documents is ordinary language. */
   maxCorpusDocFrequency?: number;
+  /** Recorded in the receipt so a reader can reproduce this exact report. */
+  command?: string;
   onProgress?: (docs: number, tokens: number) => void;
 };
 
@@ -32,7 +35,11 @@ export async function scanCorpus(
   options: ScanOptions = {},
 ): Promise<ContaminationReport> {
   const started = Date.now();
-  const hasher = createHash('sha256');
+  // Two hashes on this path. The sampled one is what a browser can also compute, so the
+  // two surfaces produce comparable identities; the full one is the stronger attestation
+  // and exists only here. Reporting both beats quietly picking one.
+  const fullHasher = createHash('sha256');
+  const portable = new CorpusHasher();
   const session = new ScanSession(index, {
     benchmarkItems: options.benchmarkItems,
     maxCorpusDocFrequency: options.maxCorpusDocFrequency,
@@ -51,7 +58,8 @@ export async function scanCorpus(
     for await (const line of rl) {
       const trimmed = line.trim();
       if (trimmed.length === 0) continue;
-      hasher.update(trimmed);
+      fullHasher.update(trimmed);
+      portable.add(trimmed);
 
       const parsed = parseCorpusLine(trimmed, session.corpusDocs + 1, options.textField, options.idField);
       if (!parsed) continue;
@@ -67,5 +75,15 @@ export async function scanCorpus(
     stream.close();
   }
 
-  return session.finish(basename(corpusPath), hasher.digest('hex').slice(0, 32), Date.now() - started);
+  const corpusBytes = statSync(corpusPath).size;
+  const name = basename(corpusPath);
+
+  return session.finish({
+    corpusName: name,
+    corpusHash: await portable.digest(corpusBytes),
+    corpusHashFull: fullHasher.digest('hex'),
+    corpusBytes,
+    command: options.command ?? `node src/cli.ts contaminate --index <index> --corpus ${name}`,
+    elapsedMs: Date.now() - started,
+  });
 }

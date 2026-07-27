@@ -403,7 +403,6 @@ function render(report, file, isSample) {
       <tr><th>matches kept</th><td class="num">${exact.totalHits}</td></tr>
       <tr><th>dropped as ordinary language</th><td class="num">${exact.droppedGeneric ?? 0}</td></tr>
       <tr><th>could not be checked</th><td class="num">${uncheckable} item${uncheckable === 1 ? '' : 's'} shorter than ${report.n} tokens</td></tr>
-      <tr><th>content hash</th><td class="num">${esc(report.corpusHash)}</td></tr>
     </table></div>`;
 
   if (exact.hits.length > 0) {
@@ -427,6 +426,25 @@ function render(report, file, isSample) {
       shorter than ${report.n} tokens, so nothing could ever match ${uncheckable === 1 ? 'it' : 'them'}.
       A clean result that stayed silent about that would be hiding the part of the benchmark nobody looked at.</p>`;
   }
+
+  const r = report.receipt;
+  html += `
+    <h2>Receipt — reproduce this without asking us</h2>
+    <p class="muted">Everything needed to re-derive this exact result on your own machine. The
+    corpus hash is computed the same way on the command line, so the two reports name the
+    same bytes.</p>
+    <pre>scanner        ${esc(r.scannerVersion)}, index format ${r.indexFormatVersion}
+index          ${esc(r.benchmark)} · n=${r.n} · stride ${r.stride} · ${r.indexGrams.toLocaleString()} grams
+benchmark hash ${esc(r.benchmarkHash)}
+corpus         ${esc(r.corpus)} · ${r.corpusBytes.toLocaleString()} bytes · ${r.corpusDocs.toLocaleString()} docs
+corpus hash    ${esc(r.corpusHash)}
+generated      ${esc(r.generatedAt)}
+
+${esc(r.command)}</pre>
+    <p class="muted">The corpus hash covers the first 64 lines, every thousandth line after
+    that, and the exact line and byte counts — enough to notice a changed corpus, not enough
+    to stop someone who edits theirs deliberately. The command line additionally records a
+    full SHA-256, which does. That limit is written down rather than implied away.</p>`;
 
   $('out').innerHTML = html;
 }

@@ -1,4 +1,5 @@
 import { NgramIndex } from './ngramIndex.ts';
+import { CorpusHasher } from './corpusHash.ts';
 import { decodeIndex, gunzipIfNeeded } from './indexCodec.ts';
 import { parseCorpusLine, ScanSession } from './scanSession.ts';
 import type { ContaminationReport, NgramIndexData } from './types.ts';
@@ -19,16 +20,11 @@ export type BrowserScanOptions = {
   textField?: string;
   idField?: string;
   maxCorpusDocFrequency?: number;
+  /** Recorded in the receipt: the command-line invocation that reproduces this report. */
+  command?: string;
   /** Called roughly every 5,000 documents so a long scan can show progress. */
   onProgress?: (docs: number, tokens: number, bytesRead: number) => void;
 };
-
-async function sha256Hex(chunks: string[]): Promise<string> {
-  const encoder = new TextEncoder();
-  const joined = encoder.encode(chunks.join('\n'));
-  const digest = await crypto.subtle.digest('SHA-256', joined);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
-}
 
 export function loadIndexFromJson(data: NgramIndexData): NgramIndex {
   return NgramIndex.load(data);
@@ -59,10 +55,10 @@ export async function scanFile(
   const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
   let carry = '';
   let bytesRead = 0;
-  // Hashing every line would hold the whole corpus in memory; sample deterministically so
-  // the attestation still binds to these exact bytes without a second pass.
-  const hashSample: string[] = [];
-  let lineNo = 0;
+  // Shared with the command line, so the same file yields the same corpus identity on
+  // either surface. Two implementations of one sampling rule would drift, and reports
+  // that cannot be compared are reports nobody can check.
+  const hasher = new CorpusHasher();
 
   for (;;) {
     const { done, value } = await reader.read();
@@ -77,8 +73,7 @@ export async function scanFile(
       newlineAt = carry.indexOf('\n');
       if (line.length === 0) continue;
 
-      lineNo++;
-      if (lineNo <= 64 || lineNo % 1000 === 0) hashSample.push(line);
+      hasher.add(line);
 
       const parsed = parseCorpusLine(line, session.corpusDocs + 1, options.textField, options.idField);
       if (!parsed) continue;
@@ -94,16 +89,18 @@ export async function scanFile(
 
   const tail = carry.trim();
   if (tail.length > 0) {
-    lineNo++;
-    hashSample.push(tail);
+    hasher.add(tail);
     const parsed = parseCorpusLine(tail, session.corpusDocs + 1, options.textField, options.idField);
     if (parsed) session.addDocument(parsed.docId, parsed.text);
   }
 
-  hashSample.push(`lines:${lineNo}`, `bytes:${file.size}`);
-  const hash = await sha256Hex(hashSample);
-
-  return session.finish(file.name, hash, Math.round(performance.now() - started));
+  return session.finish({
+    corpusName: file.name,
+    corpusHash: await hasher.digest(file.size),
+    corpusBytes: file.size,
+    command: options.command ?? `node src/cli.ts contaminate --index <index> --corpus ${file.name}`,
+    elapsedMs: Math.round(performance.now() - started),
+  });
 }
 
 export { NgramIndex, decodeIndex, gunzipIfNeeded };

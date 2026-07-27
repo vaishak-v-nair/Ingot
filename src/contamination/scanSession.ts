@@ -2,7 +2,7 @@ import { minhashSignature } from '../signals/nearDup.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import { hashTokens } from './fastTokens.ts';
 import { forEachNgramHashed, NgramIndex } from './ngramIndex.ts';
-import { DEFAULT_MAX_CORPUS_DOC_FREQUENCY } from './types.ts';
+import { DEFAULT_MAX_CORPUS_DOC_FREQUENCY, INDEX_FORMAT_VERSION } from './types.ts';
 import type { BenchmarkItem, ContaminationHit, ContaminationReport, TierResult } from './types.ts';
 
 /**
@@ -31,6 +31,17 @@ const MAX_KEYS_PER_RUN = 16;
 export type SessionOptions = {
   benchmarkItems?: BenchmarkItem[];
   maxCorpusDocFrequency?: number;
+};
+
+/** What only the caller knows: where the corpus came from and how to run this again. */
+export type FinishInput = {
+  corpusName: string;
+  corpusHash: string;
+  corpusBytes: number;
+  corpusHashFull?: string;
+  /** The exact invocation that reproduces this report. */
+  command: string;
+  elapsedMs: number;
 };
 
 type RawHit = { itemIdx: number; offset: number; key: number };
@@ -160,7 +171,8 @@ export class ScanSession {
     }
   }
 
-  finish(corpusName: string, corpusHash: string, elapsedMs: number): ContaminationReport {
+  finish(input: FinishInput): ContaminationReport {
+    const { corpusName, corpusHash, elapsedMs } = input;
     const exactHits: ContaminationHit[] = [];
     const exactItemsHit = new Set<number>();
     let exactTotal = 0;
@@ -221,10 +233,28 @@ export class ScanSession {
     for (const i of exactItemsHit) contaminated.add(this.index.itemIds[i]);
     for (const i of this.nearItemsHit) contaminated.add(this.index.itemIds[i]);
 
+    const generatedAt = new Date().toISOString();
+
     return {
       benchmark: this.index.benchmark,
       corpus: corpusName,
       corpusHash,
+      receipt: {
+        scannerVersion: SCANNER_VERSION,
+        indexFormatVersion: INDEX_FORMAT_VERSION,
+        benchmark: this.index.benchmark,
+        benchmarkHash: this.index.benchmarkHash,
+        n: this.index.n,
+        stride: this.index.stats.stride,
+        indexGrams: this.index.stats.gramsKept,
+        corpus: corpusName,
+        corpusHash,
+        corpusBytes: input.corpusBytes,
+        corpusDocs: this.corpusDocs,
+        corpusHashFull: input.corpusHashFull,
+        command: input.command,
+        generatedAt,
+      },
       n: this.index.n,
       corpusDocs: this.corpusDocs,
       corpusTokens: this.corpusTokens,
@@ -234,7 +264,7 @@ export class ScanSession {
       uncheckableItemIds: this.index.uncheckableItemIds,
       elapsedMs,
       scannerVersion: SCANNER_VERSION,
-      generatedAt: new Date().toISOString(),
+      generatedAt,
     };
   }
 }
