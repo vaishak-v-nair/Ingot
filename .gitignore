@@ -1,0 +1,20 @@
+# Reference corpora and benchmarks. Reproducible with the fetch scripts, and some carry
+# licences that forbid redistribution, so they are never committed.
+data/
+
+# Generated scan output
+reports/
+
+# Build artifacts from scripts/build-web.ts
+web/ingot.js
+web/indexes/
+
+# Node
+node_modules/
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# results/ is deliberately NOT ignored. The measured numbers are the product.

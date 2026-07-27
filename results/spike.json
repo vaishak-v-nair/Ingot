@@ -1,0 +1,94 @@
+{
+  "scanner": "ingot-0.1.0",
+  "humanReference": "dolly-15k (human-authored)",
+  "machineReference": "alpaca-52k (text-davinci-003)",
+  "batchSize": 1200,
+  "operatingThreshold": 85,
+  "monotonic": false,
+  "cleanControl": {
+    "batches": 8,
+    "purities": [
+      84,
+      95,
+      85,
+      97,
+      87,
+      89,
+      89,
+      93
+    ],
+    "mean": 89.875,
+    "sd": 4.703721930556695
+  },
+  "falsePositiveRate": 0.125,
+  "detectionFloor": 0.5,
+  "rows": [
+    {
+      "ratio": 0,
+      "purities": [
+        82,
+        84,
+        90,
+        93,
+        91
+      ],
+      "mean": 88,
+      "sd": 4.743416490252569,
+      "confidence": "medium"
+    },
+    {
+      "ratio": 0.05,
+      "purities": [
+        86,
+        94,
+        100,
+        85,
+        86
+      ],
+      "mean": 90.2,
+      "sd": 6.572670690061993,
+      "confidence": "high"
+    },
+    {
+      "ratio": 0.1,
+      "purities": [
+        91,
+        94,
+        79,
+        75,
+        99
+      ],
+      "mean": 87.6,
+      "sd": 10.188228501560024,
+      "confidence": "medium"
+    },
+    {
+      "ratio": 0.25,
+      "purities": [
+        76,
+        84,
+        76,
+        87,
+        83
+      ],
+      "mean": 81.2,
+      "sd": 4.969909455915671,
+      "confidence": "medium"
+    },
+    {
+      "ratio": 0.5,
+      "purities": [
+        58,
+        47,
+        68,
+        56,
+        53
+      ],
+      "mean": 56.4,
+      "sd": 7.700649323271382,
+      "confidence": "medium"
+    }
+  ],
+  "generatedAt": "2026-07-25T10:01:58.551Z",
+  "note": "Baselines are estimated from 20 random 1200-record subsamples of the first half of each corpus. Subsamples may overlap each other, so the spread is a subsampling estimate rather than one from independent batches. Every record scored in the spike test comes from the held-out second half, so nothing that calibrated the reference is ever scored against it. Scanner ingot-0.1.0."
+}

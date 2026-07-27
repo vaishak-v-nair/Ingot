@@ -1,0 +1,9 @@
+Ingot
+Copyright 2026 Vaishak V Nair
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+The reference corpora and benchmarks Ingot scans are not part of this software and
+carry their own licences. `databricks-dolly-15k` is CC-BY-SA-3.0. `stanford_alpaca`
+is CC-BY-NC-4.0, research and calibration only. Benchmark n-gram indexes published
+here contain one-way hashes and item ids, never benchmark text.

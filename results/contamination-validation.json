@@ -1,0 +1,110 @@
+{
+  "scanner": "ingot-0.1.0",
+  "benchmarkItems": 1000,
+  "corpusDocs": 6000,
+  "planted": 60,
+  "seed": 3085,
+  "rows": [
+    {
+      "n": 8,
+      "indexGrams": 54973,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 60,
+      "plantedUncheckable": 0,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 1,
+      "controlFalsePositives": 5,
+      "controlHitIds": [
+        "alpaca-11757",
+        "alpaca-21362",
+        "alpaca-23474",
+        "alpaca-4838",
+        "alpaca-5118"
+      ]
+    },
+    {
+      "n": 9,
+      "indexGrams": 54004,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 60,
+      "plantedUncheckable": 0,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 1,
+      "controlFalsePositives": 3,
+      "controlHitIds": [
+        "alpaca-11757",
+        "alpaca-4838",
+        "alpaca-5118"
+      ]
+    },
+    {
+      "n": 10,
+      "indexGrams": 53023,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 60,
+      "plantedUncheckable": 0,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 1,
+      "controlFalsePositives": 2,
+      "controlHitIds": [
+        "alpaca-4838",
+        "alpaca-5118"
+      ]
+    },
+    {
+      "n": 11,
+      "indexGrams": 52039,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 57,
+      "plantedUncheckable": 3,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.9824561403508771,
+      "controlFalsePositives": 1,
+      "controlHitIds": [
+        "alpaca-4838"
+      ]
+    },
+    {
+      "n": 12,
+      "indexGrams": 51080,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 57,
+      "plantedUncheckable": 3,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.08771929824561403,
+      "controlFalsePositives": 0,
+      "controlHitIds": []
+    },
+    {
+      "n": 13,
+      "indexGrams": 50143,
+      "droppedStoplist": 0,
+      "droppedNonDiscriminative": 0,
+      "checkablePlanted": 57,
+      "plantedUncheckable": 3,
+      "verbatimRecall": 1,
+      "paraphraseRecall": 0.03508771929824561,
+      "controlFalsePositives": 0,
+      "controlHitIds": []
+    }
+  ],
+  "ablation": {
+    "withFilterGrams": 53023,
+    "withoutFilterGrams": 53023,
+    "withFilterFlagged": 2,
+    "withoutFilterFlagged": 2
+  },
+  "defaultN": 10,
+  "legacyN": 13,
+  "verdictPass": true,
+  "limitations": [
+    "The control is an independent corpus, not one that predates the benchmark. A true temporal control needs dated corpora and is not yet available here.",
+    "Paraphrase is simulated by deterministic light editing, not by a model rewriting the text. Real paraphrase will be harder.",
+    "Benchmark and corpus are both 2023-era public datasets."
+  ]
+}

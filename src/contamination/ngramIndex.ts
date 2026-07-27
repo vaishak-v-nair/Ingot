@@ -263,7 +263,7 @@ export class NgramIndex {
    *
    * Hot path: called once per corpus token position. An open-addressing table over
    * typed arrays was tried here and measured 2.8x SLOWER than V8's Map (2549ms vs
-   * 903ms over 12M probes), so the Map stays. See vault/Build Log.md.
+   * 903ms over 12M probes), so the Map stays. See docs/measurements.md.
    */
   lookup(key: number): number[] | undefined {
     return this.map.get(key);
