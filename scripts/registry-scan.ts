@@ -42,6 +42,12 @@ type PairResult = {
   corpusTokens: number;
   corpusHash: string;
   elapsedMs: number;
+  /**
+   * Every flagged item, not just the sampled ones. Without this, counting distinct items
+   * across corpora means guessing: an item flagged in two corpora is two rows and one
+   * finding, and a summary that cannot tell the difference reports the wrong total.
+   */
+  contaminatedItemIds: string[];
   samples: ContaminationHit[];
 };
 
@@ -81,6 +87,7 @@ for (const b of BENCHMARKS) {
         corpusTokens: report.corpusTokens,
         corpusHash: report.corpusHash,
         elapsedMs: report.elapsedMs,
+        contaminatedItemIds: report.contaminatedItemIds,
         samples: exact.hits.slice(0, 3),
       });
 

@@ -1,0 +1,84 @@
+name: pages
+
+# Publishes the scanner and the registry to GitHub Pages.
+#
+# Requires Pages to be enabled for the repository with "GitHub Actions" as the source.
+# Until it is, this workflow fails on the deploy step and nothing else is affected.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a queued run supersedes an older one rather than racing it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Cache benchmark data
+        id: bench
+        uses: actions/cache@v4
+        with:
+          path: ingot-bench
+          key: benchmarks-v1
+
+      - name: Fetch benchmarks
+        if: steps.bench.outputs.cache-hit != 'true'
+        run: |
+          node scripts/fetch-benchmarks.ts
+          cp -r data ingot-bench
+
+      - name: Restore cached benchmarks
+        if: steps.bench.outputs.cache-hit == 'true'
+        run: cp -r ingot-bench data
+
+      # The bundle and the published indexes. Indexes carry one-way hashes and item ids
+      # only, never benchmark text, so serving them redistributes nothing.
+      - name: Build the scanner
+        run: node scripts/build-web.ts
+
+      # Generated from the committed results, so the page cannot drift from the scan that
+      # produced it.
+      - name: Build the registry page
+        run: node scripts/build-registry-page.ts
+
+      - name: Check the site is complete before publishing it
+        run: |
+          set -euo pipefail
+          for f in web/index.html web/about.html web/registry.html web/ingot.js \
+                   web/sample-corpus.jsonl web/indexes/mmlu.idx.bin.gz \
+                   web/indexes/gsm8k.idx.bin.gz web/indexes/humaneval.idx.bin.gz; do
+            test -s "$f" || { echo "::error::missing or empty: $f"; exit 1; }
+          done
+          grep -q 'id="drop"' web/index.html
+          echo "site ok"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

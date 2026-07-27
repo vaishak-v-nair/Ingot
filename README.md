@@ -206,6 +206,7 @@ instead of trusting it. All are written up in `docs/measurements.md` and guarded
   and where a determined vendor still wins
 - `docs/index-format.md` — the index format, specified completely enough to implement
   independently
+- `docs/github-action.md` — running the scan as a gate in your own CI
 
 ## Licences of the reference data
 

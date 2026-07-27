@@ -49,7 +49,8 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 496,
+      "elapsedMs": 272,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -64,7 +65,8 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 102,
+      "elapsedMs": 93,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -79,7 +81,8 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 465,
+      "elapsedMs": 327,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -94,7 +97,8 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 99,
+      "elapsedMs": 78,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -109,7 +113,10 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 331,
+      "elapsedMs": 304,
+      "contaminatedItemIds": [
+        "HumanEval-78"
+      ],
       "samples": [
         {
           "tier": "exact",
@@ -152,7 +159,10 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 141,
+      "elapsedMs": 76,
+      "contaminatedItemIds": [
+        "HumanEval-78"
+      ],
       "samples": [
         {
           "tier": "exact",
@@ -177,7 +187,8 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 292,
+      "elapsedMs": 189,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -192,7 +203,8 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 107,
+      "elapsedMs": 102,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -207,7 +219,14 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 2561,
+      "elapsedMs": 1478,
+      "contaminatedItemIds": [
+        "mmlu-258",
+        "mmlu-3811",
+        "mmlu-5703",
+        "mmlu-6695",
+        "mmlu-7120"
+      ],
       "samples": [
         {
           "tier": "exact",
@@ -250,7 +269,8 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 868,
+      "elapsedMs": 1203,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -265,7 +285,8 @@
       "corpusDocs": 26534,
       "corpusTokens": 1666879,
       "corpusHash": "d051a258433bdde731149b5af8311ee0",
-      "elapsedMs": 2746,
+      "elapsedMs": 2058,
+      "contaminatedItemIds": [],
       "samples": []
     },
     {
@@ -280,7 +301,8 @@
       "corpusDocs": 7208,
       "corpusTokens": 628087,
       "corpusHash": "5164d08ca8b530e5857ff1b3eb1f0c35",
-      "elapsedMs": 1090,
+      "elapsedMs": 774,
+      "contaminatedItemIds": [],
       "samples": []
     }
   ]

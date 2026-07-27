@@ -1,0 +1,111 @@
+name: 'Ingot contamination scan'
+description: 'Fail the build when a benchmark appears inside your training data, with the matching text in the log.'
+author: 'Ingot'
+
+branding:
+  icon: 'search'
+  color: 'orange'
+
+inputs:
+  corpus:
+    description: 'Path to the JSONL corpus to scan. Any size — it streams.'
+    required: true
+  index:
+    description: 'A bundled benchmark by name (humaneval, gsm8k), or a path or URL to a published .idx.bin.gz.'
+    required: false
+    default: 'gsm8k'
+  max-items:
+    description: 'Fail when more than this many benchmark items are found. 0 means any finding fails.'
+    required: false
+    default: '0'
+  text-field:
+    description: 'Field holding the document text. Auto-detected when omitted.'
+    required: false
+    default: ''
+  report:
+    description: 'Where to write the JSON report, including the reproducibility receipt.'
+    required: false
+    default: 'ingot-report.json'
+  fail-on-findings:
+    description: 'Set to false to report without failing the build.'
+    required: false
+    default: 'true'
+
+outputs:
+  items-found:
+    description: 'Distinct benchmark items found in the corpus.'
+    value: ${{ steps.scan.outputs.items-found }}
+  report:
+    description: 'Path to the JSON report.'
+    value: ${{ steps.scan.outputs.report }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node 24
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+
+    - name: Fetch the index when it is a URL
+      id: resolve
+      shell: bash
+      run: |
+        set -euo pipefail
+        INDEX='${{ inputs.index }}'
+        case "$INDEX" in
+          http://*|https://*)
+            curl -fsSL "$INDEX" -o /tmp/ingot-index.idx.bin.gz
+            echo "index=/tmp/ingot-index.idx.bin.gz" >> "$GITHUB_OUTPUT"
+            ;;
+          *)
+            echo "index=$INDEX" >> "$GITHUB_OUTPUT"
+            ;;
+        esac
+
+    - name: Scan
+      id: scan
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        ARGS=(contaminate
+          --index '${{ steps.resolve.outputs.index }}'
+          --corpus '${{ inputs.corpus }}'
+          --json '${{ inputs.report }}')
+        if [ -n '${{ inputs.text-field }}' ]; then
+          ARGS+=(--text-field '${{ inputs.text-field }}')
+        fi
+
+        # The whole report goes to the log on purpose. A gate that says "3 findings" and
+        # nothing else forces everyone to go and look; the matching text is the finding.
+        npx --yes @ingot/scan "${ARGS[@]}" | tee /tmp/ingot-out.txt
+
+        FOUND=$(node -e "
+          const r = require('${{ github.workspace }}/${{ inputs.report }}');
+          const exact = r.tiers.find((t) => t.tier === 'exact');
+          process.stdout.write(String(exact.itemsHit));
+        ")
+        echo "items-found=$FOUND" >> "$GITHUB_OUTPUT"
+        echo "report=${{ inputs.report }}" >> "$GITHUB_OUTPUT"
+
+        {
+          echo "### Ingot contamination scan"
+          echo
+          echo "**$FOUND** benchmark item(s) found in \`${{ inputs.corpus }}\`."
+          echo
+          echo '```'
+          sed -n '/EVIDENCE/,/RECEIPT/p' /tmp/ingot-out.txt || true
+          echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
+
+        if [ '${{ inputs.fail-on-findings }}' != 'true' ]; then
+          echo "fail-on-findings is false; reporting only"
+          exit 0
+        fi
+        if [ "$FOUND" -gt '${{ inputs.max-items }}' ]; then
+          echo "::error::$FOUND benchmark items found, threshold is ${{ inputs.max-items }}."
+          echo "::error::Read the matches above before acting: canonical text with one natural"
+          echo "::error::phrasing looks identical to leakage in any count."
+          exit 1
+        fi
