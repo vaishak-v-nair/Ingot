@@ -20,7 +20,7 @@ import { loadBatch } from '../src/loader.ts';
 import { mulberry32 } from '../src/text.ts';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
-import { MAX_N, MIN_N } from '../src/contamination/types.ts';
+import { DEFAULT_N, LEGACY_N, MAX_N, MIN_N } from '../src/contamination/types.ts';
 import { SCANNER_VERSION } from '../src/types.ts';
 import type { BenchmarkItem } from '../src/contamination/types.ts';
 
@@ -163,36 +163,43 @@ for (let n = MIN_N; n <= MAX_N; n++) {
 }
 
 // Ablation: does the discriminative filter change what we would report?
-const withFilter = NgramIndex.build('ablate-on', bench, { n: 13 });
-const withoutFilter = NgramIndex.build('ablate-off', bench, { n: 13, disableDiscriminativeFilter: true });
+const withFilter = NgramIndex.build('ablate-on', bench, { n: DEFAULT_N });
+const withoutFilter = NgramIndex.build('ablate-off', bench, { n: DEFAULT_N, disableDiscriminativeFilter: true });
 const ablationOn = await scanCorpus(withFilter, controlCorpus);
 const ablationOff = await scanCorpus(withoutFilter, controlCorpus);
 
 process.stdout.write(
-  `\n  DISCRIMINATIVE FILTER ABLATION (n=13, control corpus)\n` +
+  `\n  DISCRIMINATIVE FILTER ABLATION (n=${DEFAULT_N}, control corpus)\n` +
     `    filter on   ${withFilter.size.toLocaleString()} grams, ${ablationOn.contaminatedItemIds.length} items flagged\n` +
     `    filter off  ${withoutFilter.size.toLocaleString()} grams, ${ablationOff.contaminatedItemIds.length} items flagged\n`,
 );
 
-const n13 = rows.find((r) => r.n === 13)!;
-const verdictPass = n13.verbatimRecall === 1;
+const shipped = rows.find((r) => r.n === DEFAULT_N)!;
+const legacy = rows.find((r) => r.n === LEGACY_N)!;
+const verdictPass = shipped.verbatimRecall === 1;
 
 process.stdout.write(
   `\n  VERDICT\n` +
-    `    verbatim recall at n=13: ${(n13.verbatimRecall * 100).toFixed(1)}% ` +
+    `    shipped default n=${DEFAULT_N}\n` +
+    `      verbatim recall ${(shipped.verbatimRecall * 100).toFixed(1)}% ` +
     `${verdictPass ? 'PASS' : 'FAIL — this is a bug, not a metric'}\n` +
-    `    control false positives at n=13: ${n13.controlFalsePositives} of ${bench.length} items\n` +
-    `    uncheckable at n=13: ${n13.plantedUncheckable} of ${PLANTED} planted items are shorter\n` +
-    `      than 13 tokens, so nothing could ever match them. Recall is over the\n` +
-    `      ${n13.checkablePlanted} that are checkable. A user must be told this, or a clean\n` +
-    `      result hides the part of their benchmark that was never checked.\n`,
+    `      paraphrase ${(shipped.paraphraseRecall * 100).toFixed(1)}%, ` +
+    `false positives ${shipped.controlFalsePositives}/${bench.length}, ` +
+    `unscannable ${shipped.plantedUncheckable}/${PLANTED} planted\n` +
+    `    legacy n=${LEGACY_N}, reported so findings stay comparable with prior work\n` +
+    `      verbatim recall ${(legacy.verbatimRecall * 100).toFixed(1)}%, ` +
+    `paraphrase ${(legacy.paraphraseRecall * 100).toFixed(1)}%, ` +
+    `unscannable ${legacy.plantedUncheckable}/${PLANTED} planted\n` +
+    `    Recall counts only checkable items. Items shorter than n produce no grams, so\n` +
+    `    nothing can match them; a clean result silent about those hides the part of the\n` +
+    `    benchmark that was never examined.\n`,
 );
 
-if (n13.controlHitIds.length > 0) {
+if (shipped.controlHitIds.length > 0) {
   process.stdout.write(
     `    control hits are not automatically errors: an independent corpus can genuinely\n` +
       `    share a source. Inspect the matched text before calling them false positives.\n` +
-      `    ids: ${n13.controlHitIds.join(', ')}\n`,
+      `    ids: ${shipped.controlHitIds.join(', ')}\n`,
   );
 }
 
@@ -213,6 +220,8 @@ writeFileSync(
         withFilterFlagged: ablationOn.contaminatedItemIds.length,
         withoutFilterFlagged: ablationOff.contaminatedItemIds.length,
       },
+      defaultN: DEFAULT_N,
+      legacyN: LEGACY_N,
       verdictPass,
       limitations: [
         'The control is an independent corpus, not one that predates the benchmark. A true temporal control needs dated corpora and is not yet available here.',

@@ -2,8 +2,23 @@
 
 export const INDEX_FORMAT_VERSION = 1;
 
-/** GPT-3 (Brown et al. 2020) established 13. The n sweep re-derives it rather than assuming it. */
-export const DEFAULT_N = 13;
+/**
+ * 10, not the field's inherited 13.
+ *
+ * GPT-3 (Brown et al. 2020) used 13-gram matching and everyone followed, with no
+ * systematic re-derivation since. Measured on 1,000 items planted in 6,000 documents
+ * (`scripts/contamination-validate.ts`), 13 misses 96.5% of copies edited by dropping one
+ * word in eleven, and leaves 6.8% of a benchmark unscannable because items shorter than
+ * 13 tokens produce no grams at all. 10 matches 13 on verbatim recall, catches 100% of
+ * those edited copies, and scans 20x more of the benchmark, for two false positives per
+ * thousand items — each inspectable, because every hit displays its matching text.
+ *
+ * Reports quote n=13 alongside, so findings stay comparable with prior published work.
+ */
+export const DEFAULT_N = 10;
+
+/** The field's historical default. Reported beside the Ingot default for comparability. */
+export const LEGACY_N = 13;
 export const MIN_N = 8;
 export const MAX_N = 13;
 

@@ -68,6 +68,21 @@ n=10 matches n=13 on verbatim recall, is 28x better on edited copies, and scans 
 of the benchmark, for two false positives per thousand items — and those are inspectable,
 because every hit displays its matching text.
 
+**What the false positives actually are.** Both n=10 control hits are canonical facts with
+one natural phrasing:
+
+```
+The planets [[are Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune]]
+
+...the squares of the two adjacent sides is equal to [[the square of the hypotenuse
+(the side opposite to the right]] angled triangle...
+```
+
+Neither is contamination, and no reader needs the docs to know that, because the report
+shows the matching text rather than a count. That is the argument for displaying evidence:
+a false positive you can see is a judgment a user makes in one second, while a false
+positive expressed as a percentage is one they cannot evaluate at all.
+
 Caveats stated first: one corpus pair, both 2023-era, and paraphrase is simulated by
 deterministic word dropping rather than a model rewriting the text. Real paraphrase will
 be harder than this.
