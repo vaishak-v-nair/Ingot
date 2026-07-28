@@ -15,7 +15,7 @@ web/registry.html
 # unreachable: git never descends into an ignored directory to reconsider a file.
 web/indexes/*
 # HumanEval (70 KB) and GSM8K (350 KB) are one-way hashes with no benchmark text, so they
-# ship: `npx @ingot/scan contaminate --index gsm8k` works with nothing else downloaded, and
+# ship: `npx ingot-scan contaminate --index gsm8k` works with nothing else downloaded, and
 # test/sample-corpus.test.ts can assert the front page still matches. MMLU is 5.35 MB and
 # stays a download.
 !web/indexes/humaneval.idx.bin.gz
@@ -24,6 +24,14 @@ web/indexes/*
 # Node
 node_modules/
 *.log
+
+# Secrets. This repository is public, and a key committed here is a key published:
+# rewriting history does not unpublish it. Ingot itself needs no credential — it runs
+# offline with no API key — so anything matching these is an accident by definition.
+.env
+.env.*
+*.pem
+*.key
 
 # OS
 Thumbs.db
