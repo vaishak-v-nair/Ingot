@@ -79,7 +79,7 @@ runs:
 
         # The whole report goes to the log on purpose. A gate that says "3 findings" and
         # nothing else forces everyone to go and look; the matching text is the finding.
-        npx --yes @ingot/scan "${ARGS[@]}" | tee /tmp/ingot-out.txt
+        npx --yes ingot-scan "${ARGS[@]}" | tee /tmp/ingot-out.txt
 
         FOUND=$(node -e "
           const r = require('${{ github.workspace }}/${{ inputs.report }}');

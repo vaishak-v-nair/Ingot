@@ -12,7 +12,7 @@ in a browser tab or on the command line — and nothing is uploaded, because the
 to upload it to.
 
 ```bash
-npx @ingot/scan contaminate --index gsm8k --corpus your-corpus.jsonl
+npx ingot-scan contaminate --index gsm8k --corpus your-corpus.jsonl
 ```
 
 No clone, no benchmark download, no account. Or open the web scanner, drop a file, and
@@ -67,7 +67,7 @@ you can hand to a reviewer.
 `gsm8k` and `humaneval` ship with the package, so this needs nothing else:
 
 ```bash
-npx @ingot/scan contaminate --index gsm8k --corpus mine.jsonl
+npx ingot-scan contaminate --index gsm8k --corpus mine.jsonl
 ```
 
 Corpus format is JSONL, one record per line. The text field is auto-detected as `text`,

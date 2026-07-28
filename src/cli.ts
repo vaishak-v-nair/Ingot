@@ -267,7 +267,7 @@ export async function runContaminate(argv: string[]): Promise<number> {
   }
 
   const command =
-    `npx @ingot/scan contaminate --index ${indexArg} --corpus ${corpusPath}` +
+    `npx ingot-scan contaminate --index ${indexArg} --corpus ${corpusPath}` +
     (benchPath ? ` --bench ${benchPath}` : '') +
     (maxDocFreq !== undefined ? ` --max-doc-freq ${maxDocFreq}` : '');
 
