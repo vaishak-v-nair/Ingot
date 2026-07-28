@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { NgramIndex, forEachNgram, tokenHash } from '../src/contamination/ngramIndex.ts';
 import { hashTokens } from '../src/contamination/fastTokens.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
@@ -238,6 +239,73 @@ test('planted verbatim contamination is recalled at 100%', async () => {
     );
   }
   assert.equal(report.contaminatedItemIds.length, plantedIds.length, 'no clean item may be flagged');
+});
+
+test('a gzipped corpus scans identically to the file it expands to', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `g${i}`,
+    text: words(50, 5100 + i),
+  }));
+  const index = NgramIndex.build('gz-bench', bench, { n: N });
+  const rows = [
+    { id: 'd1', text: `${words(20, 5300)} ${bench[4].text} ${words(20, 5400)}` },
+    { id: 'd2', text: words(60, 5500) },
+  ];
+
+  const plainPath = writeCorpus('gz-twin.jsonl', rows);
+  const gzPath = `${plainPath}.gz`;
+  writeFileSync(gzPath, gzipSync(readFileSync(plainPath)));
+
+  const plain = await scanCorpus(index, plainPath);
+  const gz = await scanCorpus(index, gzPath);
+
+  // The corpus is the text, not its encoding. If these hashes differ, a lab that stores
+  // its corpus compressed and a reviewer who expanded it cannot compare two reports —
+  // which is the entire point of publishing a hash.
+  assert.equal(gz.corpusHash, plain.corpusHash, 'compression must not change corpus identity');
+  assert.equal(gz.receipt.corpusHashFull, plain.receipt.corpusHashFull);
+  assert.equal(gz.receipt.corpusBytes, plain.receipt.corpusBytes, 'bytes are the corpus, not the archive');
+  assert.equal(gz.corpusDocs, plain.corpusDocs);
+  assert.deepEqual(gz.contaminatedItemIds, plain.contaminatedItemIds);
+  assert.ok(plain.contaminatedItemIds.includes('g4'), 'the fixture must actually find something');
+});
+
+test('sharded corpus files scan as the single corpus they concatenate to', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `s${i}`,
+    text: words(50, 6100 + i),
+  }));
+  const index = NgramIndex.build('shard-bench', bench, { n: N });
+
+  const partA = [
+    { id: 'a1', text: `${words(20, 6300)} ${bench[2].text} ${words(20, 6400)}` },
+    { id: 'a2', text: words(60, 6500) },
+  ];
+  const partB = [
+    { id: 'b1', text: words(60, 6600) },
+    { id: 'b2', text: `${words(20, 6700)} ${bench[9].text} ${words(20, 6800)}` },
+  ];
+
+  const aPath = writeCorpus('shard-a.jsonl', partA);
+  const bPath = writeCorpus('shard-b.jsonl', partB);
+  const wholePath = writeCorpus('shard-whole.jsonl', [...partA, ...partB]);
+
+  const sharded = await scanCorpus(index, [aPath, bPath], { corpusName: 'shard-whole.jsonl' });
+  const whole = await scanCorpus(index, wholePath);
+
+  // A pretraining corpus only ever arrives sharded. If the shard count changed the answer,
+  // no two scans of the same corpus would agree and the number would mean nothing.
+  assert.equal(sharded.corpusHash, whole.corpusHash, 'sharding must not change corpus identity');
+  assert.equal(sharded.receipt.corpusHashFull, whole.receipt.corpusHashFull);
+  assert.equal(sharded.receipt.corpusBytes, whole.receipt.corpusBytes);
+  assert.equal(sharded.corpusDocs, whole.corpusDocs);
+  assert.deepEqual(sharded.contaminatedItemIds, whole.contaminatedItemIds);
+  assert.deepEqual(sharded.contaminatedItemIds, ['s2', 's9']);
+
+  // The hash covers the concatenation, so the order that produced it has to be recoverable
+  // or nobody can rebuild the input it attests to.
+  assert.deepEqual(sharded.receipt.corpusParts, ['shard-a.jsonl', 'shard-b.jsonl']);
+  assert.equal(whole.receipt.corpusParts, undefined);
 });
 
 test('a match reports its span with surrounding context, not just a count', async () => {

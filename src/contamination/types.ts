@@ -144,6 +144,15 @@ export type ContaminationHit = {
   contextAfter: string;
   /** Jaccard estimate for near, cosine for semantic. Absent for exact: it is a match or it isn't. */
   score?: number;
+  /**
+   * How many corpus documents contain this match's rarest n-gram.
+   *
+   * The number that decides whether a reader should believe the hit. A passage that leaked
+   * appears once or twice; the Declaration of Independence appears everywhere and matches
+   * just as exactly. Without this, the two are indistinguishable in a report — and at web
+   * scale the second kind vastly outnumbers the first.
+   */
+  corpusDocFrequency?: number;
 };
 
 export type TierResult = {
@@ -209,6 +218,13 @@ export type Receipt = {
    * silently substituting the weaker one would not be.
    */
   corpusHashFull?: string;
+  /**
+   * The files that made up the corpus, in the order they were streamed, when it arrived
+   * as more than one. A pretraining corpus ships sharded, and the hash above covers the
+   * concatenation — so without the part list in the order used, the hash is not
+   * reproducible. Absent for a single file, where `corpus` already names it.
+   */
+  corpusParts?: string[];
   /** The exact invocation that produces this report. */
   command: string;
   generatedAt: string;

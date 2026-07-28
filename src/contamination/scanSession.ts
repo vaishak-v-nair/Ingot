@@ -39,6 +39,8 @@ export type FinishInput = {
   corpusHash: string;
   corpusBytes: number;
   corpusHashFull?: string;
+  /** Ordered file list, when the corpus arrived sharded. See Receipt.corpusParts. */
+  corpusParts?: string[];
   /** The exact invocation that reproduces this report. */
   command: string;
   elapsedMs: number;
@@ -189,7 +191,11 @@ export class ScanSession {
       }
       exactTotal++;
       exactItemsHit.add(run.itemIdx);
-      if (hit && exactHits.length < MAX_STORED_HITS) exactHits.push(hit);
+      // Carried on the hit so a reader can weigh it without rerunning the scan: survived
+      // the filter is not the same as rare, and the margin is the whole judgement.
+      if (hit && exactHits.length < MAX_STORED_HITS) {
+        exactHits.push({ ...hit, corpusDocFrequency: Number.isFinite(rarest) ? rarest : undefined });
+      }
     }
 
     const itemsTotal = this.index.itemIds.length;
@@ -252,6 +258,7 @@ export class ScanSession {
         corpusBytes: input.corpusBytes,
         corpusDocs: this.corpusDocs,
         corpusHashFull: input.corpusHashFull,
+        corpusParts: input.corpusParts,
         command: input.command,
         generatedAt,
       },
