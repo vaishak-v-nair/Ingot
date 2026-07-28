@@ -16,7 +16,7 @@
  * step between download and result. Nothing here rewrites the corpus, which means a
  * reader reproduces the scan by fetching the same URLs.
  *
- *   node scripts/fetch-pretraining.ts --shards 26 --out E:/ingot-corpora/c4-en
+ *   node scripts/fetch-pretraining.ts --shards 26 --out ../corpora/c4-en
  *
  * Resumable: a shard whose size already matches the server's is left alone, so an
  * interrupted download costs only the shard it was on.
@@ -44,7 +44,10 @@ function flag(name: string, fallback: string): string {
 }
 
 const shardCount = Number(flag('shards', '26'));
-const outDir = resolve(flag('out', 'E:/ingot-corpora/c4-en'));
+// Defaults beside the repository, not inside it. A pretraining corpus is gigabytes of
+// third-party data under its own licence, and the manifest written here makes it
+// reproducible from the URLs — so there is never a reason for it to enter a git tree.
+const outDir = resolve(flag('out', '../corpora/c4-en'));
 
 if (!Number.isInteger(shardCount) || shardCount < 1 || shardCount > TOTAL_SHARDS) {
   process.stderr.write(`--shards must be between 1 and ${TOTAL_SHARDS}\n`);

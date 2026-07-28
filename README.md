@@ -4,6 +4,7 @@
 
 [Run it in your browser](https://vaishak-v-nair.github.io/Ingot/) ·
 [the registry](https://vaishak-v-nair.github.io/Ingot/registry.html) ·
+[**three ways contamination scanning silently fails**](docs/silent-failures.md) ·
 [how every number was measured](docs/measurements.md)
 
 Ingot answers that with evidence rather than a score: it shows the matching text, side by

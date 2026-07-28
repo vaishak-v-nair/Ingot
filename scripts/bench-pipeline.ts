@@ -9,7 +9,7 @@
  * Each stage adds exactly one thing to the previous, so the deltas attribute the cost
  * rather than inferring it. Run against one shard of a fetched pretraining corpus:
  *
- *   node scripts/bench-pipeline.ts --shard E:/ingot-corpora/c4-en/c4-train.00000-of-01024.json.gz
+ *   node scripts/bench-pipeline.ts --shard ../corpora/c4-en/c4-train.00000-of-01024.json.gz
  */
 import { createHash } from 'node:crypto';
 import { createReadStream, existsSync, statSync } from 'node:fs';
@@ -27,7 +27,7 @@ function flag(name: string, fallback: string): string {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 }
 
-const shard = resolve(flag('shard', 'E:/ingot-corpora/c4-en/c4-train.00000-of-01024.json.gz'));
+const shard = resolve(flag('shard', '../corpora/c4-en/c4-train.00000-of-01024.json.gz'));
 const benchPath = resolve(flag('bench', 'data/bench/mmlu.jsonl'));
 const N = Number(flag('n', String(DEFAULT_N)));
 

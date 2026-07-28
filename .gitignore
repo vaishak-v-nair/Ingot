@@ -5,6 +5,11 @@ data/
 # Generated scan output
 reports/
 
+# Fetched pretraining corpora, if anyone points --out inside the repo. The scripts
+# default to ../corpora so gigabytes never land in a working tree, but a default is not
+# a guarantee and this file is the guarantee.
+corpora/
+
 # Published bundle, rebuilt by prepack on every publish
 dist/
 

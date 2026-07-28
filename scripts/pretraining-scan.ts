@@ -6,8 +6,8 @@
  * pretraining, so a null result on fine-tuning data says almost nothing about whether a
  * benchmark leaked. This is the same scan pointed at the place the answer lives.
  *
- *   node scripts/fetch-pretraining.ts --shards 26 --out E:/ingot-corpora/c4-en
- *   node scripts/pretraining-scan.ts --corpus E:/ingot-corpora/c4-en
+ *   node scripts/fetch-pretraining.ts --shards 26 --out ../corpora/c4-en
+ *   node scripts/pretraining-scan.ts --corpus ../corpora/c4-en
  *
  * One pass per (benchmark, n). The benchmarks are deliberately NOT merged into a single
  * index to save passes: the discriminative filter drops grams shared across benchmark
@@ -43,10 +43,13 @@ function flag(name: string, fallback: string): string {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 }
 
-const corpusDir = resolve(flag('corpus', 'E:/ingot-corpora/c4-en'));
+const corpusDir = resolve(flag('corpus', '../corpora/c4-en'));
 const shardLimit = Number(flag('shards', '0')) || 0;
 const nValues = flag('n', '') ? [Number(flag('n', ''))] : [DEFAULT_N, LEGACY_N];
 const outName = flag('out', 'pretraining-c4');
+// A single pass over 21 GB costs the better part of an hour, so re-examining one
+// benchmark should not mean re-scanning all three.
+const only = flag('benchmark', '');
 
 const manifestPath = join(corpusDir, 'manifest.json');
 if (!existsSync(manifestPath)) {
@@ -97,6 +100,7 @@ process.stdout.write(`  licence  ${manifest.licence}\n`);
 process.stdout.write(`  passes   ${BENCHMARKS.length * nValues.length} (one per benchmark per n)\n\n`);
 
 for (const b of BENCHMARKS) {
+  if (only && b.name !== only) continue;
   if (!existsSync(resolve(b.path))) {
     process.stdout.write(`  ${b.name}: missing, run scripts/fetch-benchmarks.ts\n`);
     continue;
@@ -150,9 +154,10 @@ for (const b of BENCHMARKS) {
       throughputMBs: throughput,
       droppedGeneric: exact.droppedGeneric ?? 0,
       contaminatedItemIds: report.contaminatedItemIds,
-      // More samples than the registry keeps: at this scale the evidence is the finding,
-      // and three rows cannot show whether a hit is canonical text or a real leak.
-      samples: exact.hits.slice(0, 25),
+      // Every retained hit, not a slice of them. At this scale the evidence IS the
+      // finding: deciding whether 865 matches are leakage or canonical text cannot be
+      // done from 25 of them, and the scanner already caps what it keeps.
+      samples: exact.hits,
     });
 
     process.stdout.write(

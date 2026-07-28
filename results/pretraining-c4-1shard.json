@@ -1,0 +1,934 @@
+{
+  "scanner": "ingot-0.1.0",
+  "defaultN": 10,
+  "legacyN": 13,
+  "corpus": {
+    "name": "c4-en-1shards",
+    "licence": "ODC-BY",
+    "source": "https://huggingface.co/datasets/allenai/c4/resolve/main/en/c4-train.<shard>-of-01024.json.gz",
+    "fetchedAt": "2026-07-28T09:23:12.684Z",
+    "shardCount": 1,
+    "compressedBytes": 319308785,
+    "uncompressedBytes": 821282490,
+    "shards": [
+      {
+        "name": "c4-train.00000-of-01024.json.gz",
+        "bytes": 319308785,
+        "sha256": "8ef8d75b0e045dec4aa5123a671b4564466b0707086a7ed1ba8721626dfffbc9"
+      }
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "gsm8k",
+      "path": "data/bench/gsm8k.jsonl",
+      "licence": "MIT",
+      "note": "test split, question text"
+    },
+    {
+      "name": "humaneval",
+      "path": "data/bench/humaneval.jsonl",
+      "licence": "MIT",
+      "note": "prompt: signature + docstring"
+    },
+    {
+      "name": "mmlu",
+      "path": "data/bench/mmlu.jsonl",
+      "licence": "MIT",
+      "note": "test split, question + choices"
+    }
+  ],
+  "results": [
+    {
+      "benchmark": "gsm8k",
+      "corpus": "c4-en-1shards",
+      "n": 10,
+      "itemsTotal": 1319,
+      "itemsHit": 0,
+      "rate": 0,
+      "totalMatches": 0,
+      "uncheckableItems": 0,
+      "corpusDocs": 356317,
+      "corpusTokens": 131633580,
+      "corpusBytes": 821282490,
+      "corpusHash": "e5da405654d23722586f3e0bb94f33ac",
+      "elapsedMs": 96492,
+      "throughputMBs": 8.511404986941923,
+      "droppedGeneric": 0,
+      "contaminatedItemIds": [],
+      "samples": []
+    },
+    {
+      "benchmark": "humaneval",
+      "corpus": "c4-en-1shards",
+      "n": 10,
+      "itemsTotal": 164,
+      "itemsHit": 3,
+      "rate": 0.018292682926829267,
+      "totalMatches": 5,
+      "uncheckableItems": 0,
+      "corpusDocs": 356317,
+      "corpusTokens": 131633580,
+      "corpusBytes": 821282490,
+      "corpusHash": "e5da405654d23722586f3e0bb94f33ac",
+      "elapsedMs": 88112,
+      "throughputMBs": 9.320892613945889,
+      "droppedGeneric": 0,
+      "contaminatedItemIds": [
+        "HumanEval-20",
+        "HumanEval-21",
+        "HumanEval-78"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-20",
+          "corpusDocId": "doc133423",
+          "corpusOffset": 16927,
+          "matchedText": "1.0, 2.0, 3.0, 4.0, 5.0",
+          "contextBefore": "for example, at least 0.05, 0.7, 0.15, 0.2, ",
+          "contextAfter": ", 6.0, 7.0, 8.0, 10.0, 12.0, 14.0",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-21",
+          "corpusDocId": "doc133423",
+          "corpusOffset": 16927,
+          "matchedText": "1.0, 2.0, 3.0, 4.0, 5.0",
+          "contextBefore": "for example, at least 0.05, 0.7, 0.15, 0.2, ",
+          "contextAfter": ", 6.0, 7.0, 8.0, 10.0, 12.0, 14.0",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc200639",
+          "corpusOffset": 266,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "in graduated lengths. Lettering Quill brush brown series 179a also available in ",
+          "contextAfter": ", 10, 11, 12, 14, 16, 18, 20",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc258495",
+          "corpusOffset": 1364,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F",
+          "contextBefore": "dates to 1660. Ci sono 6066 posts film nella film. Jump to ",
+          "contextAfter": ", G, H, I, J, K, L, M, N, O, P, Q, R",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc267074",
+          "corpusOffset": 2191,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F",
+          "contextBefore": "prin detinerea certificatelor: Ci sono 6066 posts film nella film. Jump to ",
+          "contextAfter": ", G, H, I, J, K, L, M, N, O, P, Q, R",
+          "corpusDocFrequency": 2
+        }
+      ]
+    },
+    {
+      "benchmark": "mmlu",
+      "corpus": "c4-en-1shards",
+      "n": 10,
+      "itemsTotal": 14042,
+      "itemsHit": 37,
+      "rate": 0.0026349522859991452,
+      "totalMatches": 74,
+      "uncheckableItems": 28,
+      "corpusDocs": 356317,
+      "corpusTokens": 131633580,
+      "corpusBytes": 821282490,
+      "corpusHash": "e5da405654d23722586f3e0bb94f33ac",
+      "elapsedMs": 184356,
+      "throughputMBs": 4.45487258347979,
+      "droppedGeneric": 0,
+      "contaminatedItemIds": [
+        "mmlu-10825",
+        "mmlu-11018",
+        "mmlu-11040",
+        "mmlu-11323",
+        "mmlu-11438",
+        "mmlu-11525",
+        "mmlu-1165",
+        "mmlu-11684",
+        "mmlu-11887",
+        "mmlu-11923",
+        "mmlu-11987",
+        "mmlu-12074",
+        "mmlu-12142",
+        "mmlu-12145",
+        "mmlu-1289",
+        "mmlu-13262",
+        "mmlu-3727",
+        "mmlu-3731",
+        "mmlu-3811",
+        "mmlu-3829",
+        "mmlu-4421",
+        "mmlu-5400",
+        "mmlu-5684",
+        "mmlu-5721",
+        "mmlu-5745",
+        "mmlu-5774",
+        "mmlu-5775",
+        "mmlu-5823",
+        "mmlu-5861",
+        "mmlu-5898",
+        "mmlu-5904",
+        "mmlu-5935",
+        "mmlu-5947",
+        "mmlu-5951",
+        "mmlu-6018",
+        "mmlu-6080",
+        "mmlu-6498"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "doc2910",
+          "corpusOffset": 1287,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "a ground for unalienable Rights, he pointed to the sky and said “",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11684",
+          "corpusDocId": "doc3160",
+          "corpusOffset": 530,
+          "matchedText": "breached the implied covenant of good faith and fair dealing",
+          "contextBefore": "minds regarding the property’s location in a flood zone; (2) plaintiff ",
+          "contextAfter": "; (3) there was a mutual mistake of fact; (4) the contract did",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5951",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 111,
+          "matchedText": "agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and",
+          "contextBefore": "allies.\nNATO’s founding treaty states in Article 5 that NATO members “",
+          "contextAfter": " that “if such an armed attack occurs, each of them, in exercise",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5951",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 136,
+          "matchedText": "that “if such an armed attack occurs, each of them, in exercise of the right of individual or collective self-defence",
+          "contextBefore": "or North America shall be considered an attack against them all” and ",
+          "contextAfter": "” will assist the victim state. In a 2014 summit declaration, NATO governments",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6018",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 111,
+          "matchedText": "agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and",
+          "contextBefore": "allies.\nNATO’s founding treaty states in Article 5 that NATO members “",
+          "contextAfter": " that “if such an armed attack occurs, each of them, in exercise",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6018",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 136,
+          "matchedText": "that “if such an armed attack occurs, each of them, in exercise of the right of individual or collective self-defence",
+          "contextBefore": "or North America shall be considered an attack against them all” and ",
+          "contextAfter": "” will assist the victim state. In a 2014 summit declaration, NATO governments",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6080",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 111,
+          "matchedText": "agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and",
+          "contextBefore": "allies.\nNATO’s founding treaty states in Article 5 that NATO members “",
+          "contextAfter": " that “if such an armed attack occurs, each of them, in exercise",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6080",
+          "corpusDocId": "doc5541",
+          "corpusOffset": 136,
+          "matchedText": "that “if such an armed attack occurs, each of them, in exercise of the right of individual or collective self-defence",
+          "contextBefore": "or North America shall be considered an attack against them all” and ",
+          "contextAfter": "” will assist the victim state. In a 2014 summit declaration, NATO governments",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "doc17756",
+          "corpusOffset": 3742,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "have needed to show the theme that America was against racism implicitly. \"",
+          "contextAfter": ". That they were endowed by their Creator by certain inalienable right, that",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11987",
+          "corpusDocId": "doc26512",
+          "corpusOffset": 327,
+          "matchedText": "under Title VII of the Civil Rights Act of 1964",
+          "contextBefore": "v. Johnson (discussed in this post), which addressed the national security exception ",
+          "contextAfter": " and the security clearance exception. Those exceptions differ from the state secrets",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5721",
+          "corpusDocId": "doc41515",
+          "corpusOffset": 11,
+          "matchedText": "Government is not the solution to our problem; government is the problem",
+          "contextBefore": "Ever since Ronald Reagan told us in his 1981 Inaugural Address, “",
+          "contextAfter": ".” government bashing by right-wingers, Republicans and many Democrats has been a",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5774",
+          "corpusDocId": "doc41515",
+          "corpusOffset": 11,
+          "matchedText": "Government is not the solution to our problem; government is the problem",
+          "contextBefore": "Ever since Ronald Reagan told us in his 1981 Inaugural Address, “",
+          "contextAfter": ".” government bashing by right-wingers, Republicans and many Democrats has been a",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11040",
+          "corpusDocId": "doc60615",
+          "corpusOffset": 204,
+          "matchedText": "because it violates the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "5(a)(2) and _16-21-2-2.5(b)„is unconstitutional ",
+          "contextAfter": ".\n\"We are pleased that Judge Magnus-Stinson has entered a final judgment",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11923",
+          "corpusDocId": "doc60615",
+          "corpusOffset": 205,
+          "matchedText": "it violates the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "a)(2) and _16-21-2-2.5(b)„is unconstitutional because ",
+          "contextAfter": ".\n\"We are pleased that Judge Magnus-Stinson has entered a final judgment",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-12074",
+          "corpusDocId": "doc60615",
+          "corpusOffset": 203,
+          "matchedText": "unconstitutional because it violates the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "1.5(a)(2) and _16-21-2-2.5(b)„is ",
+          "contextAfter": ".\n\"We are pleased that Judge Magnus-Stinson has entered a final judgment",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-4421",
+          "corpusDocId": "doc62266",
+          "corpusOffset": 60,
+          "matchedText": "the ratio of the length to the height of the",
+          "contextBefore": "providing a cropping aspect ratio L:H, the cropping aspect ratio being ",
+          "contextAfter": " cropped digital image; providing a cropping criterion, the cropping criterion being a",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "doc75650",
+          "corpusOffset": 60,
+          "matchedText": "We hold these truths to be self‑evident, that all men are created equal",
+          "contextBefore": "of America.\nForemost among these principles is this profound and poetic proposition: “",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10825",
+          "corpusDocId": "doc86439",
+          "corpusOffset": 49,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority, and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement. You acknowledge and understand that you access the Website and",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11018",
+          "corpusDocId": "doc86439",
+          "corpusOffset": 49,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority, and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement. You acknowledge and understand that you access the Website and",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11887",
+          "corpusDocId": "doc86439",
+          "corpusOffset": 49,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority, and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement. You acknowledge and understand that you access the Website and",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3811",
+          "corpusDocId": "doc86599",
+          "corpusOffset": 1905,
+          "matchedText": "be deprived of life, liberty, or property, without due process",
+          "contextBefore": "They were very unhappy about leaving what they knew.\"\n\"No person shall . . . ",
+          "contextAfter": " of law\"\nMontpelier was home to James and Dolley Madison. Mr. Madison",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-1165",
+          "corpusDocId": "doc86970",
+          "corpusOffset": 523,
+          "matchedText": "is rotated about the x-axis. What is the volume of the",
+          "contextBefore": "quadrant bounded by the line 3x + 2y = 7 and the coordinate axes ",
+          "contextAfter": " resulting solid",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11438",
+          "corpusDocId": "doc96443",
+          "corpusOffset": 68,
+          "matchedText": "has been charged with leaving the scene of an accident",
+          "contextBefore": "involved, including serious injuries or death.\nIf you or someone you love ",
+          "contextAfter": ", also referred to as hit and run, you need to understand that",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6498",
+          "corpusDocId": "doc123105",
+          "corpusOffset": 918,
+          "matchedText": "of the International Covenant on Civil and Political Rights, and",
+          "contextBefore": "article 19 of the Universal Declaration of Human Rights and article 19 ",
+          "contextAfter": " falls within category II of the categories applicable to the consideration of",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11525",
+          "corpusDocId": "doc124080",
+          "corpusOffset": 58,
+          "matchedText": "was sentenced to life in prison without the possibility of parole",
+          "contextBefore": "a sentence for attempted armed robbery. On July 16th, 2015, the suspect ",
+          "contextAfter": ", along with a sentence of 55 years to life in prison, to",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2406,
+          "matchedText": "I know that whenever the subject has occurred in conversation where I have been present, it has appeared to be the opinion of every one, that we could not be taxed",
+          "contextBefore": "supposed to be in parliament, as we are not represented there.\n--A. ",
+          "contextAfter": " in a parliament where we were not represented. But the payment of",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2441,
+          "matchedText": "we were not represented. But the payment of duties laid by",
+          "contextBefore": "every one, that we could not be taxed in a parliament where ",
+          "contextAfter": " act of parliament, as regulations of commerce, was never disputed.\n--A. I",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2452,
+          "matchedText": "act of parliament, as regulations of commerce, was never disputed",
+          "contextBefore": "where we were not represented. But the payment of duties laid by ",
+          "contextAfter": ".\n--A. I do not know that there was any; I think there",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3123,
+          "matchedText": "An external tax is a duty laid on commodities imported; that duty is added to the first cost, and other charges on the commodity, and when it is offered",
+          "contextBefore": "they may be laid?\n--A. I think the difference is very great. ",
+          "contextAfter": " to sale, makes a part of the price. If the people do",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3153,
+          "matchedText": "sale, makes a part of the price. If the people do not like it at that price, they refuse it; they are not obliged to pay it. But an internal tax is forced from the people without their consent, if not laid by their own representatives. The Stamp Act says, we shall have no commerce, make no exchange of property with each other, neither purchase nor grant, nor recover debts; we shall neither marry nor make our wills, unless we pay such",
+          "contextBefore": "and other charges on the commodity, and when it is offered to ",
+          "contextAfter": " sums, and thus it is intended to extort our money from us",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5745",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3234,
+          "matchedText": "such sums, and thus it is intended to extort our money from us, or ruin us by the",
+          "contextBefore": "debts; we shall neither marry nor make our wills, unless we pay ",
+          "contextAfter": " consequences of refusing to pay for it.\nQ. But supposing the internal",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2406,
+          "matchedText": "I know that whenever the subject has occurred in conversation where I have been present, it has appeared to be the opinion of every one, that we could not be taxed",
+          "contextBefore": "supposed to be in parliament, as we are not represented there.\n--A. ",
+          "contextAfter": " in a parliament where we were not represented. But the payment of",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2441,
+          "matchedText": "we were not represented. But the payment of duties laid by",
+          "contextBefore": "every one, that we could not be taxed in a parliament where ",
+          "contextAfter": " act of parliament, as regulations of commerce, was never disputed.\n--A. I",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 2452,
+          "matchedText": "act of parliament, as regulations of commerce, was never disputed",
+          "contextBefore": "where we were not represented. But the payment of duties laid by ",
+          "contextAfter": ".\n--A. I do not know that there was any; I think there",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3123,
+          "matchedText": "An external tax is a duty laid on commodities imported; that duty is added to the first cost, and other charges on the commodity, and when it is offered",
+          "contextBefore": "they may be laid?\n--A. I think the difference is very great. ",
+          "contextAfter": " to sale, makes a part of the price. If the people do",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3153,
+          "matchedText": "sale, makes a part of the price. If the people do not like it at that price, they refuse it; they are not obliged to pay it. But an internal tax is forced from the people without their consent, if not laid by their own representatives. The Stamp Act says, we shall have no commerce, make no exchange of property with each other, neither purchase nor grant, nor recover debts; we shall neither marry nor make our wills, unless we pay such",
+          "contextBefore": "and other charges on the commodity, and when it is offered to ",
+          "contextAfter": " sums, and thus it is intended to extort our money from us",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5775",
+          "corpusDocId": "doc153277",
+          "corpusOffset": 3234,
+          "matchedText": "such sums, and thus it is intended to extort our money from us, or ruin us by the",
+          "contextBefore": "debts; we shall neither marry nor make our wills, unless we pay ",
+          "contextAfter": " consequences of refusing to pay for it.\nQ. But supposing the internal",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5904",
+          "corpusDocId": "doc162132",
+          "corpusOffset": 137,
+          "matchedText": "by a fine of not more than five hundred dollars",
+          "contextBefore": "subject to imprisonment for a term not exceeding six (6) months, or ",
+          "contextAfter": " ($500), or both",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5935",
+          "corpusDocId": "doc162132",
+          "corpusOffset": 137,
+          "matchedText": "by a fine of not more than five hundred dollars",
+          "contextBefore": "subject to imprisonment for a term not exceeding six (6) months, or ",
+          "contextAfter": " ($500), or both",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5947",
+          "corpusDocId": "doc162132",
+          "corpusOffset": 137,
+          "matchedText": "by a fine of not more than five hundred dollars",
+          "contextBefore": "subject to imprisonment for a term not exceeding six (6) months, or ",
+          "contextAfter": " ($500), or both",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3811",
+          "corpusDocId": "doc168987",
+          "corpusOffset": 7434,
+          "matchedText": "be deprived of life, liberty, or property, without due process",
+          "contextBefore": "compelled in any criminal case to be a witness against himself, nor ",
+          "contextAfter": " of law; nor shall private property be taken for public use, without",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5861",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 67,
+          "matchedText": "we shall not flag or fail.\nWe shall go on to the end, we shall fight",
+          "contextBefore": "grip of the Vandals and all the odious apparatus of Sabotage rule, ",
+          "contextAfter": " on the proxies, we shall fight the sockpuppets and vandalbots, we shall",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5861",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 93,
+          "matchedText": "we shall fight with growing confidence and growing strength in",
+          "contextBefore": "shall fight on the proxies, we shall fight the sockpuppets and vandalbots, ",
+          "contextAfter": " cyberspace, we shall defend our Wiki, whatever the cost may be, we",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5861",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 109,
+          "matchedText": "whatever the cost may be, we shall fight on the",
+          "contextBefore": "growing confidence and growing strength in cyberspace, we shall defend our Wiki, ",
+          "contextAfter": " userpages, we shall fight on the featured articles, we shall fight in",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5898",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 67,
+          "matchedText": "we shall not flag or fail.\nWe shall go on to the end, we shall fight",
+          "contextBefore": "grip of the Vandals and all the odious apparatus of Sabotage rule, ",
+          "contextAfter": " on the proxies, we shall fight the sockpuppets and vandalbots, we shall",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5898",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 93,
+          "matchedText": "we shall fight with growing confidence and growing strength in",
+          "contextBefore": "shall fight on the proxies, we shall fight the sockpuppets and vandalbots, ",
+          "contextAfter": " cyberspace, we shall defend our Wiki, whatever the cost may be, we",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5898",
+          "corpusDocId": "doc174254",
+          "corpusOffset": 109,
+          "matchedText": "whatever the cost may be, we shall fight on the",
+          "contextBefore": "growing confidence and growing strength in cyberspace, we shall defend our Wiki, ",
+          "contextAfter": " userpages, we shall fight on the featured articles, we shall fight in",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-13262",
+          "corpusDocId": "doc183327",
+          "corpusOffset": 2,
+          "matchedText": "Protocol against the illicit manufacturing of and trafficking in firearms, their parts and components and ammunition",
+          "contextBefore": "Equipo Nizkor - ",
+          "contextAfter": ".\n2. The provisions of the Convention shall apply, mutatis mutandis, to this",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-13262",
+          "corpusDocId": "doc183327",
+          "corpusOffset": 57,
+          "matchedText": "the illicit manufacturing of and trafficking in firearms, their parts and components and ammunition",
+          "contextBefore": "strengthen cooperation among States Parties in order to prevent, combat and eradicate ",
+          "contextAfter": ".\n(f) \"Tracing\" shall mean the systematic tracking of firearms and, where possible",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-13262",
+          "corpusDocId": "doc183327",
+          "corpusOffset": 128,
+          "matchedText": "illicit manufacturing of and trafficking in firearms, their parts and components and ammunition",
+          "contextBefore": "Protocol shall apply, except as otherwise stated herein, to the prevention of ",
+          "contextAfter": " and to the investigation and prosecution of offences established in accordance with",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-13262",
+          "corpusDocId": "doc183327",
+          "corpusOffset": 254,
+          "matchedText": "the illicit manufacturing of and trafficking in firearms, their parts and components and ammunition",
+          "contextBefore": "in order to enhance each other's abilities to prevent, detect and investigate ",
+          "contextAfter": " and to prosecute the persons involved in those illicit activities.\n2. States",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5400",
+          "corpusDocId": "doc189005",
+          "corpusOffset": 431,
+          "matchedText": "the Diagnostic and Statistical Manual of Mental Disorders (DSM)-IV",
+          "contextBefore": "2) is a 1996 revision of the BDI, developed in response to ",
+          "contextAfter": ", which changed many of the diagnostic criteria for Major Depressive Disorder. Participants",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-12145",
+          "corpusDocId": "doc198050",
+          "corpusOffset": 3422,
+          "matchedText": "the burden of proving by a preponderance of the evidence that",
+          "contextBefore": "318, 321, 730 P.2d 380, 382 (1986).\n¶62 The claimant bears ",
+          "contextAfter": " she is entitled to compensation. Ricks v. Teslow Consolidated, 162 Mont. 469",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "doc198608",
+          "corpusOffset": 333,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "work of other English theorists. The first section features the famous lines, \"",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-12142",
+          "corpusDocId": "doc231826",
+          "corpusOffset": 384,
+          "matchedText": "the president as commander in chief of the armed forces",
+          "contextBefore": "39 billion, a 26.9% increase over April 2010.\nThe constitution designates ",
+          "contextAfter": ". Military service is compulsory, and all 18-year-old males — and 17",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11323",
+          "corpusDocId": "doc232263",
+          "corpusOffset": 170,
+          "matchedText": "motion to dismiss for failure to state a claim upon which relief",
+          "contextBefore": "Liability Act. Defendant filed a C.R.C.P. 12(b)(5) ",
+          "contextAfter": " may be granted. The trial court ruled in Defendant’s favor, finding",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5904",
+          "corpusDocId": "doc237626",
+          "corpusOffset": 5850,
+          "matchedText": "guilty of a misdemeanor, and on conviction thereof shall be punished by a fine",
+          "contextBefore": "the provisions of an order entered pursuant to this section shall be ",
+          "contextAfter": " not exceeding $500 or imprisonment in jail for a period not exceeding",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5935",
+          "corpusDocId": "doc237626",
+          "corpusOffset": 5850,
+          "matchedText": "guilty of a misdemeanor, and on conviction thereof shall be punished by a fine",
+          "contextBefore": "the provisions of an order entered pursuant to this section shall be ",
+          "contextAfter": " not exceeding $500 or imprisonment in jail for a period not exceeding",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5947",
+          "corpusDocId": "doc237626",
+          "corpusOffset": 5850,
+          "matchedText": "guilty of a misdemeanor, and on conviction thereof shall be punished by a fine",
+          "contextBefore": "the provisions of an order entered pursuant to this section shall be ",
+          "contextAfter": " not exceeding $500 or imprisonment in jail for a period not exceeding",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-1289",
+          "corpusDocId": "doc242129",
+          "corpusOffset": 5441,
+          "matchedText": "on the opposite side of the street. \"Crossing the street",
+          "contextBefore": "of control that residents of Middlefield could not contemplate parking their cars ",
+          "contextAfter": " is too dangerous, don't make us do that!\"\nSo this plan tries",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3731",
+          "corpusDocId": "doc242605",
+          "corpusOffset": 188,
+          "matchedText": "system of checks and balances among the three branches of",
+          "contextBefore": "is needed between elections.\nThe League of Women Voters supports a healthy ",
+          "contextAfter": " government. All of these bills introduce significant changes in the balance of",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "doc264442",
+          "corpusOffset": 514,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "derive their most important rights, not from the government, but from God: ‘",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11987",
+          "corpusDocId": "doc271667",
+          "corpusOffset": 27,
+          "matchedText": "under Title VII of the Civil Rights Act of 1964",
+          "contextBefore": "for the Eastern District of Arkansas. The plaintiffs sued Tanami Trading Corporation ",
+          "contextAfter": ", 42 U.S.C. § 2000, the Civil Rights Act of 1991, and",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3727",
+          "corpusDocId": "doc282615",
+          "corpusOffset": 251,
+          "matchedText": "the American Federation of Labor and Congress of Industrial Organizations (AFL-CIO",
+          "contextBefore": "for Putin)”.\nThe hackers also infiltrated the networks of the United Nations, ",
+          "contextAfter": "), and ministries of foreign affairs and finance worldwide, the Times report added",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5904",
+          "corpusDocId": "doc291710",
+          "corpusOffset": 92,
+          "matchedText": "Be it enacted by the Senate and House of Representatives of the United States of America in Congress assembled, That",
+          "contextBefore": "rest, and to promote its observance as a day of religious worship.\n\"",
+          "contextAfter": " no person, or corporation, or the agent, servant, or employee of any",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5935",
+          "corpusDocId": "doc291710",
+          "corpusOffset": 92,
+          "matchedText": "Be it enacted by the Senate and House of Representatives of the United States of America in Congress assembled, That",
+          "contextBefore": "rest, and to promote its observance as a day of religious worship.\n\"",
+          "contextAfter": " no person, or corporation, or the agent, servant, or employee of any",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5947",
+          "corpusDocId": "doc291710",
+          "corpusOffset": 92,
+          "matchedText": "Be it enacted by the Senate and House of Representatives of the United States of America in Congress assembled, That",
+          "contextBefore": "rest, and to promote its observance as a day of religious worship.\n\"",
+          "contextAfter": " no person, or corporation, or the agent, servant, or employee of any",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10825",
+          "corpusDocId": "doc304464",
+          "corpusOffset": 194,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement.\nIllegal and/or unauthorized uses of the Service include, but",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11018",
+          "corpusDocId": "doc304464",
+          "corpusOffset": 194,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement.\nIllegal and/or unauthorized uses of the Service include, but",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11887",
+          "corpusDocId": "doc304464",
+          "corpusOffset": 194,
+          "matchedText": "to abide by all of the terms and conditions of",
+          "contextBefore": "have the right, authority and capacity to enter into this Agreement and ",
+          "contextAfter": " this Agreement.\nIllegal and/or unauthorized uses of the Service include, but",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5684",
+          "corpusDocId": "doc306250",
+          "corpusOffset": 1888,
+          "matchedText": "It is impossible but that offences will come: but woe unto him",
+          "contextBefore": "of these, ye have done it unto Me.\nLuke 17.1,2 ",
+          "contextAfter": ", through whom they come! It were better for him that a millstone",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5823",
+          "corpusDocId": "doc306250",
+          "corpusOffset": 1888,
+          "matchedText": "It is impossible but that offences will come: but woe unto him",
+          "contextBefore": "of these, ye have done it unto Me.\nLuke 17.1,2 ",
+          "contextAfter": ", through whom they come! It were better for him that a millstone",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3727",
+          "corpusDocId": "doc308176",
+          "corpusOffset": 885,
+          "matchedText": "the American Federation of Labor and Congress of Industrial Organizations",
+          "contextBefore": "Boskin, Chairman of the Council of Economic Advisers; Lane Kirkland, president of ",
+          "contextAfter": "; Robert Georgine, president of the building and construction trades department of the",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3811",
+          "corpusDocId": "doc335786",
+          "corpusOffset": 264,
+          "matchedText": "be deprived of life liberty or property without due process",
+          "contextBefore": "other parts of the body. Balanitis can ..\nstates that no person shall ",
+          "contextAfter": " of law nor shall any person be denied the equal protection of",
+          "corpusDocFrequency": 3
+        }
+      ]
+    }
+  ]
+}
