@@ -41,11 +41,24 @@ Ingot indexes the **benchmark** and streams the corpus once. lm-evaluation-harne
 reverse, indexing the corpus, and reports nine days on the Pile.
 
 ```
-  37.1 MB/sec CPU, single-threaded  →  20 GB in 9.0 minutes
+  7.0 MB/sec single-threaded, end to end  →  20 GB in about 48 minutes
 ```
 
-83.3 MB / 10.0M tokens, three repetitions, best of, corpus held in memory so the figure is
-CPU rather than disk. Reproduce with `node scripts/bench-scan.ts`.
+Measured on the real thing: 21.4 GB of gzipped C4 shards on disk, GSM8K at n=10, 51
+minutes wall clock, decompression and parsing and hashing included. Reproduce with
+`node scripts/pretraining-scan.ts`.
+
+**An earlier version of this README said 37.1 MB/sec and 20 GB in 9.0 minutes. That was
+wrong** — not the measurement, the extrapolation. 37.1 MB/sec is the scan *kernel*:
+tokenize, roll the n-gram, look it up, over text already read off disk and already
+JSON-parsed, which is what `scripts/bench-scan.ts` measures and says it measures. Quoting
+it as a scanning rate silently dropped decompression, line splitting, `JSON.parse`, corpus
+hashing and match bookkeeping — together the majority of the work. `scripts/bench-pipeline.ts`
+measures the whole path and attributes the cost stage by stage.
+
+The kernel figure is still the right one for judging optimisation work, and it is still
+where the remaining headroom is. It is the wrong one for answering "how long will my scan
+take", which is the only question a reader was asking.
 
 Published indexes carry **one-way hashes and item ids, never benchmark text**, so an index
 can be distributed for a benchmark whose licence forbids redistributing the data — and a

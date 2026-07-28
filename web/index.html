@@ -158,10 +158,15 @@
     <p class="sub">lm-evaluation-harness does the reverse — it indexes the corpus — and reports
     nine days on the Pile. The benchmark is the small side and fits in memory, so Ingot inverts
     it and makes one pass with a rolling hash.</p>
-    <pre>  37.1 MB/sec CPU, single-threaded  &rarr;  20 GB in 9.0 minutes
+    <pre>  7.0 MB/sec single-threaded, end to end  &rarr;  20 GB in about 48 minutes
 
-  83.3 MB / 10.0M tokens · 3 repetitions, best of · corpus in memory, so this is
-  CPU rather than disk · reproduce with: node scripts/bench-scan.ts</pre>
+  21.4 GB of gzipped C4 shards on disk · GSM8K at n=10 · 51 minutes wall clock
+  decompression, JSON.parse, hashing and match bookkeeping all included
+  reproduce with: node scripts/pretraining-scan.ts</pre>
+    <p class="sub">This said <em>37.1 MB/sec, 20 GB in 9.0 minutes</em> until we scanned a real
+    corpus. That figure is the scan kernel — tokenize, roll, look up — over text already read and
+    already parsed, and quoting it as a scanning rate dropped most of the actual work. The kernel
+    number is still the right one for judging optimisation; it was the wrong one to put here.</p>
 
     <h3 style="margin-top:2.5rem">The field's 13-gram default is wrong</h3>
     <p class="sub">Everyone matches on 13-grams because GPT-3 did in 2020. We could find no

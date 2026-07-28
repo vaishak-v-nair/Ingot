@@ -14,6 +14,23 @@ node scripts/registry-scan.ts          # the public registry
 
 ## Throughput
 
+The number that answers "how long will my scan take", measured on a real corpus rather
+than extrapolated from a kernel:
+
+```
+  7.0 MB/sec single-threaded, end to end  →  20 GB in about 48 minutes
+```
+
+21.4 GB of gzipped C4 shards on disk, GSM8K at n=10, 51 minutes wall clock. Decompression,
+line splitting, `JSON.parse`, corpus hashing and match bookkeeping all included, because a
+user pays for all of them. Reproduce with `node scripts/pretraining-scan.ts`.
+
+For comparison, lm-evaluation-harness indexes the corpus rather than the benchmark and
+reports nine days on the Pile. Ingot indexes the benchmark, which fits in RAM, and
+streams the corpus once.
+
+### The scan kernel, and the claim it should not have become
+
 ```
   phase                       best ms  delta ms       tok/sec
   ───────────────────────────────────────────────────────────
@@ -22,15 +39,26 @@ node scripts/registry-scan.ts          # the public registry
   C + ngram rolling              2038      1320     4,907,396
   D + index lookup (full)        2243       205     4,458,883
 
-  37.1 MB/sec CPU, single-threaded  →  20 GB in 9.0 minutes
+  37.1 MB/sec, kernel only
 ```
 
 83.3 MB / 10.0M tokens, three repetitions, best of, corpus held in memory so the figure
 is CPU rather than disk. Reproduce with `node scripts/bench-scan.ts`.
 
-For comparison, lm-evaluation-harness indexes the corpus rather than the benchmark and
-reports nine days on the Pile. Ingot indexes the benchmark, which fits in RAM, and
-streams the corpus once.
+**This figure was published as `37.1 MB/sec → 20 GB in 9.0 minutes`, and that extrapolation
+was wrong by about 5x.** The measurement is sound and the caveat was even stated — corpus
+in memory, CPU not disk — but stating a caveat is not the same as honouring it. Phase D
+covers tokenize, roll, look up. A scan also decompresses, splits lines, parses JSON, hashes
+the corpus twice and records matches, and those are the majority of the wall clock.
+
+`scripts/bench-pipeline.ts` measures the whole path, one stage added at a time so the
+deltas attribute cost instead of inferring it. On one C4 shard the kernel is roughly half
+of end-to-end time, and I/O with parsing is most of the rest.
+
+The lesson is not "measure more". It is that a benchmark built to guide optimisation
+answers a different question from the one a reader asks, and the caveat that made it
+honest in context disappeared the moment the number was quoted on a front page. Same shape
+as the fixture defects below: a number that was correct about something nobody was asking.
 
 ### Two wrong optimizations, and the ruler that caused them
 
