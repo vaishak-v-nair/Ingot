@@ -6,12 +6,27 @@
 <title>Ingot — is your benchmark inside your training data?</title>
 <meta name="description" content="Drop a training corpus and find out whether a benchmark leaked into it. Scanned in your own browser tab; nothing is uploaded.">
 <style>
+  /* Self-hosted, latin subset only, 42 KB for both. Same-origin on purpose: a webfont
+     fetched from a CDN would put a third-party request in the network panel, and the
+     privacy claim on this page is that the panel stays empty. Both are SIL OFL; see NOTICE.
+     font-display:swap so text is readable before the font lands. */
+  @font-face {
+    font-family: "Instrument Serif"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/instrument-serif-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
+  }
   *, *::before, *::after { box-sizing: border-box; }
   :root {
     --ink: #16150f; --paper: #fbfaf7; --dim: #6d6a5c; --line: #ddd9cc; --card: #fff;
     --gold: #9a6a00; --hot: #ff9d1f; --ember: #d2451e; --ok: #2f6b34; --bad: #8f2f22;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* Display face. A high-contrast serif in a category of grotesques: this page produces
+       documents, and it should read like one. */
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
   }
   @media (prefers-color-scheme: dark) {
     :root { --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f; --card: #16150f;
@@ -32,7 +47,12 @@
   nav a:hover { color: var(--ink); }
 
   header { padding: 3rem 0 0; }
-  h1 { font-size: clamp(1.9rem, 5.4vw, 3.1rem); line-height: 1.05; margin: 0 0 .6rem; letter-spacing: -.025em; }
+  h1 { font-family: var(--display); font-weight: 400;
+       font-size: clamp(2.1rem, 6vw, 3.7rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.015em; }
+  /* No negative tracking here. Instrument Serif is already narrow, and tightening it at
+     section-heading size closes the counters up. The h1 can carry -.015em because at
+     59px there is room; a 28px heading cannot. */
+  h3 { font-family: var(--display); font-weight: 400; letter-spacing: 0; }
   .lede { color: var(--dim); max-width: 46ch; margin: 0 0 .8rem; font-size: 1.02rem; }
   .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .76rem;
              border: 1px solid var(--line); border-radius: 999px; padding: .42rem .8rem; background: var(--card); }
@@ -77,7 +97,10 @@
 
   /* ---------- evidence sections ---------- */
   section { padding: 3.25rem 0; border-top: 1px solid var(--line); }
-  section h3 { font-size: clamp(1.3rem, 3.2vw, 1.8rem); letter-spacing: -.02em; margin: .6rem 0 .5rem; font-weight: 640; }
+  /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
+     for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
+     being drawn and then tightened on top of it. */
+  section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
   .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
   .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
   .cards { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }

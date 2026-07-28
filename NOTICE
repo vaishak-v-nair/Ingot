@@ -5,5 +5,19 @@ Licensed under the Apache License, Version 2.0. See LICENSE.
 
 The reference corpora and benchmarks Ingot scans are not part of this software and
 carry their own licences. `databricks-dolly-15k` is CC-BY-SA-3.0. `stanford_alpaca`
-is CC-BY-NC-4.0, research and calibration only. Benchmark n-gram indexes published
-here contain one-way hashes and item ids, never benchmark text.
+is CC-BY-NC-4.0, research and calibration only. C4 is ODC-BY. The Pile subsets used
+as a canonicality reference carry their own component licences. Benchmark n-gram
+indexes published here contain one-way hashes and item ids, never benchmark text.
+
+Fonts in `web/fonts/` are bundled rather than fetched from a CDN, because a
+third-party request would appear in the network panel and this site's claim is that
+it makes none. Both are licensed under the SIL Open Font License 1.1:
+
+  Instrument Serif  Copyright 2022 The Instrument Serif Project Authors
+                    https://github.com/Instrument/instrument-serif
+  JetBrains Mono    Copyright 2020 The JetBrains Mono Project Authors
+                    https://github.com/JetBrains/JetBrainsMono
+
+The OFL permits bundling and redistribution with attribution, which this notice
+provides. Neither font is sold, and neither is distributed under a name it does
+not have.

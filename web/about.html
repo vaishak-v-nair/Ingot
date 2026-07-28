@@ -6,6 +6,17 @@
 <title>Ingot — why this exists</title>
 <meta name="description" content="Independent verification of the AI training data supply chain: what Ingot checks, what it refuses to claim, and where it goes next.">
 <style>
+  /* Self-hosted, latin subset only. Same-origin so the network panel stays empty,
+     which is the claim the sibling page makes. SIL OFL; see NOTICE. */
+  @font-face {
+    font-family: "Instrument Serif"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/instrument-serif-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
+  }
+
   *, *::before, *::after { box-sizing: border-box; }
   :root {
     --ink: #0d0c08;
@@ -17,8 +28,9 @@
     --ember: #d2451e;
     --good: #2f6b34;
     --card: #fffdf8;
-    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -53,7 +65,7 @@
   }
   h1 {
     font-size: clamp(2.6rem, 7.2vw, 5.2rem); line-height: .98; margin: 1rem 0 0;
-    font-weight: 680; letter-spacing: -.03em; max-width: 30ch;
+    font-family: var(--display); font-weight: 400; letter-spacing: -.015em; max-width: 30ch;
   }
   h1 .molten {
     background: linear-gradient(96deg, var(--gold-hot), var(--ember) 62%, var(--gold));
