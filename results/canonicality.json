@@ -1,0 +1,630 @@
+{
+  "scanner": "ingot-0.1.0",
+  "benchmark": "mmlu",
+  "n": 10,
+  "webCorpus": {
+    "name": "c4-en-26shards",
+    "uncompressedBytes": 21328472590,
+    "itemsFlagged": 342
+  },
+  "referenceCorpus": {
+    "name": "pile-noncrawl",
+    "documents": 251488,
+    "droppedAsWebDerived": 108876,
+    "excludedSubsets": [
+      "Pile-CC",
+      "OpenWebText2",
+      "HackerNews",
+      "Ubuntu IRC"
+    ],
+    "keptBySubset": {
+      "PubMed Abstracts": 59766,
+      "Github": 36532,
+      "StackExchange": 60328,
+      "Enron Emails": 1957,
+      "FreeLaw": 10195,
+      "USPTO Backgrounds": 22802,
+      "Wikipedia (en)": 34989,
+      "PubMed Central": 11888,
+      "Gutenberg (PG-19)": 140,
+      "DM Mathematics": 3929,
+      "NIH ExPorter": 3709,
+      "ArXiv": 4838,
+      "EuroParl": 290,
+      "PhilPapers": 125
+    },
+    "sha256": "b874e586569730ea1c16cf022058c1560764ab1e9986b820a47ef30ffb5d11d8",
+    "itemsHit": 113,
+    "totalMatches": 332
+  },
+  "confirmedCanonical": [
+    "mmlu-10648",
+    "mmlu-10651",
+    "mmlu-10652",
+    "mmlu-10737",
+    "mmlu-10775",
+    "mmlu-10829",
+    "mmlu-10846",
+    "mmlu-10915",
+    "mmlu-10964",
+    "mmlu-10977",
+    "mmlu-11058",
+    "mmlu-11073",
+    "mmlu-11096",
+    "mmlu-11097",
+    "mmlu-11179",
+    "mmlu-11182",
+    "mmlu-11278",
+    "mmlu-11323",
+    "mmlu-11377",
+    "mmlu-11391",
+    "mmlu-11466",
+    "mmlu-11485",
+    "mmlu-11488",
+    "mmlu-11503",
+    "mmlu-11524",
+    "mmlu-11525",
+    "mmlu-11530",
+    "mmlu-11606",
+    "mmlu-11663",
+    "mmlu-11668",
+    "mmlu-1167",
+    "mmlu-11670",
+    "mmlu-11678",
+    "mmlu-11684",
+    "mmlu-11687",
+    "mmlu-11834",
+    "mmlu-11892",
+    "mmlu-11919",
+    "mmlu-11987",
+    "mmlu-11990",
+    "mmlu-12010",
+    "mmlu-12033",
+    "mmlu-12046",
+    "mmlu-12053",
+    "mmlu-12082",
+    "mmlu-12102",
+    "mmlu-12142",
+    "mmlu-12145",
+    "mmlu-12154",
+    "mmlu-12156",
+    "mmlu-12208",
+    "mmlu-12237",
+    "mmlu-12281",
+    "mmlu-13028",
+    "mmlu-3283",
+    "mmlu-3337",
+    "mmlu-3727",
+    "mmlu-3811",
+    "mmlu-480",
+    "mmlu-5400",
+    "mmlu-5677",
+    "mmlu-5722",
+    "mmlu-5730",
+    "mmlu-5904",
+    "mmlu-5935",
+    "mmlu-5947",
+    "mmlu-6858"
+  ],
+  "webCorpusOnly": [
+    "mmlu-10022",
+    "mmlu-10027",
+    "mmlu-10368",
+    "mmlu-10382",
+    "mmlu-10399",
+    "mmlu-10402",
+    "mmlu-10445",
+    "mmlu-10456",
+    "mmlu-10457",
+    "mmlu-10470",
+    "mmlu-1049",
+    "mmlu-10503",
+    "mmlu-10545",
+    "mmlu-10570",
+    "mmlu-10617",
+    "mmlu-10673",
+    "mmlu-10741",
+    "mmlu-10758",
+    "mmlu-10785",
+    "mmlu-10794",
+    "mmlu-10825",
+    "mmlu-10844",
+    "mmlu-10879",
+    "mmlu-10944",
+    "mmlu-10983",
+    "mmlu-11018",
+    "mmlu-11036",
+    "mmlu-11040",
+    "mmlu-11137",
+    "mmlu-11153",
+    "mmlu-11196",
+    "mmlu-11235",
+    "mmlu-11260",
+    "mmlu-11285",
+    "mmlu-11295",
+    "mmlu-11300",
+    "mmlu-11347",
+    "mmlu-11382",
+    "mmlu-11412",
+    "mmlu-11438",
+    "mmlu-11439",
+    "mmlu-11470",
+    "mmlu-11475",
+    "mmlu-11596",
+    "mmlu-1165",
+    "mmlu-11667",
+    "mmlu-11672",
+    "mmlu-11706",
+    "mmlu-11753",
+    "mmlu-11764",
+    "mmlu-11775",
+    "mmlu-11795",
+    "mmlu-11822",
+    "mmlu-11869",
+    "mmlu-11881",
+    "mmlu-11883",
+    "mmlu-11887",
+    "mmlu-11888",
+    "mmlu-11905",
+    "mmlu-11907",
+    "mmlu-11923",
+    "mmlu-11928",
+    "mmlu-11931",
+    "mmlu-11952",
+    "mmlu-12014",
+    "mmlu-12023",
+    "mmlu-12045",
+    "mmlu-12050",
+    "mmlu-12059",
+    "mmlu-12074",
+    "mmlu-12078",
+    "mmlu-12100",
+    "mmlu-12123",
+    "mmlu-12155",
+    "mmlu-12189",
+    "mmlu-12196",
+    "mmlu-12199",
+    "mmlu-12205",
+    "mmlu-12222",
+    "mmlu-12227",
+    "mmlu-12228",
+    "mmlu-12239",
+    "mmlu-12248",
+    "mmlu-12249",
+    "mmlu-12285",
+    "mmlu-12287",
+    "mmlu-12297",
+    "mmlu-12354",
+    "mmlu-12365",
+    "mmlu-12375",
+    "mmlu-12407",
+    "mmlu-12417",
+    "mmlu-12434",
+    "mmlu-12437",
+    "mmlu-12566",
+    "mmlu-1289",
+    "mmlu-13059",
+    "mmlu-13262",
+    "mmlu-13420",
+    "mmlu-13615",
+    "mmlu-13631",
+    "mmlu-13681",
+    "mmlu-13705",
+    "mmlu-13815",
+    "mmlu-1548",
+    "mmlu-1863",
+    "mmlu-1906",
+    "mmlu-1909",
+    "mmlu-2296",
+    "mmlu-2409",
+    "mmlu-2580",
+    "mmlu-2583",
+    "mmlu-2641",
+    "mmlu-2834",
+    "mmlu-2875",
+    "mmlu-304",
+    "mmlu-3164",
+    "mmlu-3265",
+    "mmlu-3284",
+    "mmlu-3297",
+    "mmlu-3358",
+    "mmlu-3362",
+    "mmlu-3363",
+    "mmlu-3381",
+    "mmlu-3386",
+    "mmlu-3391",
+    "mmlu-3405",
+    "mmlu-3406",
+    "mmlu-3414",
+    "mmlu-3416",
+    "mmlu-3417",
+    "mmlu-3420",
+    "mmlu-3426",
+    "mmlu-3433",
+    "mmlu-3441",
+    "mmlu-3443",
+    "mmlu-3464",
+    "mmlu-351",
+    "mmlu-355",
+    "mmlu-3629",
+    "mmlu-3633",
+    "mmlu-3668",
+    "mmlu-3713",
+    "mmlu-3726",
+    "mmlu-3730",
+    "mmlu-3731",
+    "mmlu-4255",
+    "mmlu-4259",
+    "mmlu-4323",
+    "mmlu-4350",
+    "mmlu-4421",
+    "mmlu-4452",
+    "mmlu-4509",
+    "mmlu-4511",
+    "mmlu-4522",
+    "mmlu-4561",
+    "mmlu-4620",
+    "mmlu-4691",
+    "mmlu-4702",
+    "mmlu-4846",
+    "mmlu-4858",
+    "mmlu-4965",
+    "mmlu-4973",
+    "mmlu-5137",
+    "mmlu-5206",
+    "mmlu-5371",
+    "mmlu-5423",
+    "mmlu-5454",
+    "mmlu-5459",
+    "mmlu-5496",
+    "mmlu-5516",
+    "mmlu-5650",
+    "mmlu-5655",
+    "mmlu-5658",
+    "mmlu-5663",
+    "mmlu-5666",
+    "mmlu-5673",
+    "mmlu-5674",
+    "mmlu-5679",
+    "mmlu-5684",
+    "mmlu-5685",
+    "mmlu-5695",
+    "mmlu-5696",
+    "mmlu-5703",
+    "mmlu-5712",
+    "mmlu-5720",
+    "mmlu-5721",
+    "mmlu-5728",
+    "mmlu-5729",
+    "mmlu-5732",
+    "mmlu-5739",
+    "mmlu-5745",
+    "mmlu-5757",
+    "mmlu-5758",
+    "mmlu-5759",
+    "mmlu-5764",
+    "mmlu-5774",
+    "mmlu-5775",
+    "mmlu-5787",
+    "mmlu-5790",
+    "mmlu-5818",
+    "mmlu-5820",
+    "mmlu-5823",
+    "mmlu-5827",
+    "mmlu-5837",
+    "mmlu-5840",
+    "mmlu-5844",
+    "mmlu-5846",
+    "mmlu-5849",
+    "mmlu-5851",
+    "mmlu-5861",
+    "mmlu-5875",
+    "mmlu-5880",
+    "mmlu-5881",
+    "mmlu-5893",
+    "mmlu-5898",
+    "mmlu-5908",
+    "mmlu-5924",
+    "mmlu-5933",
+    "mmlu-5939",
+    "mmlu-5951",
+    "mmlu-5955",
+    "mmlu-5961",
+    "mmlu-5966",
+    "mmlu-5969",
+    "mmlu-5971",
+    "mmlu-5997",
+    "mmlu-5999",
+    "mmlu-6014",
+    "mmlu-6018",
+    "mmlu-6024",
+    "mmlu-6027",
+    "mmlu-6031",
+    "mmlu-6039",
+    "mmlu-6071",
+    "mmlu-6072",
+    "mmlu-6076",
+    "mmlu-6080",
+    "mmlu-6120",
+    "mmlu-6258",
+    "mmlu-6423",
+    "mmlu-6451",
+    "mmlu-6473",
+    "mmlu-6477",
+    "mmlu-6517",
+    "mmlu-6519",
+    "mmlu-6566",
+    "mmlu-6728",
+    "mmlu-6805",
+    "mmlu-7009",
+    "mmlu-7019",
+    "mmlu-7059",
+    "mmlu-7120",
+    "mmlu-7189",
+    "mmlu-7465",
+    "mmlu-7565",
+    "mmlu-7613",
+    "mmlu-7619",
+    "mmlu-7717",
+    "mmlu-7726",
+    "mmlu-7962",
+    "mmlu-8026",
+    "mmlu-8039",
+    "mmlu-8055",
+    "mmlu-8159",
+    "mmlu-8362",
+    "mmlu-8373",
+    "mmlu-8413",
+    "mmlu-86",
+    "mmlu-8813",
+    "mmlu-892",
+    "mmlu-9421",
+    "mmlu-9712",
+    "mmlu-9770",
+    "mmlu-9999"
+  ],
+  "confirmationsBySource": {
+    "freelaw": 46,
+    "wikipedia-en": 2,
+    "arxiv": 2,
+    "stackexchange": 2,
+    "pubmed-abstracts": 1,
+    "pubmed-central": 2,
+    "gutenberg-pg-19": 3
+  },
+  "subsetsByItem": {
+    "mmlu-11278": [
+      "freelaw"
+    ],
+    "mmlu-12082": [
+      "freelaw"
+    ],
+    "mmlu-10964": [
+      "freelaw"
+    ],
+    "mmlu-11524": [
+      "freelaw"
+    ],
+    "mmlu-12145": [
+      "freelaw"
+    ],
+    "mmlu-12033": [
+      "freelaw",
+      "wikipedia-en"
+    ],
+    "mmlu-10977": [
+      "freelaw"
+    ],
+    "mmlu-11687": [
+      "freelaw"
+    ],
+    "mmlu-11391": [
+      "freelaw"
+    ],
+    "mmlu-12010": [
+      "freelaw"
+    ],
+    "mmlu-11987": [
+      "freelaw"
+    ],
+    "mmlu-6858": [
+      "arxiv"
+    ],
+    "mmlu-11058": [
+      "freelaw"
+    ],
+    "mmlu-11606": [
+      "freelaw"
+    ],
+    "mmlu-11525": [
+      "freelaw",
+      "wikipedia-en"
+    ],
+    "mmlu-11668": [
+      "freelaw"
+    ],
+    "mmlu-11834": [
+      "freelaw"
+    ],
+    "mmlu-12102": [
+      "freelaw"
+    ],
+    "mmlu-480": [
+      "arxiv",
+      "stackexchange"
+    ],
+    "mmlu-5400": [
+      "pubmed-abstracts",
+      "pubmed-central"
+    ],
+    "mmlu-11485": [
+      "freelaw"
+    ],
+    "mmlu-11684": [
+      "freelaw"
+    ],
+    "mmlu-10651": [
+      "freelaw"
+    ],
+    "mmlu-1167": [
+      "stackexchange"
+    ],
+    "mmlu-11073": [
+      "freelaw"
+    ],
+    "mmlu-12053": [
+      "freelaw"
+    ],
+    "mmlu-5904": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-5935": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-5947": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-10846": [
+      "freelaw"
+    ],
+    "mmlu-11097": [
+      "freelaw"
+    ],
+    "mmlu-11678": [
+      "freelaw"
+    ],
+    "mmlu-12154": [
+      "freelaw"
+    ],
+    "mmlu-11488": [
+      "freelaw"
+    ],
+    "mmlu-11377": [
+      "freelaw"
+    ],
+    "mmlu-11990": [
+      "freelaw"
+    ],
+    "mmlu-12156": [
+      "freelaw"
+    ],
+    "mmlu-11530": [
+      "freelaw"
+    ],
+    "mmlu-11670": [
+      "freelaw"
+    ],
+    "mmlu-3811": [
+      "freelaw"
+    ],
+    "mmlu-11663": [
+      "freelaw"
+    ],
+    "mmlu-10737": [
+      "freelaw"
+    ],
+    "mmlu-10648": [
+      "freelaw"
+    ],
+    "mmlu-10915": [
+      "freelaw"
+    ],
+    "mmlu-5677": [
+      "freelaw"
+    ],
+    "mmlu-5722": [
+      "freelaw"
+    ],
+    "mmlu-5730": [
+      "freelaw"
+    ],
+    "mmlu-12142": [
+      "freelaw"
+    ],
+    "mmlu-10652": [
+      "freelaw"
+    ],
+    "mmlu-12208": [
+      "pubmed-central"
+    ],
+    "mmlu-11919": [
+      "freelaw"
+    ]
+  },
+  "attributionCoverage": {
+    "retainedMatches": 200,
+    "totalMatches": 332
+  },
+  "controlSet": {
+    "note": "Hand-labelled items nobody believes leaked. They measure the test's negative power, and are not a sample.",
+    "confirmed": 1,
+    "total": 9,
+    "rows": [
+      {
+        "id": "mmlu-5720",
+        "label": "Patrick Henry, \"give me liberty or give me death\"",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-5732",
+        "label": "Roosevelt, Four Freedoms",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-3811",
+        "label": "Fifth Amendment, \"without due process\"",
+        "confirmed": true
+      },
+      {
+        "id": "mmlu-5951",
+        "label": "NATO Treaty, Article 5",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-11040",
+        "label": "Equal Protection Clause, Fourteenth Amendment",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-6072",
+        "label": "Machiavelli, on friendships obtained by payment",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-5745",
+        "label": "Franklin's 1766 testimony to Parliament",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-5703",
+        "label": "Jonathan Edwards, \"Sinners in the Hands of an Angry God\"",
+        "confirmed": false
+      },
+      {
+        "id": "mmlu-8373",
+        "label": "Singer's second premise",
+        "confirmed": false
+      }
+    ]
+  },
+  "caveat": "The reference corpus is far smaller than the web corpus. An item confirmed in both is canonical. An item absent from the reference is NOT thereby leakage — it may simply be too rare for a corpus this size.",
+  "receipt": {
+    "scannerVersion": "ingot-0.1.0",
+    "indexFormatVersion": 3,
+    "benchmark": "mmlu",
+    "benchmarkHash": "28ce774dfca4c3b41361e35791f5e046",
+    "n": 10,
+    "stride": 1,
+    "indexGrams": 773421,
+    "corpus": "pile-noncrawl",
+    "corpusHash": "e62b50cd2c347c31c995137f79aaea17",
+    "corpusBytes": 1543102610,
+    "corpusDocs": 251407,
+    "corpusHashFull": "6f700d916938d6e47e5422ccf8b64d6d9cfe8364d87b8f111bc8a42bbfffd540",
+    "command": "node scripts/canonicality-check.ts --benchmark mmlu --n 10",
+    "generatedAt": "2026-07-28T15:55:23.756Z"
+  }
+}

@@ -25,9 +25,10 @@ They change how you should read everything below.
 - **One corpus, one snapshot.** C4 is Common Crawl from April 2019. Findings about C4 are
   not findings about any particular model's training set. We are not claiming any model
   trained on contaminated data.
-- **The canonical-text finding rests on judgement plus one statistical test.** The
-  experiment that would settle it is specified at the end, along with the reason we have
-  not run it yet.
+- **The canonical-text finding is partly demonstrated, mostly undetermined.** 67 of 342
+  flagged items are confirmed canonical against a corpus of independent provenance. The
+  other 275 are undetermined, and a published control shows why absence proves nothing at
+  this reference size. Zero leakage was demonstrated. See the last section.
 
 ## What was scanned
 
@@ -215,22 +216,66 @@ that number, and it still got quoted as a scanning rate.
   other 665 were counted but not kept** — we have not seen them either, and neither can you
   without re-running the scan. That is a real limit on this finding, not a formality.
 
-## The experiment that would settle failure 2, and why it is not here
+## Testing failure 2 properly, and what the test could not tell us
 
 The proper test for canonicality is independence: scan a **second corpus of different
-provenance** and keep only matches confirmed in both. Text appearing in two independently
-assembled corpora is canonical by construction; text that leaked into one is specific to
+provenance** and keep only matches confirmed in both. Text reaching two independently
+assembled corpora is a property of the language; text that leaked into one is specific to
 one.
 
-We are not running it against RedPajama or FineWeb, and the reason is the point. **C4,
-RedPajama and FineWeb are all Common Crawl derivatives.** A match confirmed across two of
-them most likely means one web page survived both filtering pipelines — not that two
-independent sources contain the text. The test would appear to pass while proving nothing,
-which is the same failure this entire report is about.
+**The obvious second corpus would have proved nothing.** C4, RedPajama and FineWeb are all
+Common Crawl derivatives. A match confirmed across two of them most likely means one web
+page survived two filtering pipelines. The test would appear to pass while measuring
+nothing — the same shape of failure as everything else in this report.
 
-The test needs a corpus with genuinely different provenance — digitised books, or a
-reference corpus — where a match means scraped web pages *and* print both contain the
-passage. That scan is next, and its result will be published here whichever way it goes.
+So we built a reference corpus with the crawl removed: The Pile with `Pile-CC`,
+`OpenWebText2`, `HackerNews` and `Ubuntu IRC` excluded. What remains is **251,488
+documents, 1.49 GB** of court opinions, patents, academic abstracts, encyclopedia articles,
+digitised books and parliamentary proceedings — text whose route into a dataset never
+passed through a crawler. 108,876 web-derived documents were dropped, and the per-subset
+counts are published.
+
+```
+  of 342 MMLU items flagged in C4:
+    confirmed canonical (also in non-crawl text)     67   19.6%
+    web-corpus only                                 275   80.4%
+
+  confirmations by source:  freelaw 46 · gutenberg 3 · wikipedia 2 · arxiv 2
+                            stackexchange 2 · pubmed-central 2 · pubmed-abstracts 1
+```
+
+**67 items are now demonstrated canonical rather than argued canonical**, most of them by
+court opinions independently containing the legal phrasing MMLU's law questions use.
+
+### The 80.4% is not a leakage rate, and here is the measurement that proves it
+
+Before reading anything into the unconfirmed items, we ran a control: nine items identified
+by inspection as unambiguously canonical — Patrick Henry, Roosevelt's Four Freedoms, NATO
+Article 5, Machiavelli, Franklin's testimony to Parliament. Nobody believes MMLU leaked
+Patrick Henry into Common Crawl.
+
+**One of the nine was confirmed. Eight were not.**
+
+```
+  NOT FOUND   Patrick Henry, "give me liberty or give me death"
+  NOT FOUND   Roosevelt, Four Freedoms
+  confirmed   Fifth Amendment, "without due process"
+  NOT FOUND   NATO Treaty, Article 5
+  NOT FOUND   Machiavelli, on friendships obtained by payment
+  NOT FOUND   Franklin's 1766 testimony to Parliament
+  ...
+```
+
+A 1.49 GB reference against a 21.33 GB web corpus has almost no power to find a passage
+that is genuinely canonical. 140 Gutenberg documents will not contain Patrick Henry's
+speech. **So this test has strong positive power and negligible negative power: presence is
+evidence, absence is not.** Reporting "19.6% canonical, 80.4% possibly leaked" would be
+precisely the confident wrong number this report is about, and the control set is what
+stops us writing it.
+
+The fix is a reference corpus one to two orders of magnitude larger, which is the next
+experiment. Until then the honest statement is: 67 confirmed canonical, 275 undetermined,
+zero demonstrated leakage.
 
 ## Reproduce every number
 
@@ -252,6 +297,8 @@ carrying the scanner version, index identity, corpus hash and the exact command,
 party reproduces any number here without asking us for anything.
 
 Full results, every shard hash, and the retained matches:
+[`results/canonicality.json`](../results/canonicality.json) — the cross-provenance test and its control set ·
+[`results/canonical-grams.json`](../results/canonical-grams.json) — the 67 confirmed-canonical item ids, no benchmark text ·
 [`results/pretraining-c4.json`](../results/pretraining-c4.json) — the three-benchmark run ·
 [`results/pretraining-c4-mmlu-evidence.json`](../results/pretraining-c4-mmlu-evidence.json) — the 200 retained MMLU matches with their document frequencies ·
 [`results/pretraining-c4-1shard.json`](../results/pretraining-c4-1shard.json) — the single-shard comparison ·

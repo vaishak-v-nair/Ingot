@@ -1,0 +1,240 @@
+{
+  "scanner": "ingot-0.1.0",
+  "format": "canonical-items/1",
+  "benchmark": "mmlu",
+  "benchmarkHash": "28ce774dfca4c3b41361e35791f5e046",
+  "n": 10,
+  "note": "Benchmark items whose flagged text was independently confirmed in non-web-crawl sources. Item ids only; no benchmark text is redistributed.",
+  "method": "flagged in c4-en-26shards AND in a Pile subset excluding Pile-CC/OpenWebText2/HackerNews/Ubuntu IRC",
+  "canonicalItemIds": [
+    "mmlu-10648",
+    "mmlu-10651",
+    "mmlu-10652",
+    "mmlu-10737",
+    "mmlu-10775",
+    "mmlu-10829",
+    "mmlu-10846",
+    "mmlu-10915",
+    "mmlu-10964",
+    "mmlu-10977",
+    "mmlu-11058",
+    "mmlu-11073",
+    "mmlu-11096",
+    "mmlu-11097",
+    "mmlu-11179",
+    "mmlu-11182",
+    "mmlu-11278",
+    "mmlu-11323",
+    "mmlu-11377",
+    "mmlu-11391",
+    "mmlu-11466",
+    "mmlu-11485",
+    "mmlu-11488",
+    "mmlu-11503",
+    "mmlu-11524",
+    "mmlu-11525",
+    "mmlu-11530",
+    "mmlu-11606",
+    "mmlu-11663",
+    "mmlu-11668",
+    "mmlu-1167",
+    "mmlu-11670",
+    "mmlu-11678",
+    "mmlu-11684",
+    "mmlu-11687",
+    "mmlu-11834",
+    "mmlu-11892",
+    "mmlu-11919",
+    "mmlu-11987",
+    "mmlu-11990",
+    "mmlu-12010",
+    "mmlu-12033",
+    "mmlu-12046",
+    "mmlu-12053",
+    "mmlu-12082",
+    "mmlu-12102",
+    "mmlu-12142",
+    "mmlu-12145",
+    "mmlu-12154",
+    "mmlu-12156",
+    "mmlu-12208",
+    "mmlu-12237",
+    "mmlu-12281",
+    "mmlu-13028",
+    "mmlu-3283",
+    "mmlu-3337",
+    "mmlu-3727",
+    "mmlu-3811",
+    "mmlu-480",
+    "mmlu-5400",
+    "mmlu-5677",
+    "mmlu-5722",
+    "mmlu-5730",
+    "mmlu-5904",
+    "mmlu-5935",
+    "mmlu-5947",
+    "mmlu-6858"
+  ],
+  "sourcesByItem": {
+    "mmlu-11278": [
+      "freelaw"
+    ],
+    "mmlu-12082": [
+      "freelaw"
+    ],
+    "mmlu-10964": [
+      "freelaw"
+    ],
+    "mmlu-11524": [
+      "freelaw"
+    ],
+    "mmlu-12145": [
+      "freelaw"
+    ],
+    "mmlu-12033": [
+      "freelaw",
+      "wikipedia-en"
+    ],
+    "mmlu-10977": [
+      "freelaw"
+    ],
+    "mmlu-11687": [
+      "freelaw"
+    ],
+    "mmlu-11391": [
+      "freelaw"
+    ],
+    "mmlu-12010": [
+      "freelaw"
+    ],
+    "mmlu-11987": [
+      "freelaw"
+    ],
+    "mmlu-6858": [
+      "arxiv"
+    ],
+    "mmlu-11058": [
+      "freelaw"
+    ],
+    "mmlu-11606": [
+      "freelaw"
+    ],
+    "mmlu-11525": [
+      "freelaw",
+      "wikipedia-en"
+    ],
+    "mmlu-11668": [
+      "freelaw"
+    ],
+    "mmlu-11834": [
+      "freelaw"
+    ],
+    "mmlu-12102": [
+      "freelaw"
+    ],
+    "mmlu-480": [
+      "arxiv",
+      "stackexchange"
+    ],
+    "mmlu-5400": [
+      "pubmed-abstracts",
+      "pubmed-central"
+    ],
+    "mmlu-11485": [
+      "freelaw"
+    ],
+    "mmlu-11684": [
+      "freelaw"
+    ],
+    "mmlu-10651": [
+      "freelaw"
+    ],
+    "mmlu-1167": [
+      "stackexchange"
+    ],
+    "mmlu-11073": [
+      "freelaw"
+    ],
+    "mmlu-12053": [
+      "freelaw"
+    ],
+    "mmlu-5904": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-5935": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-5947": [
+      "freelaw",
+      "gutenberg-pg-19"
+    ],
+    "mmlu-10846": [
+      "freelaw"
+    ],
+    "mmlu-11097": [
+      "freelaw"
+    ],
+    "mmlu-11678": [
+      "freelaw"
+    ],
+    "mmlu-12154": [
+      "freelaw"
+    ],
+    "mmlu-11488": [
+      "freelaw"
+    ],
+    "mmlu-11377": [
+      "freelaw"
+    ],
+    "mmlu-11990": [
+      "freelaw"
+    ],
+    "mmlu-12156": [
+      "freelaw"
+    ],
+    "mmlu-11530": [
+      "freelaw"
+    ],
+    "mmlu-11670": [
+      "freelaw"
+    ],
+    "mmlu-3811": [
+      "freelaw"
+    ],
+    "mmlu-11663": [
+      "freelaw"
+    ],
+    "mmlu-10737": [
+      "freelaw"
+    ],
+    "mmlu-10648": [
+      "freelaw"
+    ],
+    "mmlu-10915": [
+      "freelaw"
+    ],
+    "mmlu-5677": [
+      "freelaw"
+    ],
+    "mmlu-5722": [
+      "freelaw"
+    ],
+    "mmlu-5730": [
+      "freelaw"
+    ],
+    "mmlu-12142": [
+      "freelaw"
+    ],
+    "mmlu-10652": [
+      "freelaw"
+    ],
+    "mmlu-12208": [
+      "pubmed-central"
+    ],
+    "mmlu-11919": [
+      "freelaw"
+    ]
+  }
+}
