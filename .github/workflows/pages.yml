@@ -68,7 +68,14 @@ jobs:
           grep -q 'id="drop"' web/index.html
           echo "site ok"
 
+      # enablement:true turns Pages on via the API rather than requiring someone to find
+      # the setting. The job already holds `pages: write`, which is the permission that
+      # call needs, so every earlier run failed here asking for a click it could have made
+      # itself. If repository policy still blocks it, the step fails with the same message
+      # as before and the setting has to be flipped by hand.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web

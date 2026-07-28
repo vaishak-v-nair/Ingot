@@ -30,6 +30,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createInterface } from 'node:readline';
 import { createGzip, createZstdDecompress } from 'node:zlib';
+import { withRetry } from './retry.ts';
 
 const BASE = 'https://huggingface.co/datasets/monology/pile-uncopyrighted/resolve/main';
 const PARTS = ['val.jsonl.zst', 'test.jsonl.zst'];
@@ -51,22 +52,6 @@ const cacheDir = join(outDir, 'download');
 
 function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
-async function withRetry<T>(label: string, attempt: () => Promise<T>, tries = 5): Promise<T> {
-  let lastErr: unknown;
-  for (let i = 1; i <= tries; i++) {
-    try {
-      return await attempt();
-    } catch (err) {
-      lastErr = err;
-      if (i === tries) break;
-      const waitMs = 2000 * 2 ** (i - 1);
-      process.stdout.write(`      ${label}: ${err instanceof Error ? err.message : String(err)} — retry ${i} in ${waitMs / 1000}s\n`);
-      await new Promise((r) => setTimeout(r, waitMs));
-    }
-  }
-  throw lastErr;
 }
 
 async function download(name: string): Promise<string> {

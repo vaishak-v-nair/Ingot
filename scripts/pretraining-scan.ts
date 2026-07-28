@@ -23,12 +23,7 @@ import { scanCorpus } from '../src/contamination/scan.ts';
 import { DEFAULT_N, LEGACY_N } from '../src/contamination/types.ts';
 import { SCANNER_VERSION } from '../src/types.ts';
 import type { BenchmarkItem, ContaminationHit } from '../src/contamination/types.ts';
-
-const BENCHMARKS = [
-  { name: 'gsm8k', path: 'data/bench/gsm8k.jsonl', licence: 'MIT', note: 'test split, question text' },
-  { name: 'humaneval', path: 'data/bench/humaneval.jsonl', licence: 'MIT', note: 'prompt: signature + docstring' },
-  { name: 'mmlu', path: 'data/bench/mmlu.jsonl', licence: 'MIT', note: 'test split, question + choices' },
-];
+import { BENCHMARKS } from './benchmarks.ts';
 
 type Manifest = {
   corpus: string;
@@ -94,6 +89,40 @@ type PairResult = {
 
 const results: PairResult[] = [];
 
+/**
+ * Written after EVERY pass, not once at the end.
+ *
+ * A pass over 21 GB takes the better part of an hour, and three of them run in sequence.
+ * Writing only at the end means a crash on the last pass throws away every completed one —
+ * hours of compute, gone, with nothing on disk to show which passes had already succeeded.
+ * Rewriting the whole file each time is cheap next to the scan that produced it.
+ */
+function writeResults(): void {
+  mkdirSync(resolve('results'), { recursive: true });
+  const payload = {
+    scanner: SCANNER_VERSION,
+    defaultN: DEFAULT_N,
+    legacyN: LEGACY_N,
+    corpus: {
+      name: corpusName,
+      licence: manifest.licence,
+      source: manifest.source,
+      fetchedAt: manifest.fetchedAt,
+      shardCount: shards.length,
+      compressedBytes,
+      uncompressedBytes: results[0]?.corpusBytes ?? 0,
+      // Every shard with its digest: the scan hashes the concatenation, so without the
+      // ordered part list the corpus hash attests to bytes nobody can reassemble.
+      shards: shards.map((s) => ({ name: s.name, bytes: s.bytes, sha256: s.sha256 })),
+    },
+    benchmarks: BENCHMARKS,
+    // Named so a partial file is never mistaken for a finished run.
+    complete: results.length === BENCHMARKS.filter((b) => !only || b.name === only).length * nValues.length,
+    results,
+  };
+  writeFileSync(resolve(`results/${outName}.json`), JSON.stringify(payload, null, 2) + '\n', 'utf8');
+}
+
 process.stdout.write(`\n  INGOT — benchmarks against a pretraining corpus — ${SCANNER_VERSION}\n\n`);
 process.stdout.write(`  corpus   ${manifest.corpus} · ${shards.length} shards · ${(compressedBytes / 1e9).toFixed(2)} GB gzipped\n`);
 process.stdout.write(`  licence  ${manifest.licence}\n`);
@@ -154,11 +183,16 @@ for (const b of BENCHMARKS) {
       throughputMBs: throughput,
       droppedGeneric: exact.droppedGeneric ?? 0,
       contaminatedItemIds: report.contaminatedItemIds,
+
       // Every retained hit, not a slice of them. At this scale the evidence IS the
       // finding: deciding whether 865 matches are leakage or canonical text cannot be
       // done from 25 of them, and the scanner already caps what it keeps.
       samples: exact.hits,
     });
+
+    // Persist before starting the next pass, so an hour of finished work survives a crash
+    // in the pass that follows it.
+    writeResults();
 
     process.stdout.write(
       `  ${b.name.padEnd(10)} n=${n}  ` +
@@ -171,27 +205,5 @@ for (const b of BENCHMARKS) {
   }
   process.stdout.write('\n');
 }
-
-mkdirSync(resolve('results'), { recursive: true });
-const payload = {
-  scanner: SCANNER_VERSION,
-  defaultN: DEFAULT_N,
-  legacyN: LEGACY_N,
-  corpus: {
-    name: corpusName,
-    licence: manifest.licence,
-    source: manifest.source,
-    fetchedAt: manifest.fetchedAt,
-    shardCount: shards.length,
-    compressedBytes,
-    uncompressedBytes: results[0]?.corpusBytes ?? 0,
-    // Every shard with its digest: the scan hashes the concatenation, so without the
-    // ordered part list the corpus hash attests to bytes nobody can reassemble.
-    shards: shards.map((s) => ({ name: s.name, bytes: s.bytes, sha256: s.sha256 })),
-  },
-  benchmarks: BENCHMARKS,
-  results,
-};
-writeFileSync(resolve(`results/${outName}.json`), JSON.stringify(payload, null, 2) + '\n', 'utf8');
 
 process.stdout.write(`  wrote results/${outName}.json\n\n`);

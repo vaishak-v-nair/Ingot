@@ -26,6 +26,7 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSyn
 import { basename, join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { withRetry } from './retry.ts';
 
 const TOTAL_SHARDS = 1024;
 const BASE = 'https://huggingface.co/datasets/allenai/c4/resolve/main/en';
@@ -68,31 +69,6 @@ async function sha256(path: string): Promise<string> {
   const h = createHash('sha256');
   await pipeline(createReadStream(path), h);
   return h.digest('hex');
-}
-
-/**
- * Retries a transient network failure.
- *
- * A CDN closing the connection part-way through is normal at this scale — the first
- * 26-shard run died on shard 9 with "other side closed" — and without this the whole
- * download is only as long as its unluckiest minute. Retries are bounded and reported, so
- * a genuinely missing shard still fails rather than looping.
- */
-async function withRetry<T>(label: string, attempt: () => Promise<T>, tries = 5): Promise<T> {
-  let lastErr: unknown;
-  for (let i = 1; i <= tries; i++) {
-    try {
-      return await attempt();
-    } catch (err) {
-      lastErr = err;
-      if (i === tries) break;
-      const waitMs = 2000 * 2 ** (i - 1);
-      const reason = err instanceof Error ? err.message : String(err);
-      process.stdout.write(`      ${label}: ${reason} — retry ${i}/${tries - 1} in ${waitMs / 1000}s\n`);
-      await new Promise((r) => setTimeout(r, waitMs));
-    }
-  }
-  throw lastErr;
 }
 
 async function remoteSize(url: string): Promise<number> {

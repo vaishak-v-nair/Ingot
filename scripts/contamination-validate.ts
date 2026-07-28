@@ -133,6 +133,14 @@ type Row = {
   n: number;
   checkablePlanted: number;
   plantedUncheckable: number;
+  /**
+   * Unscannable items across the WHOLE benchmark, not just the planted subset. This is the
+   * figure the docs quote as "n=13 leaves 6.8% of a benchmark unscannable", and it was
+   * printed to the terminal but never written to this file — so the published number could
+   * not be traced back to it. Storing it is what makes that claim checkable.
+   */
+  benchmarkUncheckable: number;
+  benchmarkItems: number;
   indexGrams: number;
   droppedStoplist: number;
   droppedNonDiscriminative: number;
@@ -168,6 +176,8 @@ for (let n = MIN_N; n <= MAX_N; n++) {
     droppedNonDiscriminative: index.stats.droppedNonDiscriminative,
     checkablePlanted,
     plantedUncheckable,
+    benchmarkUncheckable: index.stats.uncheckableItems,
+    benchmarkItems: bench.length,
     verbatimRecall: checkablePlanted === 0 ? 0 : foundVerbatim / checkablePlanted,
     paraphraseRecall: checkablePlanted === 0 ? 0 : foundParaphrase / checkablePlanted,
     controlFalsePositives: control.contaminatedItemIds.length,

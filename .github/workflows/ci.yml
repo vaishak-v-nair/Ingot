@@ -100,3 +100,11 @@ jobs:
             git diff results/contamination-validation.json
             exit 1
           fi
+
+      # The step above proves the results files still reproduce. This one proves the PROSE
+      # still matches those files. They are different failures: a re-run that moves a number
+      # leaves every document quoting the old one, and nothing caught that until now. The
+      # report argues that published figures drift from what was measured; shipping it
+      # without this check would have been the same mistake in the same repository.
+      - name: Published prose still matches the results files
+        run: node scripts/check-published-numbers.ts

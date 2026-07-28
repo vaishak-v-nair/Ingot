@@ -254,7 +254,7 @@ by inspection as unambiguously canonical — Patrick Henry, Roosevelt's Four Fre
 Article 5, Machiavelli, Franklin's testimony to Parliament. Nobody believes MMLU leaked
 Patrick Henry into Common Crawl.
 
-**One of the nine was confirmed. Eight were not.**
+**1 of 9 was confirmed. Eight were not.**
 
 ```
   NOT FOUND   Patrick Henry, "give me liberty or give me death"
