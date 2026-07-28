@@ -43,3 +43,4 @@ Thumbs.db
 .DS_Store
 
 # results/ is deliberately NOT ignored. The measured numbers are the product.
+.gstack/

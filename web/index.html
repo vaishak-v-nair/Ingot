@@ -202,30 +202,39 @@
 <section id="findings">
   <div class="wrap">
     <div class="kicker">The registry</div>
-    <h3>Three benchmarks against two public corpora</h3>
+    <h3>Three benchmarks against 21 GB of C4</h3>
     <p class="sub">Everything scanned is public, so every number reproduces from the same files.
-    At n=10, six items were flagged across 15,525 benchmark items.</p>
+    26 shards of Common Crawl web text: <strong>21.33 GB</strong>, 9,264,249 documents,
+    3,418,685,530 tokens. Every shard's URL and SHA-256 is published.</p>
     <div class="scroll">
       <table>
-        <tr><th>benchmark</th><th>corpus</th><th class="num">flagged</th><th class="num">rate</th><th class="num">unscannable</th></tr>
-        <tr><td>gsm8k</td><td>alpaca-52k</td><td class="num">0 / 1319</td><td class="num">0.00%</td><td class="num">0</td></tr>
-        <tr><td>gsm8k</td><td>dolly-15k</td><td class="num">0 / 1319</td><td class="num">0.00%</td><td class="num">0</td></tr>
-        <tr><td>humaneval</td><td>alpaca-52k</td><td class="num">1 / 164</td><td class="num">0.61%</td><td class="num">0</td></tr>
-        <tr><td>humaneval</td><td>dolly-15k</td><td class="num">1 / 164</td><td class="num">0.61%</td><td class="num">0</td></tr>
-        <tr><td>mmlu</td><td>alpaca-52k</td><td class="num">5 / 14042</td><td class="num">0.04%</td><td class="num">28</td></tr>
-        <tr><td>mmlu</td><td>dolly-15k</td><td class="num">0 / 14042</td><td class="num">0.00%</td><td class="num">28</td></tr>
+        <tr><th>benchmark</th><th class="num">flagged</th><th class="num">rate</th><th class="num">matches</th><th class="num">discarded</th><th class="num">unscannable</th></tr>
+        <tr><td>gsm8k</td><td class="num">2 / 1319</td><td class="num">0.152%</td><td class="num">2</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>humaneval</td><td class="num">6 / 164</td><td class="num">3.659%</td><td class="num">15</td><td class="num">115</td><td class="num">0</td></tr>
+        <tr><td>mmlu</td><td class="num">342 / 14042</td><td class="num">2.436%</td><td class="num">865</td><td class="num">642</td><td class="num">28</td></tr>
       </table>
     </div>
-    <p class="sub" style="margin-top:1.4rem"><strong>All six were inspected and none is contamination.</strong>
-    Every one is canonical text: a prime or digit sequence inside a HumanEval docstring, the proper
-    noun "I Have a Dream speech", a stock definition of capitalism. They match because that text is
-    everywhere, not because a benchmark leaked.</p>
-    <p class="sub">That is published rather than quietly dropped, because it is the finding: a phrase
-    appearing in exactly one benchmark item still carries no evidential weight if the whole world
-    writes it. A corpus-side document-frequency filter was added and did not fire — these phrases sit
-    in two or three documents of a 26k corpus, below any sane threshold, while still being ubiquitous
-    in English. Independence across corpora turned out to be the stronger signal, and it sharpens with
-    every corpus added to the registry.</p>
+    <p class="sub" style="margin-top:1.4rem"><strong>"2.4% of MMLU is contaminated in C4" is wrong,
+    and that is the finding.</strong> Of 342 flagged items we inspected 200 retained matches across
+    120 items and found no contamination. We found NATO Article 5, Patrick Henry, Roosevelt's Four
+    Freedoms, the Fifth Amendment, Machiavelli. MMLU asks questions <em>about</em> those documents,
+    so it quotes them. C4 is web text, so it contains them. The overlap is exact, reproducible and
+    evidentially worthless.</p>
+    <p class="sub">The standard defence does not save you. Document-frequency filtering discarded
+    757 matches at this scale and <strong>0</strong> at 356,317 documents — same filter, same
+    threshold, so it only engages once the corpus is enormous. Even then the survivors are canonical,
+    because a famous passage's <em>exact</em> ten-gram is rare: Patrick Henry's most quoted sentence
+    appears in one document out of nine million, as
+    <code>give me liberty or give me death!?- Patrick Henry</code>.</p>
+    <p class="sub">Tested properly against a corpus of different provenance — The Pile with every
+    web-crawl subset removed, 251,488 documents of court opinions, patents, abstracts and digitised
+    books — <strong>67 of the 342 are confirmed canonical</strong>, 46 of them by court opinions. The
+    other 275 are undetermined, not leaked: a control of nine unmistakably canonical items scored
+    <strong>1 of 9</strong> against that reference, so absence from it carries no information.
+    Presence is evidence; absence is a lead.</p>
+    <p class="sub">The full write-up, including the two published numbers this project had to retract,
+    is in <a href="https://github.com/vaishak-v-nair/Ingot/blob/main/docs/silent-failures.md">three
+    ways contamination scanning silently fails</a>.</p>
     <p class="sub">This is also the argument for showing evidence rather than a percentage. A false
     positive you can see is a judgment a reader makes in one second. A false positive expressed as a
     rate is one they cannot evaluate at all.</p>
@@ -257,10 +266,11 @@
     Ingot · <a href="https://github.com/vaishak-v-nair/Ingot">source</a> · Apache-2.0 ·
     zero runtime dependencies, Node 24 runs the TypeScript directly<br>
     Numbers on this page come from <strong>results/</strong> and reproduce with
-    <strong>node scripts/contamination-validate.ts</strong>, <strong>node scripts/bench-scan.ts</strong>
-    and <strong>node scripts/registry-scan.ts</strong>.<br>
-    Reference corpora: databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0,
-    calibration and research only).
+    <strong>node scripts/contamination-validate.ts</strong>,
+    <strong>node scripts/pretraining-scan.ts</strong> and
+    <strong>node scripts/canonicality-check.ts</strong>.<br>
+    Corpora: C4 en (ODC-BY), The Pile uncopyrighted with web-crawl subsets removed,
+    databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0, calibration only).
   </div>
 </footer>
 

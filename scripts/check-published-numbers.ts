@@ -24,8 +24,11 @@ function json<T>(path: string): T {
 const REPORT = 'docs/silent-failures.md';
 const README = 'README.md';
 const MEASUREMENTS = 'docs/measurements.md';
+// The front page publishes numbers too, and until now nothing checked it. It is the
+// surface most people see and the one least likely to be updated when a scan is re-run.
+const SITE = 'web/index.html';
 
-for (const p of [REPORT, README, MEASUREMENTS, 'results/pretraining-c4.json']) {
+for (const p of [REPORT, README, MEASUREMENTS, SITE, 'results/pretraining-c4.json']) {
   if (!existsSync(resolve(p))) {
     process.stderr.write(`\n  missing: ${p}\n\n`);
     process.exit(2);
@@ -87,6 +90,23 @@ const claims: Claim[] = [
   { doc: REPORT, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
   { doc: README, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
   { doc: MEASUREMENTS, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
+  // The front page carries the C4 registry table. Each row is checked separately so a
+  // re-run that moves one benchmark cannot slip through because the others still match.
+  { doc: SITE, label: 'site: corpus size', expected: `${(c4.corpus.uncompressedBytes / 1e9).toFixed(2)} GB` },
+  { doc: SITE, label: 'site: corpus documents', expected: mmlu.corpusDocs.toLocaleString('en-US') },
+  { doc: SITE, label: 'site: corpus tokens', expected: mmlu.corpusTokens.toLocaleString('en-US') },
+  ...c4.results.map((r) => ({
+    doc: SITE,
+    label: `site: ${r.benchmark} flagged`,
+    expected: `${r.itemsHit} / ${r.itemsTotal}`,
+  })),
+  ...c4.results.map((r) => ({
+    doc: SITE,
+    label: `site: ${r.benchmark} rate`,
+    expected: `${(r.rate * 100).toFixed(3)}%`,
+  })),
+  { doc: SITE, label: 'site: total discarded by filter', expected: `${droppedTotal}` },
+  { doc: SITE, label: 'site: single-shard documents', expected: shard.results[0].corpusDocs.toLocaleString('en-US') },
 ];
 
 // The canonicality run is optional: the report ships whether or not that scan has been run,
@@ -105,6 +125,14 @@ if (existsSync(resolve('results/canonicality.json'))) {
     {
       doc: REPORT,
       label: 'control set result',
+      expected: `${canon.controlSet.confirmed} of ${canon.controlSet.total}`,
+    },
+    { doc: SITE, label: 'site: items confirmed canonical', expected: `${canon.confirmedCanonical.length}` },
+    { doc: SITE, label: 'site: items undetermined', expected: `${canon.webCorpusOnly.length}` },
+    { doc: SITE, label: 'site: reference corpus documents', expected: canon.referenceCorpus.documents.toLocaleString('en-US') },
+    {
+      doc: SITE,
+      label: 'site: control set result',
       expected: `${canon.controlSet.confirmed} of ${canon.controlSet.total}`,
     },
   );
