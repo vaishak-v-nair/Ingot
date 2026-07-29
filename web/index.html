@@ -34,7 +34,14 @@
   }
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; background: var(--paper); color: var(--ink);
-         font: 16px/1.55 var(--sans); overflow-x: hidden; }
+         font: 16px/1.55 var(--sans); overflow-x: hidden; position: relative; }
+  /* Heat at the crucible. A 7% ember wash behind the hero only — absolute rather than
+     fixed, so the page cools as you scroll down into the record. This is the one place
+     --hot is allowed to touch the ground; everywhere else it stays a mark. */
+  body::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 46rem;
+                 z-index: -1; pointer-events: none;
+                 background: radial-gradient(70rem 30rem at 50% -8rem,
+                   color-mix(in srgb, var(--hot) 7%, transparent), transparent 68%); }
   a { color: inherit; }
   /* One shell in two states. Below the rail breakpoint .page and .wrap are the same 54rem
      column the page has always been. Above it the shell widens by exactly the width of the
@@ -50,12 +57,26 @@
   nav .wrap { display: flex; align-items: center; gap: 1.25rem; padding-top: .75rem; padding-bottom: .75rem; }
   .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
            text-transform: uppercase; color: var(--gold); margin-right: auto; }
-  nav a { font-size: .85rem; color: var(--dim); text-decoration: none; }
+  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
+          position: relative; transition: color .15s; }
   nav a:hover { color: var(--ink); }
+  /* The gold rule draws in under a link rather than toggling on: an underline arriving is
+     alive, an underline switching is a state change. */
+  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
+                 height: 1px; background: var(--gold); transition: right .18s ease; }
+  nav a:hover::after { right: 0; }
 
   header { padding: 3rem 0 0; }
   h1 { font-family: var(--display); font-weight: 400;
        font-size: clamp(2.1rem, 6vw, 3.7rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.015em; }
+  /* The molten tail. The headline cools from ink into a trace of ember at its end — the
+     metaphor about.html carries at full temperature, here at a tenth the dose. Clipped
+     text keeps its metrics; a browser without clipping keeps plain ink. */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    h1 { background: linear-gradient(100deg, var(--ink) 58%,
+           color-mix(in srgb, var(--ink) 55%, var(--ember)));
+         -webkit-background-clip: text; background-clip: text; color: transparent; }
+  }
   /* No negative tracking here. Instrument Serif is already narrow, and tightening it at
      section-heading size closes the counters up. The h1 can carry -.015em because at
      59px there is room; a 28px heading cannot. */
@@ -79,17 +100,26 @@
   .drop { border: 2px dashed var(--line); border-radius: 14px; padding: 2.4rem 1.5rem;
           text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
   .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--hot) 8%, var(--card)); }
+  .drop:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
   .drop p { margin: .4rem 0; color: var(--dim); font-size: .9rem; }
   .drop strong { font-size: 1.05rem; color: var(--ink); }
   input[type=file] { display: none; }
   .btns { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
   .btn { border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-         border-radius: 8px; padding: .55rem 1.1rem; cursor: pointer; font: inherit; font-size: .92rem; }
-  .btn:hover { border-color: var(--gold); }
+         border-radius: 8px; padding: .55rem 1.1rem; cursor: pointer; font: inherit; font-size: .92rem;
+         transition: border-color .15s, background .15s, color .15s, transform .12s ease; }
+  .btn:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
   .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .btn.primary:hover { background: var(--gold); border-color: var(--gold); color: #17150d; }
 
-  progress { width: 100%; height: .5rem; margin-top: 1rem; }
+  /* A molten thread, not the OS default widget. The corpus flowing through the scanner is
+     the one honest piece of theatre this page owns, and it was rendering as a grey bar. */
+  progress { width: 100%; height: 3px; margin-top: 1rem; appearance: none;
+             border: 0; background: var(--line); }
+  progress::-webkit-progress-bar { background: var(--line); }
+  progress::-webkit-progress-value { background: linear-gradient(90deg, var(--gold), var(--hot)); }
+  progress::-moz-progress-bar { background: linear-gradient(90deg, var(--gold), var(--hot)); }
   #status { font-family: var(--mono); font-size: .8rem; color: var(--dim); min-height: 1.4em; margin-top: .5rem; }
 
   .verdict { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 1.5rem; margin: 1.25rem 0; }
@@ -148,7 +178,9 @@
      for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
      being drawn and then tightened on top of it. */
   section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
-  .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+  .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+            color: var(--gold); display: flex; align-items: center; gap: .7rem; }
+  .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
   .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
   /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
      row is the single most recognisable generated-page layout there is, and these three
@@ -177,6 +209,10 @@
   pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
         border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
   tr.win td { background: color-mix(in srgb, var(--hot) 9%, transparent); }
+  /* Data rows warm faintly under the pointer. Rows that mix th and td are labels rather
+     than records, and stay still. */
+  table tr:not(:has(th)):hover td { background: color-mix(in srgb, var(--hot) 5%, transparent); }
+  tr.win:hover td { background: color-mix(in srgb, var(--hot) 13%, transparent); }
   /* ---------- the receipt rail ---------- */
   /* Marginalia, not a second column. It carries the artifacts a scan actually produces —
      the corpus hash, the counts, the caveat — beside the argument that cites them, and it
@@ -214,6 +250,37 @@
   /* Mid-scan the rail holds the only moving numbers on the page. Ember marks the figures
      that are still changing, so a reader can tell a running total from a settled one. */
   .rail dl.ticking dd { color: var(--ember); }
+
+  /* ---------- motion ---------- */
+  /* Everything here narrates measurement: content settles beneath rules that never move,
+     the verdict counts to its value, the highlight sweeps the matched words the way a
+     stamp strikes. ease-out only — settling, never bouncing. The one loop is the status
+     dot, and it is a status light. All of it sits behind prefers-reduced-motion, and the
+     hidden pre-reveal state is keyed on a .js class the script adds, so a script that
+     never runs costs the settling and not the content. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js section > .wrap, .js footer > .wrap {
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .65s ease-out, transform .65s ease-out; }
+    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
+    /* The kicker's gold rule draws in a beat after its section lands. */
+    .js section > .wrap .kicker::before { width: 0; transition: width .6s ease .25s; }
+    .js section > .wrap.in .kicker::before { width: 1.9rem; }
+
+    #out > * { animation: rise .45s ease-out backwards; }
+    /* The words appear, then the stamp strikes: the highlight is drawn as a background
+       image so its width can sweep on, and it ends at the exact state the static rule
+       gives reduced-motion readers from the start. */
+    #out mark { background: none;
+      background-image: linear-gradient(color-mix(in srgb, var(--hot) 35%, transparent),
+                                        color-mix(in srgb, var(--hot) 35%, transparent));
+      background-repeat: no-repeat; background-size: 100% 100%;
+      animation: sweep .55s ease-out .5s backwards; }
+    .dot { animation: breathe 2.6s ease-in-out infinite; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  @keyframes sweep { from { background-size: 0 100%; } }
+  @keyframes breathe { 50% { opacity: .4; } }
 
   footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim);
            font-family: var(--mono); font-size: .78rem; }
@@ -471,6 +538,23 @@ const INDEXES = [
 const SAMPLE_URL = './sample-corpus.jsonl';
 
 const $ = (id) => document.getElementById(id);
+
+/**
+ * Motion is additive. The reveal styles hide content only once this class lands, so a
+ * script that never runs — old browser, blocked JS — leaves a complete static page
+ * rather than a blank one. Rules stay put; the content settles in beneath them.
+ */
+const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+if (MOTION) {
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+}
+
 const benchSel = $('bench');
 for (const b of INDEXES) {
   const o = document.createElement('option');
@@ -713,6 +797,13 @@ ${esc(r.command)}</pre>
 
   $('out').innerHTML = html;
 
+  if (MOTION) {
+    // The record cascades in reading order, capped so a long list of hits arrives as one
+    // block rather than a minute of theatre.
+    [...$('out').children].forEach((el, i) => { el.style.animationDelay = `${Math.min(i * 35, 300)}ms`; });
+    if (hitCount > 0) countUp($('out').querySelector('.big'), hitCount);
+  }
+
   // Wired after the HTML lands, since innerHTML replaces the nodes each render.
   $('dl-html').addEventListener('click', () =>
     download(renderContaminationReport(report), reportFileName(report, 'html'), 'text/html'),
@@ -720,6 +811,20 @@ ${esc(r.command)}</pre>
   $('dl-json').addEventListener('click', () =>
     download(JSON.stringify(report, null, 2), reportFileName(report, 'json'), 'application/json'),
   );
+}
+
+/**
+ * The verdict converges on its value instead of appearing fully formed — ease-out cubic,
+ * 650 ms, ending on the exact figure. A measurement settling, not a slot machine.
+ */
+function countUp(el, to) {
+  const t0 = performance.now();
+  const step = (t) => {
+    const p = Math.min(1, (t - t0) / 650);
+    el.textContent = String(Math.round(to * (1 - (1 - p) ** 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 /**

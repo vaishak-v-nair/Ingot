@@ -64,6 +64,12 @@ Restrained: one accent, used as a mark and never as a fill.
 Gold is the differentiator: the category runs blue, purple and green. It is on-name and
 unclaimed. It only works if it stays rare.
 
+Heat is allowed as temperature, never as fill: a 7% ember wash sits behind the hero —
+absolute rather than fixed, so the page cools as you scroll down into the record — and the
+h1 cools from ink into a trace of ember at its tail, the about-page molten treatment at a
+tenth the dose. An ingot is molten before it is stamped; the top of the page is the crucible
+and the record below is the cooled bar.
+
 ## Layout
 
 - **Hybrid.** Scanner controls are grid-disciplined and deliberately boring — someone
@@ -75,8 +81,25 @@ unclaimed. It only works if it stays rare.
 
 ## Motion
 
-Minimal-functional. Scan progress and results arriving. Nothing else. Bouncy motion on a
-trust product undermines the trust.
+Motion that settles, never bounces. The first version of this section said "scan progress
+and results arriving. Nothing else," and the page it produced was judged stiff — correctly.
+The replacement rule: motion is allowed exactly where it narrates measurement.
+
+- Sections settle in beneath their rules as they enter the viewport. The rules never move;
+  the content breathes in beneath them.
+- The kicker's gold rule draws in a beat after its section lands.
+- The verdict counts to its value — ease-out cubic, 650 ms, ending on the exact figure. A
+  measurement converging, not a slot machine.
+- The highlight sweeps across matched text once: the stamp striking.
+- The progress bar is a gold-to-ember thread. The promise dot breathes — the only loop on
+  the page, and it is a status light.
+- Hover is alive but small: underlines draw in, data rows warm by 5% ember, buttons lift
+  one pixel.
+
+What keeps this from becoming the thing the old rule feared: ease-out only, every animation
+runs once, everything sits behind `prefers-reduced-motion: no-preference`, and the hidden
+pre-reveal state is keyed on a `.js` class the script adds — a script that never runs costs
+the settling, never the content. Bounce, parallax and looping ornament remain banned.
 
 ## Hard constraints
 
@@ -181,6 +204,9 @@ overlap, and that is the correct trade for the rail being droppable.
 - **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
   optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
   The specimen treatment proves the page can carry a change of pace; nowhere else does.
+- **Motion exists only on the front page.** `about.html` and the generated registry page are
+  still static. The reveal, the kicker rule and the hero warmth should travel to both once
+  the treatment has survived a few days of being looked at.
 - `about.html` keeps its molten-gradient h1. Palette, measure and type now match the rest
   of the site, so this is the only remaining difference, and it is deliberate: a one-off
   hero treatment on the one page that argues rather than measures.
@@ -203,4 +229,5 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-29 | The rail becomes the reader's receipt after a scan | A static rail is a sidebar. One that fills with the visitor's own filename, corpus hash and counts — beside ours, for comparison — is content the page could not have been generated with, which is the whole brief. |
 | 2026-07-29 | The rail may never hold the only copy of a fact | It is hidden below 78.5rem. Anything unique to it would silently disappear on a laptop. This is the rule that makes hiding it safe, and the reason the assay strip stays even though the rail repeats it. |
 | 2026-07-29 | The corpus hash is gated by `check-published-numbers.ts` | It is the one figure a reader can use to prove two reports name the same bytes, so a stale one would claim provenance for a corpus that was never scanned. Hard constraint 3 applies to it more than to anything else on the page. |
+| 2026-07-29 | Motion: from "nothing" to "settling" | Supersedes the same-day minimal rule after the no-motion page was judged stiff. The fix is not decoration: every animation narrates measurement — settle, count, sweep, breathe — runs once, honours reduced-motion, and fails static. Bounce remains banned, and heat joined the palette as temperature rather than fill. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
