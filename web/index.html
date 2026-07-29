@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot — is your benchmark inside your training data?</title>
+<!-- An ingot: a gold bar on nothing. Inline data: URI, so the icon costs no request and
+     the CSP's img-src 'self' data: already allows it. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239a6a00'/%3E%3C/svg%3E">
 <meta name="description" content="Drop a training corpus and find out whether a benchmark leaked into it. Scanned in your own browser tab; nothing is uploaded.">
 <style>
   /* Self-hosted, latin subset only, 42 KB for both. Same-origin on purpose: a webfont
@@ -291,6 +294,28 @@
   @keyframes sweep { from { background-size: 0 100%; } }
   @keyframes breathe { 50% { opacity: .4; } }
 
+  /* ---------- the guided demo ---------- */
+  /* Not a video. A recording would rot the moment the page changed, weigh megabytes
+     against a zero-network budget, and show a scan instead of doing one. This runs the
+     real scanner on the real sample and walks the reader through what appears: a gold
+     ring moves between the controls with a caption that says what each one is. The ring
+     is absolute in the document, so it scrolls with the page; the dimming is its own
+     box-shadow, so there is no overlay intercepting clicks. */
+  .tour-ring { position: absolute; z-index: 50; pointer-events: none;
+               border: 2px solid var(--gold); border-radius: 12px;
+               box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--paper) 62%, transparent); }
+  .tour-card { position: absolute; z-index: 51; width: min(24rem, calc(100vw - 2rem));
+               background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+               padding: 1rem 1.15rem 1.05rem; box-shadow: 0 10px 32px rgba(0,0,0,.18); }
+  .tour-card .step { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em;
+                     text-transform: uppercase; color: var(--gold); margin-bottom: .45rem; }
+  .tour-card p { margin: 0 0 .8rem; font-size: .93rem; line-height: 1.5; }
+  .tour-card .btns { justify-content: flex-start; margin: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tour-ring, .tour-card { transition: top .45s ease, left .45s ease,
+                             width .45s ease, height .45s ease; }
+  }
+
   footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim);
            font-family: var(--mono); font-size: .78rem; }
 </style>
@@ -346,6 +371,7 @@
     <div class="btns">
       <label class="btn primary" for="file">Choose a file</label>
       <button class="btn" id="try" type="button">Try a sample corpus</button>
+      <button class="btn" id="tour" type="button">Watch it work — no file needed</button>
     </div>
     <input type="file" id="file" accept=".jsonl,.json,.txt">
   </div>
@@ -384,9 +410,10 @@
       is innocent — famous quotes appear everywhere — which is exactly why you need to see the
       words rather than a score.</li>
     </ul>
-    <p class="sub" style="margin-top:1.4rem">No file to hand? <strong>Try a sample corpus</strong>
-    scans five ordinary documents and still finds two real matches — and reading those two
-    teaches the most important habit this tool asks of you: seen words are evidence, a
+    <p class="sub" style="margin-top:1.4rem">No file to hand? <strong>Watch it work</strong>
+    walks you through a real scan step by step, and <strong>Try a sample corpus</strong> runs
+    it directly: five ordinary documents that still produce two real matches. Reading those
+    two teaches the most important habit this tool asks of you: seen words are evidence, a
     percentage is only a claim.</p>
     <p class="sub">Five words this page keeps using:</p>
     <div class="scroll">
@@ -687,6 +714,101 @@ $('try').addEventListener('click', async () => {
 });
 
 const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+/**
+ * The guided demo. Five steps, each a gold ring around a real control with a caption
+ * saying what it is; step three runs the actual sample scan and waits for the results.
+ * A video of this page would rot the moment the page changed and weigh megabytes against
+ * a zero-network budget — the tour is always current because it runs the real thing.
+ */
+const TOUR = [
+  { el: '#bench',
+    text: 'Pick the exam. Three public benchmarks live in this menu — the demo uses HumanEval, 164 programming tasks.',
+    pre: () => { if (benchSel.value !== 'humaneval') { benchSel.value = 'humaneval'; selectIndex('humaneval'); } } },
+  { el: '#drop',
+    text: 'Your training data drops here — any size, read entirely in this tab. Today the built-in sample stands in for it.' },
+  { el: '#status',
+    text: 'Scanning now, on your CPU. Open the network panel: nothing leaves this machine.',
+    pre: () => $('try').click(),
+    waitFor: () => document.querySelector('#out .hit--lead') },
+  { el: '#out .hit--lead',
+    text: 'The evidence. The matched words, large, with their context — both sample matches are famous text, not cheating, and you can tell because you can read them.' },
+  { el: '#dl-html',
+    text: 'Take it with you. The report is built here and opens with no network at all. That is the whole tool — now try your own file.' },
+];
+
+let tourAt = -1, tourRing = null, tourCard = null;
+
+function tourStop() {
+  tourAt = -1;
+  tourRing?.remove(); tourCard?.remove();
+  tourRing = tourCard = null;
+  removeEventListener('keydown', tourKey);
+  removeEventListener('resize', tourPlace);
+}
+function tourKey(e) { if (e.key === 'Escape') tourStop(); }
+
+function tourPlace() {
+  if (tourAt < 0) return;
+  const el = document.querySelector(TOUR[tourAt].el);
+  if (!el) return tourStop();
+  const r = el.getBoundingClientRect();
+  const top = r.top + scrollY, left = r.left + scrollX;
+  Object.assign(tourRing.style, {
+    top: `${top - 8}px`, left: `${left - 8}px`,
+    width: `${r.width + 16}px`, height: `${r.height + 16}px`,
+  });
+  const cardLeft = Math.max(12, Math.min(left, innerWidth - tourCard.offsetWidth - 12));
+  Object.assign(tourCard.style, { top: `${top + r.height + 18}px`, left: `${cardLeft}px` });
+}
+
+async function tourStep(i) {
+  if (i >= TOUR.length) return tourStop();
+  tourAt = i;
+  const step = TOUR[i];
+  step.pre?.();
+  // A step that runs the scanner shows its caption while the scan runs, then advances by
+  // itself when the results exist — its work, not a click, is what completes it.
+  if (step.waitFor) {
+    tourCard.querySelector('.next').textContent = 'scanning…';
+    tourCard.querySelector('.next').disabled = true;
+  }
+  const el = document.querySelector(step.el);
+  if (!el) return tourStop();
+  tourCard.querySelector('.step').textContent = `${i + 1} of ${TOUR.length}`;
+  tourCard.querySelector('p').textContent = step.text;
+  el.scrollIntoView({ block: 'center', behavior: MOTION ? 'smooth' : 'auto' });
+  tourPlace();
+  if (step.waitFor) {
+    while (tourAt === i && !step.waitFor()) await new Promise((r) => setTimeout(r, 150));
+    if (tourAt !== i) return;
+    await new Promise((r) => setTimeout(r, 900));
+    if (tourAt === i) tourStep(i + 1);
+  } else {
+    const next = tourCard.querySelector('.next');
+    next.disabled = false;
+    next.textContent = i === TOUR.length - 1 ? 'Done' : 'Next';
+  }
+}
+
+$('tour').addEventListener('click', () => {
+  if (tourAt >= 0) return;
+  tourRing = document.createElement('div');
+  tourRing.className = 'tour-ring';
+  tourCard = document.createElement('div');
+  tourCard.className = 'tour-card';
+  tourCard.setAttribute('role', 'dialog');
+  tourCard.setAttribute('aria-label', 'Guided demo');
+  tourCard.innerHTML = `<div class="step"></div><p></p>
+    <div class="btns"><button class="btn primary next" type="button">Next</button>
+    <button class="btn skip" type="button">Skip</button></div>`;
+  document.body.append(tourRing, tourCard);
+  tourCard.querySelector('.next').addEventListener('click', () => tourStep(tourAt + 1));
+  tourCard.querySelector('.skip').addEventListener('click', tourStop);
+  addEventListener('keydown', tourKey);
+  addEventListener('resize', tourPlace);
+  tourStep(0);
+});
 
 /**
  * The rail's live block. It sits above the published C4 receipt rather than replacing it,

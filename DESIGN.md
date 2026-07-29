@@ -216,13 +216,14 @@ overlap, and that is the correct trade for the rail being droppable.
 
 ## Open, not yet done
 
+- **The guided demo ("Watch it work") exists only on the front page**, and its captions are
+  hand-written English. If the scan flow gains a step, the tour's step list in `index.html`
+  must gain one too — nothing checks this yet.
 - **Two cards left, both in the results view.** `.verdict` and the sample-corpus notice are
   still bordered rounded boxes. The verdict block is the harder one: it is the only place a
   single number is the content, so a rule may not be enough to hold it. It is also the most
   visible thing on the page after a scan, which is the argument for fixing it rather than
   writing an exception into this file.
-- **No favicon.** The tab shows a default globe. Chrome requests `/favicon.ico` and gets a 404,
-  confirmed in a headless run. A same-origin SVG would satisfy `img-src 'self' data:`.
 - **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
   optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
   The specimen treatment proves the page can carry a change of pace; nowhere else does.
@@ -254,6 +255,8 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-29 | The rail becomes the reader's receipt after a scan | A static rail is a sidebar. One that fills with the visitor's own filename, corpus hash and counts — beside ours, for comparison — is content the page could not have been generated with, which is the whole brief. |
 | 2026-07-29 | The rail may never hold the only copy of a fact | It is hidden below 78.5rem. Anything unique to it would silently disappear on a laptop. This is the rule that makes hiding it safe, and the reason the assay strip stays even though the rail repeats it. |
 | 2026-07-29 | The corpus hash is gated by `check-published-numbers.ts` | It is the one figure a reader can use to prove two reports name the same bytes, so a stale one would claim provenance for a corpus that was never scanned. Hard constraint 3 applies to it more than to anything else on the page. |
+| 2026-07-29 | The guided demo is the live scanner, not a video | A recording would rot the moment the page changed, weigh megabytes against a zero-network budget, and show a scan instead of doing one. "Watch it work" moves a gold ring across the real controls, runs the real sample scan at step three, and advances itself when the results exist. Always current, zero bytes of media, CSP untouched. |
+| 2026-07-29 | Favicon: an ingot as a data: URI | Gold trapezoid bar, inline SVG on all three pages. No request, no new CSP surface — `img-src` already allowed `data:`. Closes the open item recorded the same day. |
 | 2026-07-29 | The page teaches before it argues | The site assumed its reader arrived knowing what a benchmark is, and for everyone else it was jargon from the first control. A comprehension pass added the plain register: the exam metaphor in the hero, a Start-here section with a three-step record and a five-term glossary, plain openers on the method sections, and de-jargoned tool labels. Nothing was dumbed down; it was preceded. |
 | 2026-07-29 | Motion: from "nothing" to "settling" | Supersedes the same-day minimal rule after the no-motion page was judged stiff. The fix is not decoration: every animation narrates measurement — settle, count, sweep, breathe — runs once, honours reduced-motion, and fails static. Bounce remains banned, and heat joined the palette as temperature rather than fill. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
