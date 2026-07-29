@@ -171,6 +171,13 @@ a 54–56ch measure. That contrast is deliberate and it is the whole layout syst
 *not* allowed is a third width — a block that resolves at some arbitrary point between the
 two, which is what made the page read as assembled rather than composed before the audit.
 
+**Ultra-wide is a scale, not a width.** Every dimension on the page is in rem, so past
+94rem the root font size grows fluidly (16px → 19.5px, capped) and the whole composition
+scales like a print page instead of floating in dead margins. Measured at 1904px before the
+rule: 336px of nothing on the left, 356px on the right, 63% of the viewport used. Never fix a
+wide viewport by widening a measure — text lines are in ch and must stay in their range; fix
+it by scaling the page.
+
 The receipt rail does not break this, and the reason is worth stating because it is the test
 any future second column has to pass. **The rail is margin, not column.** Above 78.5rem the
 shell widens from 54rem to 76rem and the rail takes the entire difference; the text keeps the

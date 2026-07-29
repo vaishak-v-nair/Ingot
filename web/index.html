@@ -33,6 +33,15 @@
             --gold: #e0aa3e; --ember: #ff7a4d; --ok: #7fbf85; --bad: #e2887a; }
   }
   html { -webkit-text-size-adjust: 100%; }
+  /* Every dimension on this page is in rem, so the root font size is the scale of the
+     whole composition. Fixed at 16px, the layout stops growing at ~1500px and wide
+     screens get dead margins on both sides — measured at 1904px: 336px of nothing left,
+     356px right, with the composition using 63% of the viewport. Scaling the root the
+     way print scales a page keeps the proportions identical while the margins stay
+     honest. Text measures are in ch and rem, so line lengths never leave their range. */
+  @media (min-width: 94rem) {
+    html { font-size: clamp(16px, calc(16px + (100vw - 1504px) / 96), 19.5px); }
+  }
   body { margin: 0; background: var(--paper); color: var(--ink);
          font: 16px/1.55 var(--sans); overflow-x: hidden; position: relative; }
   /* Heat at the crucible. A 7% ember wash behind the hero only — absolute rather than
@@ -66,7 +75,7 @@
                  height: 1px; background: var(--gold); transition: right .18s ease; }
   nav a:hover::after { right: 0; }
 
-  header { padding: 3rem 0 0; }
+  header { padding: 3.6rem 0 0; }
   h1 { font-family: var(--display); font-weight: 400;
        font-size: clamp(2.1rem, 6vw, 3.7rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.015em; }
   /* The molten tail. The headline cools from ink into a trace of ember at its end — the
@@ -84,9 +93,9 @@
   /* The sentence that says what this is. Full ink and a size above body copy, because it
      is the definition rather than supporting text: set in --dim at body size it reads as a
      caption under the headline and the eye skips it, which defeats the point of adding it. */
-  .says-what { font-size: clamp(1.12rem, 2.4vw, 1.34rem); line-height: 1.45; max-width: 40ch;
-               margin: 0 0 .85rem; color: var(--ink); }
-  .lede { color: var(--dim); max-width: 46ch; margin: 0 0 .8rem; font-size: 1.02rem; }
+  .says-what { font-size: clamp(1.12rem, 2.4vw, 1.34rem); line-height: 1.45; max-width: 47ch;
+               margin: 0 0 .9rem; color: var(--ink); }
+  .lede { color: var(--dim); max-width: 54ch; margin: 0 0 .95rem; font-size: 1.05rem; }
   .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .76rem;
              border: 1px solid var(--line); border-radius: 999px; padding: .42rem .8rem; background: var(--card); }
   .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
@@ -97,7 +106,7 @@
   .muted { color: var(--dim); font-size: .86rem; }
   select { font: inherit; font-size: .92rem; padding: .45rem .6rem; border-radius: 8px; border: 1px solid var(--line);
            background: var(--card); color: var(--ink); }
-  .drop { border: 2px dashed var(--line); border-radius: 14px; padding: 2.4rem 1.5rem;
+  .drop { border: 2px dashed var(--line); border-radius: 14px; padding: 3rem 1.5rem;
           text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
   .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--hot) 8%, var(--card)); }
   .drop:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
@@ -173,7 +182,7 @@
   td.num, th.num { font-family: var(--mono); }
 
   /* ---------- evidence sections ---------- */
-  section { padding: 3.25rem 0; border-top: 1px solid var(--line); }
+  section { padding: 3.9rem 0; border-top: 1px solid var(--line); }
   /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
      for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
      being drawn and then tightened on top of it. */
