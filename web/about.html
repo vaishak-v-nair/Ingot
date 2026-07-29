@@ -19,23 +19,27 @@
 
   *, *::before, *::after { box-sizing: border-box; }
   :root {
-    --ink: #0d0c08;
-    --paper: #f7f4ec;
-    --dim: #6f6a5b;
-    --line: #ded8c8;
-    --gold: #b57500;
+    /* These are the DESIGN.md tokens, byte for byte. They used to be six near-misses of
+       them -- a slightly different paper, a slightly different gold -- which is why this
+       page and index.html read as two products before you even noticed the fonts. Near
+       enough to look like a mistake, far enough to feel like one. */
+    --ink: #16150f;
+    --paper: #fbfaf7;
+    --dim: #6d6a5c;
+    --line: #ddd9cc;
+    --gold: #9a6a00;
     --gold-hot: #ff9d1f;
     --ember: #d2451e;
     --good: #2f6b34;
-    --card: #fffdf8;
+    --card: #fff;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --display: "Instrument Serif", Georgia, "Times New Roman", serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --ink: #f4efe2; --paper: #0e0d09; --dim: #9b9686; --line: #2b281f;
-      --gold: #f0b73f; --gold-hot: #ffcc5c; --ember: #ff7a4d; --good: #86c98d; --card: #16150f;
+      --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f;
+      --gold: #e0aa3e; --gold-hot: #ffcc5c; --ember: #ff7a4d; --good: #7fbf85; --card: #16150f;
     }
   }
   html { -webkit-text-size-adjust: 100%; }
@@ -44,7 +48,9 @@
     font-family: var(--sans); font-size: 17px; line-height: 1.6;
     overflow-x: hidden;
   }
-  .wrap { max-width: 66rem; margin: 0 auto; padding: 0 1.5rem; }
+  /* 54rem, the same shell as index.html and registry.html. It was 66rem, which put this
+     page's left edge 92px further out than every other page at 1440. One site, one measure. */
+  .wrap { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
   a { color: inherit; }
 
   /* ---------- hero ---------- */
@@ -81,9 +87,14 @@
 
   /* ---------- shared ---------- */
   section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
+  /* Section headings are the display serif, like every other section heading on the site.
+     They were the body sans at weight 640, because the typography pass reached this page's
+     h1 and stopped there. Weight 400 and no negative tracking: the face has no bold, and
+     asking for 600+ draws a synthetic one. */
   h2 {
-    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: -.02em;
-    margin: 0 0 .6rem; font-weight: 640; max-width: 32ch;
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: 0;
+    margin: 0 0 .6rem; max-width: 32ch;
   }
   .kicker {
     font-family: var(--mono); font-size: .72rem; letter-spacing: .2em;

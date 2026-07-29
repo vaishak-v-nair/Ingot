@@ -89,12 +89,26 @@ const html = `<!doctype html>
 <title>Ingot registry — which benchmarks appear in which corpora</title>
 <meta name="description" content="A public record of which benchmarks appear inside which public training corpora, reproducible from the same files.">
 <style>
+  /* Same two faces the rest of the site serves, from the same origin. This page is
+     generated, which is exactly why it was the page that never got them: nobody edits it,
+     so it drifted into system-sans headings while index.html moved to the serif. Fonts
+     live in web/fonts/ and are same-origin, so the CSP and the no-external-request
+     assertion both still hold. */
+  @font-face {
+    font-family: "Instrument Serif"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/instrument-serif-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
+  }
   *, *::before, *::after { box-sizing: border-box; }
   :root {
     --ink: #16150f; --paper: #fbfaf7; --dim: #6d6a5c; --line: #ddd9cc; --card: #fff;
     --gold: #9a6a00; --hot: #ff9d1f; --ok: #2f6b34;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
   }
   @media (prefers-color-scheme: dark) {
     :root { --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f; --card: #16150f;
@@ -111,10 +125,14 @@ const html = `<!doctype html>
   nav a { font-size: .85rem; color: var(--dim); text-decoration: none; }
   nav a:hover { color: var(--ink); }
   header { padding: 3rem 0 1rem; }
-  h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.06; margin: 0 0 .6rem; letter-spacing: -.025em; }
+  h1 { font-family: var(--display); font-weight: 400;
+       font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.06; margin: 0 0 .6rem; letter-spacing: -.015em; }
   .lede { color: var(--dim); max-width: 52ch; margin: 0 0 1rem; }
   section { padding: 2.5rem 0; border-top: 1px solid var(--line); }
-  h2 { font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: -.02em; }
+  /* No negative tracking at this size. Instrument Serif is narrow already; the -.02em that
+     suited the old grotesque closes its counters up. Only h1 has room for -.015em. */
+  h2 { font-family: var(--display); font-weight: 400;
+       font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: 0; }
   h4 { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
        color: var(--dim); margin: 1.6rem 0 .6rem; font-weight: 600; }
   p { color: var(--dim); max-width: 60ch; }
