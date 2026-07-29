@@ -11,6 +11,7 @@
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { QUIET } from './npx.ts';
 
 const BENCH_DIR = resolve('data/bench');
 const BENCH_FILES = ['gsm8k.jsonl', 'humaneval.jsonl', 'mmlu.jsonl'];
@@ -28,7 +29,7 @@ const CACHE_DIR = resolve('node_modules/.cache/ingot-bench');
 
 const step = (label: string): void => process.stdout.write(`\n=== ${label} ===\n`);
 const run = (script: string): void =>
-  execFileSync(process.execPath, [resolve(script)], { stdio: 'inherit' });
+  execFileSync(process.execPath, [resolve(script)], { stdio: 'inherit', ...QUIET });
 
 const haveBenchmarks = (): boolean =>
   BENCH_FILES.every((f) => existsSync(resolve(BENCH_DIR, f)));

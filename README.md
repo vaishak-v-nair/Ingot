@@ -2,10 +2,10 @@
 
 **Is the benchmark you are quoting inside the data you trained on?**
 
-[Run it in your browser](https://vaishak-v-nair.github.io/Ingot/) ·
+[Run it in your browser](https://ingot-six.vercel.app/) ·
 [**new here? how it works in five minutes**](docs/how-it-works.md) ·
 [three ways contamination scanning silently fails](docs/silent-failures.md) ·
-[the registry](https://vaishak-v-nair.github.io/Ingot/registry.html) ·
+[the registry](https://ingot-six.vercel.app/registry.html) ·
 [how every number was measured](docs/measurements.md)
 
 Ingot answers that with evidence rather than a score: it shows the matching text, side by

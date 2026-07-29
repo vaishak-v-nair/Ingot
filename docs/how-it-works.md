@@ -178,7 +178,7 @@ important thing about how Ingot is designed.
 
 ### 1. In your browser (easiest)
 
-Go to **[the scanner](https://vaishak-v-nair.github.io/Ingot/)**, drag your file in, read
+Go to **[the scanner](https://ingot-six.vercel.app/)**, drag your file in, read
 the results.
 
 Your data never leaves your computer. Not a promise — a fact you can check: open your

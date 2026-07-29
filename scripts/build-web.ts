@@ -16,6 +16,7 @@ import { loadBatch } from '../src/loader.ts';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { encodeIndex, gzipBytes } from '../src/contamination/indexCodec.ts';
 import { DEFAULT_N } from '../src/contamination/types.ts';
+import { NPX_OPTS } from './npx.ts';
 
 const BENCHES = ['gsm8k', 'humaneval', 'mmlu'];
 
@@ -28,7 +29,7 @@ execFileSync(
   'npx',
   ['--yes', 'esbuild', 'src/contamination/browserScan.ts', '--bundle', '--format=esm',
    '--outfile=web/ingot.js', '--platform=browser', '--target=es2022', '--minify'],
-  { stdio: 'inherit', shell: true },
+  { stdio: 'inherit', ...NPX_OPTS },
 );
 
 if (bundleOnly) {

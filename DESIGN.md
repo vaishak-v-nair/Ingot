@@ -89,30 +89,31 @@ trust product undermines the trust.
    gates this in CI across the README, the docs and `web/index.html`.
 4. **Every host runs the same gates.** Gates 1–3 are *checks*, not properties of the HTML,
    so a host that builds the site its own way would publish pages that passed none of them.
-   They therefore live in `scripts/check-site.ts` and `scripts/check-published-numbers.ts`,
-   and both hosts call the same two files. Adding a host means calling them, not
-   reimplementing them.
+   They therefore live in `scripts/check-site.ts` and `scripts/check-published-numbers.ts`
+   rather than inside any one host's config. Adding a host means calling those two files,
+   not reimplementing them.
 
 ## Deployment
 
-Two hosts, one build definition, identical gates:
+**Vercel, at <https://ingot-six.vercel.app>.** `vercel.json` runs `scripts/vercel-build.ts`
+on every push to `main`: fetch benchmarks → build the bundle and indexes → build the
+registry page → `check-site.ts` → `check-published-numbers.ts`. Either gate exiting
+non-zero fails the deploy, and the previous deployment stays live. Run
+`node scripts/vercel-build.ts` locally to reproduce exactly what the host does.
 
-| | build | gates |
-|---|---|---|
-| **Vercel** (primary) | `scripts/vercel-build.ts` via `vercel.json` | `check-site.ts` → `check-published-numbers.ts` |
-| **GitHub Pages** | `.github/workflows/pages.yml` | the same two scripts |
+GitHub Pages was retired once Vercel was confirmed serving. `ci.yml` still runs the tests
+and `check-published-numbers.ts` on every push and pull request, so a bad commit is caught
+by GitHub independently of whether the host happens to build.
 
-Both fetch benchmarks, build the bundle and indexes, build the registry page, then refuse
-to publish if either gate exits non-zero. Run `node scripts/vercel-build.ts` locally to
-reproduce exactly what the host does.
-
-Vercel is primary because it sits alongside the other projects in one dashboard, and
-because **it can set response headers, which GitHub Pages cannot at all.** That turns the
-first hard constraint from a build-time assertion into something the browser enforces:
-`vercel.json` sends a CSP of `default-src 'self'` with `connect-src 'self'` and
-`font-src 'self'`, so a third-party request does not merely fail review — it fails to
-happen. For a product whose claim is *check this yourself*, having the browser enforce the
-claim is worth more than the build asserting it.
+Vercel over Pages for two reasons. It sits with the other projects in one dashboard — an
+operational argument, and a real one. And **it can set response headers, which GitHub Pages
+cannot at all**, which turns the first hard constraint from a build-time assertion into
+something the browser enforces: the deployment sends `default-src 'self'` with
+`connect-src 'self'` and `font-src 'self'`, so a third-party request does not merely fail
+review, it fails to happen. For a product whose claim is *check this yourself*, the browser
+enforcing the claim is worth more than the build asserting it. Verified live: the header is
+present on the production URL, alongside `X-Content-Type-Options: nosniff` and
+`Referrer-Policy: no-referrer`.
 
 The CSP was verified against the real page served with those exact headers: no forms
 (so `form-action 'none'` is safe), no inline event handlers, no `<base>`, and the report
@@ -145,3 +146,5 @@ change. It is a cache, so every failure path falls through to fetching.
 | 2026-07-29 | Front page carries the C4 findings | The site advertised the old null result while the 21.33 GB scan and the report were invisible to visitors. |
 | 2026-07-29 | Vercel is primary; the gates move out of the workflow | Superseded a same-day entry that made Pages the only host. That entry was right that an ungated second host is a liability and wrong about the fix: the problem was never *which* host, it was that the gates lived inside one host's workflow as inline bash. Extracting them to `check-site.ts` removes the objection entirely, and Vercel then wins on two things Pages cannot do — one dashboard with the other projects, and response headers. |
 | 2026-07-29 | CSP enforces the no-third-party-request claim | The claim was previously only asserted at build time. A header makes the browser enforce it, which is a stronger guarantee than a check the visitor has to trust. Only possible because the host can set headers. |
+| 2026-07-29 | GitHub Pages retired once Vercel was confirmed serving | Not before. Removing a working deployment on the assumption its replacement works is how a project ends up with no site at all. `ci.yml` keeps the tests and the numbers gate running on GitHub regardless of the host. |
+| 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |

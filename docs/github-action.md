@@ -50,7 +50,7 @@ file:
       - uses: vaishak-v-nair/Ingot@main
         with:
           corpus: data/sft-mix.jsonl
-          index: https://vaishak-v-nair.github.io/Ingot/indexes/mmlu.idx.bin.gz
+          index: https://ingot-six.vercel.app/indexes/mmlu.idx.bin.gz
 ```
 
 Indexes carry one-way hashes and item ids, never benchmark text.

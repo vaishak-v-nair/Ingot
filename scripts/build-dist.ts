@@ -15,6 +15,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { NPX_OPTS } from './npx.ts';
 
 type Target = { entry: string; out: string; platform: 'node' | 'browser' };
 
@@ -35,7 +36,7 @@ for (const t of TARGETS) {
     '--bundle', '--format=esm', `--outfile=${t.out}`,
     `--platform=${t.platform}`, '--target=node24',
   ];
-  execFileSync('npx', args, { stdio: ['ignore', 'ignore', 'inherit'], shell: true });
+  execFileSync('npx', args, { stdio: ['ignore', 'ignore', 'inherit'], ...NPX_OPTS });
 
   const kb = statSync(resolve(t.out)).size / 1024;
   process.stdout.write(`  ${t.out.padEnd(18)} ${kb.toFixed(1).padStart(6)} KB  ${t.platform}\n`);
