@@ -45,6 +45,7 @@ const c4 = json<{
     droppedGeneric: number;
     corpusDocs: number;
     corpusTokens: number;
+    corpusHash: string;
     throughputMBs: number;
   }[];
 }>('results/pretraining-c4.json');
@@ -105,6 +106,10 @@ const claims: Claim[] = [
     label: `site: ${r.benchmark} rate`,
     expected: `${(r.rate * 100).toFixed(3)}%`,
   })),
+  // The rail prints the corpus hash, which is the one figure on the page a reader can use to
+  // prove two reports name the same bytes. A stale one is worse than none: it would claim
+  // provenance for a corpus that is no longer the corpus that was scanned.
+  { doc: SITE, label: 'site: corpus hash', expected: mmlu.corpusHash },
   { doc: SITE, label: 'site: total discarded by filter', expected: `${droppedTotal}` },
   { doc: SITE, label: 'site: single-shard documents', expected: shard.results[0].corpusDocs.toLocaleString('en-US') },
 ];

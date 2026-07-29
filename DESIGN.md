@@ -133,20 +133,51 @@ a 54–56ch measure. That contrast is deliberate and it is the whole layout syst
 *not* allowed is a third width — a block that resolves at some arbitrary point between the
 two, which is what made the page read as assembled rather than composed before the audit.
 
+The receipt rail does not break this, and the reason is worth stating because it is the test
+any future second column has to pass. **The rail is margin, not column.** Above 78.5rem the
+shell widens from 54rem to 76rem and the rail takes the entire difference; the text keeps the
+width it already had. Measured in the browser at a 1484px viewport, the text column runs
+154→986px, so 832px against the 824px it occupied before the rail existed — eight pixels, from
+the padding arithmetic, not from a decision. Nav, text column and footer share one left edge at
+both sizes. Widening a shell is only safe when the text does not notice.
+
 ## Cards
 
-There are none, and that is the rule. Three bordered boxes in a row is the most recognisable
+Almost none, and that is the rule. Three bordered boxes in a row is the most recognisable
 generated-page layout there is, and the page had two such grids. Both are now ruled records:
 dividing lines instead of fences, because the boxes were decoration around content that
 already had structure. If a card seems necessary, the content probably needs a rule, a
 numeral, or a measure — not a border.
 
+Two boxes survive, both in the results view: the verdict block and the sample-corpus notice.
+They are listed as open below rather than quietly excused. An earlier version of this section
+claimed there were none, which was wrong on the surface a visitor is most likely to look at.
+
+## The receipt rail
+
+A sticky annotation in the right margin, above 78.5rem only. It holds the published C4 receipt
+— corpus, size, documents, tokens, n, scanner, corpus hash — then the flagged counts, then the
+canonicality caveat, so the figures the argument cites stay in view while the argument is read.
+During a scan it ticks: bytes read, documents, tokens, and `uploaded 0 bytes`, in ember, because
+mid-scan is exactly when the privacy claim is easiest to doubt. After a scan its top block
+becomes the reader's own receipt — their filename, their corpus hash, their counts — sitting
+above ours for comparison. That is the part no template can contain.
+
+**Everything in it is duplicated in the body of the page, deliberately.** The rail disappears
+below the breakpoint, so an annotation holding the only copy of a fact would be a load-bearing
+column that happens to vanish on a laptop. This is also why the assay strip stays even though
+the rail repeats it a few centimetres away: for one screen out of the page's length, the two
+overlap, and that is the correct trade for the rail being droppable.
+
 ## Open, not yet done
 
-- **The receipt rail.** The approved synthesis puts a sticky column beside the argument
-  carrying the live corpus hash, counts, and the "absence carries no information" caveat.
-  Mocked up as direction D and approved; not built. It is the remaining piece that fills
-  the right half of the page during reading rather than only during a record.
+- **Two cards left, both in the results view.** `.verdict` and the sample-corpus notice are
+  still bordered rounded boxes. The verdict block is the harder one: it is the only place a
+  single number is the content, so a rule may not be enough to hold it. It is also the most
+  visible thing on the page after a scan, which is the argument for fixing it rather than
+  writing an exception into this file.
+- **No favicon.** The tab shows a default globe. Chrome requests `/favicon.ico` and gets a 404,
+  confirmed in a headless run. A same-origin SVG would satisfy `img-src 'self' data:`.
 - **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
   optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
   The specimen treatment proves the page can carry a change of pace; nowhere else does.
@@ -168,4 +199,8 @@ numeral, or a measure — not a border.
 | 2026-07-29 | The matched passage is the largest element in a result | The results view rendered the percentage at 42px and the evidence at 15px, so the layout argued the opposite of the product. The first match is now the specimen at display scale; the rest stay compact. |
 | 2026-07-29 | No cards anywhere | Both card grids became ruled records. Removing boxes is not a style preference here: three bordered boxes in a row is the layout a reader has already seen on a thousand generated pages, and it makes real evidence look templated. |
 | 2026-07-29 | Provenance before the claim | The assay strip states corpus, size, tokens and method above the findings table. Those numbers were buried mid-paragraph, which asked anyone checking a claim to parse prose to find what it was measured on. |
+| 2026-07-29 | The receipt rail is built, as margin rather than as a column | The shell widens by exactly the rail's width, so the text column moves by 8px and no reading measure changes. A second column that takes width from the text would have been a redesign; a margin is an addition. |
+| 2026-07-29 | The rail becomes the reader's receipt after a scan | A static rail is a sidebar. One that fills with the visitor's own filename, corpus hash and counts — beside ours, for comparison — is content the page could not have been generated with, which is the whole brief. |
+| 2026-07-29 | The rail may never hold the only copy of a fact | It is hidden below 78.5rem. Anything unique to it would silently disappear on a laptop. This is the rule that makes hiding it safe, and the reason the assay strip stays even though the rail repeats it. |
+| 2026-07-29 | The corpus hash is gated by `check-published-numbers.ts` | It is the one figure a reader can use to prove two reports name the same bytes, so a stale one would claim provenance for a corpus that was never scanned. Hard constraint 3 applies to it more than to anything else on the page. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
