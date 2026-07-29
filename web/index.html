@@ -291,6 +291,7 @@
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
+    <a href="#plain">Start here</a>
     <a href="#trust">Privacy</a>
     <a href="#method">Method</a>
     <a href="registry.html">Registry</a>
@@ -310,8 +311,10 @@
        "contamination" reads a headline they cannot answer, then instructions for a tool
        whose purpose nobody told them. -->
   <p class="says-what">Ingot checks whether an AI was tested on questions it had already seen.</p>
-  <p class="lede">Drop a corpus. It is scanned here, in this tab, on your machine — and every
-  match is shown with the surrounding text so you can judge it yourself.</p>
+  <p class="lede">If the test questions were in the AI's study material, its score measures
+  memory rather than ability. Drop the study material — the training data — and Ingot shows
+  you every test question hiding inside it, word for word, without the file ever leaving
+  this tab.</p>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; open devtools and watch</span></p>
 </header>
 
@@ -321,10 +324,16 @@
     <select id="bench"></select>
     <span class="muted" id="benchmeta"></span>
   </div>
+  <!-- The menu is meaningless to anyone who has not met these names. One line decodes it:
+       these are the exams, and this is what each one examines. -->
+  <p class="muted" style="margin:-.35rem 0 1rem">The exam to look for. GSM8K — maths word
+  problems · HumanEval — programming tasks · MMLU — general-knowledge questions. All three
+  are public exams AI models are graded on.</p>
 
   <div class="drop" id="drop">
-    <strong>Drop your corpus here</strong>
-    <p>JSONL, one record per line, with a <code>text</code> field. Any size — it streams.</p>
+    <strong>Drop training data here</strong>
+    <p>The text a model studied. JSONL format — one <code>{"text": …}</code> record per
+    line. Any size — it streams.</p>
     <div class="btns">
       <label class="btn primary" for="file">Choose a file</label>
       <button class="btn" id="try" type="button">Try a sample corpus</button>
@@ -336,6 +345,53 @@
   <div id="status"></div>
   <div id="out"></div>
 </div>
+
+<!-- The plain-words register. Everything below this section was written for a reader who
+     already knows what a benchmark is; this section is for everyone else, and it comes
+     first because a visitor who cannot answer the headline's question needs the metaphor
+     before the measurements. The expert layer is never dumbed down — it is preceded. -->
+<section id="plain">
+  <div class="wrap">
+    <div class="kicker">Start here</div>
+    <h3>The exam, the study pile, and the leak</h3>
+    <p class="sub">An AI model is graded like a student. It sits standard exams — called
+    <em>benchmarks</em> — and the scores are published and compared. But a model learns by
+    reading a mountain of text: its <em>training data</em>. The mountain is too big for
+    anyone to read, so nobody is sure whether the exam questions are already lying in it.
+    When they are, the model has effectively seen the test in advance, and its score
+    measures memory rather than ability. That is <em>contamination</em> — and a score alone
+    cannot reveal it.</p>
+    <p class="sub">Ingot reads the mountain for you. It takes one exam and one pile of text,
+    finds every place the exam's exact words appear in the pile, and shows you each one with
+    the words around it — so the verdict is a judgement you make with your own eyes, not a
+    percentage you have to trust.</p>
+    <ul class="plain">
+      <li><b>Pick the exam.</b> The menu above holds three public benchmarks: GSM8K is maths
+      word problems, HumanEval is programming tasks, MMLU is general-knowledge questions.</li>
+      <li><b>Drop the study material.</b> Any training-data file on your machine. It is read
+      here, in this tab — nothing is uploaded anywhere, and you can watch the network panel
+      to prove it.</li>
+      <li><b>Read the overlaps.</b> Every match is shown in its surrounding text. Some overlap
+      is innocent — famous quotes appear everywhere — which is exactly why you need to see the
+      words rather than a score.</li>
+    </ul>
+    <p class="sub" style="margin-top:1.4rem">No file to hand? <strong>Try a sample corpus</strong>
+    scans five ordinary documents and still finds two real matches — and reading those two
+    teaches the most important habit this tool asks of you: seen words are evidence, a
+    percentage is only a claim.</p>
+    <p class="sub">Five words this page keeps using:</p>
+    <div class="scroll">
+      <table>
+        <tr><th>term</th><th>plain meaning</th></tr>
+        <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
+        <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
+        <tr><td class="num">token</td><td>roughly one word</td></tr>
+        <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
+        <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
 
 <section id="trust">
   <div class="wrap">
@@ -356,6 +412,11 @@
   <div class="wrap">
     <div class="kicker">Method</div>
     <h3>Index the benchmark, stream the corpus once</h3>
+    <p class="sub">The obvious way to do this — take each of 14,042 exam questions and search
+    20 GB for it, one by one — would take days. Ingot memorises the exam instead: it
+    fingerprints every ten-word run the exam contains, then reads your file once, checking
+    each ten-word run that streams past against those fingerprints. One pass, no matter how
+    many questions.</p>
     <p class="sub">lm-evaluation-harness does the reverse — it indexes the corpus — and reports
     nine days on the Pile. The benchmark is the small side and fits in memory, so Ingot inverts
     it and makes one pass with a rolling hash.</p>
@@ -370,10 +431,11 @@
     number is still the right one for judging optimisation; it was the wrong one to put here.</p>
 
     <h3 style="margin-top:2.5rem">The field's 13-gram default is wrong</h3>
-    <p class="sub">Everyone matches on 13-grams because GPT-3 did in 2020. We could find no
-    systematic re-derivation since. Running 8 through 13 over a 1,000-item benchmark with 300
-    items planted in 6,000 documents, verbatim and again with roughly one word in eleven
-    dropped:</p>
+    <p class="sub">How many identical words in a row should count as a match? Too few and
+    ordinary language triggers it; too many and short questions can never match at all.
+    Everyone uses 13, because GPT-3 did in 2020, and we could find no systematic re-derivation
+    since. Running 8 through 13 over a 1,000-item benchmark with 300 items planted in 6,000
+    documents, verbatim and again with roughly one word in eleven dropped:</p>
     <div class="scroll">
       <table>
         <tr><th class="num">n</th><th class="num">verbatim</th><th class="num">edited copies</th><th class="num">false positives</th><th class="num">unscannable</th></tr>
@@ -404,8 +466,10 @@
   <div class="wrap">
     <div class="kicker">The registry</div>
     <h3>Three benchmarks against 21 GB of C4</h3>
-    <p class="sub">Everything scanned is public, so every number reproduces from the same files.
-    Every shard's URL and SHA-256 is published.</p>
+    <p class="sub">We ran the scanner ourselves: three public exams against C4, a public
+    snapshot of web text — the kind of pile real models train on. Everything scanned is
+    public, so every number reproduces from the same files. Every shard's URL and SHA-256 is
+    published. What it found teaches how to read every result this tool produces.</p>
     <!-- The provenance of a result, stated before the result. An ingot is a bar of metal
          stamped with its measured purity, and this is the stamp: what was scanned, how much
          of it, by which version, at which n. Prose buried these numbers mid-sentence; a

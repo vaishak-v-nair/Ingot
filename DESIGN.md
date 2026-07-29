@@ -29,6 +29,21 @@ percentage. Every design decision below serves that.
   leads with the working tool. That is the structural differentiator — **do not "fix" it
   by adding a hero section above the scanner.**
 
+## Voice: two registers
+
+The page teaches before it argues. The test reader is a smart 18-year-old who has never met
+the word "benchmark", and the metaphor that carries everything is **the exam**: benchmarks
+are exams, training data is the study pile, contamination is the exam leaking into the pile.
+
+- Every section opens in plain words and earns its jargon afterwards. A term of art gets its
+  plain meaning beside it at first use.
+- The `#plain` section ("Start here") owns the metaphor: three numbered steps and a five-term
+  glossary. New jargon anywhere on the page must either be decoded where it stands or added
+  to that glossary.
+- The plain layer is added **above** the expert layer, never instead of it. No measured number,
+  caveat or method detail is deleted to make room for accessibility — the expert reader lost
+  nothing in the comprehension pass and must lose nothing in future ones.
+
 ## Typography
 
 Self-hosted in `web/fonts/`, latin subset only, **42 KB for both**. Same-origin on purpose:
@@ -204,6 +219,9 @@ overlap, and that is the correct trade for the rail being droppable.
 - **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
   optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
   The specimen treatment proves the page can carry a change of pace; nowhere else does.
+- **The plain-words register exists only on the front page.** `about.html` and the generated
+  registry page still speak in one register, to experts. The Start-here treatment — metaphor
+  first, glossary, jargon decoded in place — should travel to both.
 - **Motion exists only on the front page.** `about.html` and the generated registry page are
   still static. The reveal, the kicker rule and the hero warmth should travel to both once
   the treatment has survived a few days of being looked at.
@@ -229,5 +247,6 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-29 | The rail becomes the reader's receipt after a scan | A static rail is a sidebar. One that fills with the visitor's own filename, corpus hash and counts — beside ours, for comparison — is content the page could not have been generated with, which is the whole brief. |
 | 2026-07-29 | The rail may never hold the only copy of a fact | It is hidden below 78.5rem. Anything unique to it would silently disappear on a laptop. This is the rule that makes hiding it safe, and the reason the assay strip stays even though the rail repeats it. |
 | 2026-07-29 | The corpus hash is gated by `check-published-numbers.ts` | It is the one figure a reader can use to prove two reports name the same bytes, so a stale one would claim provenance for a corpus that was never scanned. Hard constraint 3 applies to it more than to anything else on the page. |
+| 2026-07-29 | The page teaches before it argues | The site assumed its reader arrived knowing what a benchmark is, and for everyone else it was jargon from the first control. A comprehension pass added the plain register: the exam metaphor in the hero, a Start-here section with a three-step record and a five-term glossary, plain openers on the method sections, and de-jargoned tool labels. Nothing was dumbed down; it was preceded. |
 | 2026-07-29 | Motion: from "nothing" to "settling" | Supersedes the same-day minimal rule after the no-motion page was judged stiff. The fix is not decoration: every animation narrates measurement — settle, count, sweep, breathe — runs once, honours reduced-motion, and fails static. Bounce remains banned, and heat joined the palette as temperature rather than fill. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
