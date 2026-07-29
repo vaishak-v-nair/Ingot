@@ -143,13 +143,30 @@
   section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
   .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
   .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
-  .cards { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
-  .card { border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem; background: var(--card); }
+  /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
+     row is the single most recognisable generated-page layout there is, and these three
+     were the page's clearest example of it. The rules do the dividing; the boxes were only
+     ever decoration around content that already had structure. */
+  .cards { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+           border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .card { padding: 1.15rem 1.3rem 1.15rem 0; }
+  .card + .card { border-left: 1px solid var(--line); padding-left: 1.3rem; }
   .card b { display: block; font-family: var(--mono); font-size: 1.6rem; letter-spacing: -.03em; line-height: 1.1; }
-  .card span { display: block; margin-top: .45rem; font-size: .85rem; color: var(--dim); }
-  ul.plain { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
-  ul.plain li { border: 1px solid var(--line); border-radius: 10px; padding: .85rem 1rem; background: var(--card); font-size: .92rem; }
-  ul.plain b { color: var(--ember); }
+  .card span { display: block; margin-top: .55rem; font-size: .85rem; color: var(--dim); line-height: 1.5; }
+  /* The refusals as a numbered record. Four uniform bordered boxes were the one generic
+     moment left on the page; DESIGN.md had them flagged as an open item since the type
+     landed. The ember now lives in the numeral, so the eye finds each entry without a
+     border doing that work, and the counter makes the list read as a standard rather than
+     as four floating assertions. */
+  ul.plain { list-style: none; padding: 0; margin: 0; counter-reset: refusal;
+             border-top: 2px solid var(--ink); }
+  ul.plain li { counter-increment: refusal; position: relative;
+                padding: 1.1rem 0 1.1rem 2.9rem; border-bottom: 1px solid var(--line);
+                font-size: .92rem; color: var(--dim); }
+  ul.plain li::before { content: counter(refusal, decimal-leading-zero);
+                        position: absolute; left: 0; top: 1.18rem;
+                        font-family: var(--mono); font-size: .78rem; color: var(--ember); }
+  ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
   pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
         border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
   tr.win td { background: color-mix(in srgb, var(--hot) 9%, transparent); }

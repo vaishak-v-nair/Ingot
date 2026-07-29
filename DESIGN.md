@@ -126,15 +126,33 @@ benchmarks in `node_modules/.cache/ingot-bench`. Without it, every deploy re-dow
 from HuggingFace and a rate-limit there becomes a failed deploy of a site that did not
 change. It is a cache, so every failure path falls through to fetching.
 
+## Two widths, and only two
+
+Records span the full 54rem shell: the assay strip, tables, the findings record. Prose holds
+a 54–56ch measure. That contrast is deliberate and it is the whole layout system. What is
+*not* allowed is a third width — a block that resolves at some arbitrary point between the
+two, which is what made the page read as assembled rather than composed before the audit.
+
+## Cards
+
+There are none, and that is the rule. Three bordered boxes in a row is the most recognisable
+generated-page layout there is, and the page had two such grids. Both are now ruled records:
+dividing lines instead of fences, because the boxes were decoration around content that
+already had structure. If a card seems necessary, the content probably needs a rule, a
+numeral, or a measure — not a border.
+
 ## Open, not yet done
 
-- The four "What Ingot refuses to do" items are uniform bordered boxes — the one generic
-  moment on the page. Would be stronger as a numbered list with the ember lead-in, no box.
-- `about.html` keeps its molten-gradient h1. It now uses the same two faces, but it is a
-  more expressive page than `index.html` and the two have not been reconciled.
-- The results view still presents matches in a compact list. The strongest version makes
-  the matched passage the largest designed element on the page — a pull quote with the
-  matched span highlighted — since that is the product's whole thesis. Not built.
+- **The receipt rail.** The approved synthesis puts a sticky column beside the argument
+  carrying the live corpus hash, counts, and the "absence carries no information" caveat.
+  Mocked up as direction D and approved; not built. It is the remaining piece that fills
+  the right half of the page during reading rather than only during a record.
+- **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
+  optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
+  The specimen treatment proves the page can carry a change of pace; nowhere else does.
+- `about.html` keeps its molten-gradient h1. Palette, measure and type now match the rest
+  of the site, so this is the only remaining difference, and it is deliberate: a one-off
+  hero treatment on the one page that argues rather than measures.
 
 ## Decisions log
 
@@ -147,4 +165,7 @@ change. It is a cache, so every failure path falls through to fetching.
 | 2026-07-29 | Vercel is primary; the gates move out of the workflow | Superseded a same-day entry that made Pages the only host. That entry was right that an ungated second host is a liability and wrong about the fix: the problem was never *which* host, it was that the gates lived inside one host's workflow as inline bash. Extracting them to `check-site.ts` removes the objection entirely, and Vercel then wins on two things Pages cannot do — one dashboard with the other projects, and response headers. |
 | 2026-07-29 | CSP enforces the no-third-party-request claim | The claim was previously only asserted at build time. A header makes the browser enforce it, which is a stronger guarantee than a check the visitor has to trust. Only possible because the host can set headers. |
 | 2026-07-29 | GitHub Pages retired once Vercel was confirmed serving | Not before. Removing a working deployment on the assumption its replacement works is how a project ends up with no site at all. `ci.yml` keeps the tests and the numbers gate running on GitHub regardless of the host. |
+| 2026-07-29 | The matched passage is the largest element in a result | The results view rendered the percentage at 42px and the evidence at 15px, so the layout argued the opposite of the product. The first match is now the specimen at display scale; the rest stay compact. |
+| 2026-07-29 | No cards anywhere | Both card grids became ruled records. Removing boxes is not a style preference here: three bordered boxes in a row is the layout a reader has already seen on a thousand generated pages, and it makes real evidence look templated. |
+| 2026-07-29 | Provenance before the claim | The assay strip states corpus, size, tokens and method above the findings table. Those numbers were buried mid-paragraph, which asked anyone checking a claim to parse prose to find what it was measured on. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
