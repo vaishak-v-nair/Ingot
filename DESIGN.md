@@ -87,6 +87,24 @@ trust product undermines the trust.
 2. **No framework, no build step beyond `scripts/build-web.ts`.**
 3. **Numbers on any page must trace to `results/`.** `scripts/check-published-numbers.ts`
    gates this in CI across the README, the docs and `web/index.html`.
+4. **One build, one host.** `.github/workflows/pages.yml` is the only thing that publishes,
+   and every gate above runs inside it. A second host building the site independently would
+   serve pages that skipped all three — see the deployment note below.
+
+## Deployment
+
+`push to main` → GitHub Actions (fetch benchmarks from cache → build bundle and indexes →
+three gates) → GitHub Pages at <https://vaishak-v-nair.github.io/Ingot/>. Nothing else
+publishes. There is no `vercel.json`, no Netlify config, and no reference to any other host
+anywhere in the repository; `package.json` `homepage` and every link in the README and docs
+point at Pages.
+
+A second host is not a spare tyre here, it is a way to serve ungated pages. The whole claim
+of this project is that its published numbers trace to `results/` and that the page makes no
+third-party request — both of those are *checks that live in the workflow*, not properties of
+the HTML. A host that builds the site itself skips them and can serve a page that contradicts
+the one Pages serves, with no signal that it has. If a nicer URL is wanted, a `CNAME` on Pages
+gives that without a second build.
 
 ## Open, not yet done
 
@@ -106,3 +124,4 @@ trust product undermines the trust.
 | 2026-07-29 | Instrument Serif + JetBrains Mono, self-hosted | The system font stack was the only undesigned thing on the page. Self-hosting keeps the network panel empty. |
 | 2026-07-29 | Serif at weight 400, no negative tracking below h1 | The face has no bold and is narrow; the old grotesque's settings produced synthetic bold and closed counters. |
 | 2026-07-29 | Front page carries the C4 findings | The site advertised the old null result while the 21.33 GB scan and the report were invisible to visitors. |
+| 2026-07-29 | GitHub Pages is the only host | Pages was already serving the gated build; a second host was connected on the assumption that something extra was needed to deploy at all. It was not, and it published from the wrong directory with none of the three gates running. Custom domain via CNAME covers the one thing the alternative offered. |
