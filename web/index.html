@@ -225,6 +225,13 @@
   ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
   pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
         border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
+  /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
+     ink rule opens it, a hairline closes it, and the caption reads like a plate caption. */
+  .guide-film { margin: 2.2rem 0; border-top: 2px solid var(--ink);
+                border-bottom: 1px solid var(--line); padding: 1.2rem 0 1rem; }
+  .guide-film video { display: block; width: 100%; height: auto; background: var(--paper); }
+  .guide-film figcaption { margin-top: .8rem; font-family: var(--mono); font-size: .74rem;
+                           letter-spacing: .04em; color: var(--dim); }
   tr.win td { background: color-mix(in srgb, var(--hot) 9%, transparent); }
   /* Data rows warm faintly under the pointer. Rows that mix th and td are labels rather
      than records, and stay still. */
@@ -420,6 +427,20 @@
     it directly: five ordinary documents that still produce two real matches. Reading those
     two teaches the most important habit this tool asks of you: seen words are evidence, a
     percentage is only a claim.</p>
+    <!-- The guidance video. Click-to-play from a poster, so it costs zero bytes until
+         asked — the network panel stays empty on load, which is this page's claim. It
+         complements the tour rather than replacing it: the tour runs the real scanner,
+         this is for people who want to watch before touching anything. Self-hosted,
+         same-origin; the CSP's default-src 'self' already covers it. -->
+    <figure class="guide-film">
+      <video controls preload="none" playsinline
+             poster="media/guide-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-guide.webm" type="video/webm">
+        <source src="media/ingot-guide.mp4" type="video/mp4">
+      </video>
+      <figcaption>57 seconds, voiced and captioned: the exam, the leak, and the three
+      steps. Nothing plays or downloads until you press play.</figcaption>
+    </figure>
     <p class="sub">Five words this page keeps using:</p>
     <div class="scroll">
       <table>

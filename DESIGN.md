@@ -230,10 +230,11 @@ overlap, and that is the correct trade for the rail being droppable.
 - **The plain-words register exists only on the front page.** `about.html` and the generated
   registry page still speak in one register, to experts. The Start-here treatment — metaphor
   first, glossary, jargon decoded in place — should travel to both.
-- **The guidance video** (approved 2026-07-29): a HyperFrames-produced, voiced, captioned
-  walkthrough of purpose and use, self-hosted, click-to-play from a poster in Start-here.
-  Complements the tour rather than replacing it: the tour runs the real scanner, the video
-  is for people who want to watch before touching anything.
+- **The guidance video is built and live** (2026-07-29): 56.5s, voiced (Kokoro bf_emma) and
+  captioned, produced from the HyperFrames project in `video/ingot-guide/` (source committed;
+  re-render with `npm run render` there). Click-to-play from a poster in Start-here — zero
+  bytes until pressed. If the scan flow changes, the film's S4 steps and the tour's captions
+  both need the same edit; neither is gated yet.
 - `about.html` keeps its molten-gradient h1. Palette, measure and type now match the rest
   of the site, so this is the only remaining difference, and it is deliberate: a one-off
   hero treatment on the one page that argues rather than measures.
