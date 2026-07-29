@@ -44,3 +44,9 @@ Thumbs.db
 
 # results/ is deliberately NOT ignored. The measured numbers are the product.
 .gstack/
+
+# HyperFrames video project: source is committed, derived artifacts are not.
+video/ingot-guide/node_modules/
+video/ingot-guide/out/
+video/ingot-guide/snapshots/
+video/ingot-guide/.hyperframes/
