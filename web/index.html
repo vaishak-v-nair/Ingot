@@ -66,7 +66,12 @@
 
   nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
         background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
-  nav .wrap { display: flex; align-items: center; gap: 1.25rem; padding-top: .75rem; padding-bottom: .75rem; }
+  /* flex-wrap matters: seven items in a nowrap flex row have a min-content width of
+     ~430px, and on a 375px phone that forces the whole page to lay out at 434px and zoom
+     out 16%. Measured, not theoretical. The links wrap to a second line instead. */
+  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
+              padding-top: .75rem; padding-bottom: .75rem; }
+  nav a { padding: .25rem 0; }
   .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
            text-transform: uppercase; color: var(--gold); margin-right: auto; }
   nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
@@ -791,7 +796,7 @@ async function tourStep(i) {
   }
 }
 
-$('tour').addEventListener('click', () => {
+function tourStart() {
   if (tourAt >= 0) return;
   tourRing = document.createElement('div');
   tourRing.className = 'tour-ring';
@@ -807,8 +812,31 @@ $('tour').addEventListener('click', () => {
   tourCard.querySelector('.skip').addEventListener('click', tourStop);
   addEventListener('keydown', tourKey);
   addEventListener('resize', tourPlace);
+  // Taking the wheel back ends the tour. Programmatic scrollIntoView never fires wheel or
+  // touchmove, so these only trip on a real hand — the user scrolling away IS a dismissal,
+  // and a tour that fights the scrollbar is a hostage situation.
+  addEventListener('wheel', tourStop, { passive: true, once: true });
+  addEventListener('touchmove', tourStop, { passive: true, once: true });
   tourStep(0);
-});
+}
+
+$('tour').addEventListener('click', tourStart);
+
+/**
+ * First visit only: the demo introduces itself once, after the page has settled, and
+ * never again — the flag is written at auto-start, not completion, so even someone who
+ * skips it instantly is never re-hijacked. Krug's rule: sizzle in the user's way drains
+ * goodwill, so the invitation must be cheap to decline (Esc, Skip, or just scrolling)
+ * and must never repeat. A visitor who wants it back has the button.
+ */
+try {
+  if (!localStorage.getItem('ingot-tour-done')) {
+    setTimeout(() => {
+      localStorage.setItem('ingot-tour-done', '1');
+      if (tourAt < 0 && !document.querySelector('#out .hit')) tourStart();
+    }, 1600);
+  }
+} catch { /* storage disabled: never auto-run rather than run every visit */ }
 
 /**
  * The rail's live block. It sits above the published C4 receipt rather than replacing it,

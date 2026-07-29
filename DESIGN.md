@@ -230,9 +230,10 @@ overlap, and that is the correct trade for the rail being droppable.
 - **The plain-words register exists only on the front page.** `about.html` and the generated
   registry page still speak in one register, to experts. The Start-here treatment — metaphor
   first, glossary, jargon decoded in place — should travel to both.
-- **Motion exists only on the front page.** `about.html` and the generated registry page are
-  still static. The reveal, the kicker rule and the hero warmth should travel to both once
-  the treatment has survived a few days of being looked at.
+- **The guidance video** (approved 2026-07-29): a HyperFrames-produced, voiced, captioned
+  walkthrough of purpose and use, self-hosted, click-to-play from a poster in Start-here.
+  Complements the tour rather than replacing it: the tour runs the real scanner, the video
+  is for people who want to watch before touching anything.
 - `about.html` keeps its molten-gradient h1. Palette, measure and type now match the rest
   of the site, so this is the only remaining difference, and it is deliberate: a one-off
   hero treatment on the one page that argues rather than measures.
@@ -255,6 +256,11 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-29 | The rail becomes the reader's receipt after a scan | A static rail is a sidebar. One that fills with the visitor's own filename, corpus hash and counts — beside ours, for comparison — is content the page could not have been generated with, which is the whole brief. |
 | 2026-07-29 | The rail may never hold the only copy of a fact | It is hidden below 78.5rem. Anything unique to it would silently disappear on a laptop. This is the rule that makes hiding it safe, and the reason the assay strip stays even though the rail repeats it. |
 | 2026-07-29 | The corpus hash is gated by `check-published-numbers.ts` | It is the one figure a reader can use to prove two reports name the same bytes, so a stale one would claim provenance for a corpus that was never scanned. Hard constraint 3 applies to it more than to anything else on the page. |
+| 2026-07-29 | One navigation, on every page | Each page had grown its own nav dialect — seven links on index, three on about ("← Back to the scanner"), three different ones on registry. Failed the trunk test on every subpage. All pages now carry the same seven links in the same order, with `aria-current` marking the page you are on. |
+| 2026-07-29 | Subpages join the shell | Measured at 1904px, clicking Index → About jumped the whole site 300px right: the subpages had neither the wide shell nor the root scale. Nav and footer now widen to 76rem and the root scales past 94rem on all three pages; content stays a centered 54rem measure, which is how a document site should behave. |
+| 2026-07-29 | about.html and the registry are de-carded | The front page earned "no cards anywhere" while about.html kept five card grids — including the blacklisted colored-left-border pattern — and the registry boxed its evidence. All are now ruled records; the about page's warning boxes became stamped pull quotes in the display serif. |
+| 2026-07-29 | The tour auto-starts once per browser | First visit only, ~1.6s after load; flag written at auto-start so even instant skippers are never re-hijacked; Esc, Skip, or the user's own scroll ends it. Krug's forced-tour warning is honoured by making the dismissal free and the repetition impossible. |
+| 2026-07-29 | A guidance video joins Start-here | Supersedes the same-day "not a video" reasoning at the user's explicit direction, and narrows rather than reverses it: the tour remains the primary demo because it runs the real scanner; the video (HyperFrames, voiced, captioned, self-hosted, click-to-play) serves the visitor who wants to watch before touching anything. |
 | 2026-07-29 | The guided demo is the live scanner, not a video | A recording would rot the moment the page changed, weigh megabytes against a zero-network budget, and show a scan instead of doing one. "Watch it work" moves a gold ring across the real controls, runs the real sample scan at step three, and advances itself when the results exist. Always current, zero bytes of media, CSP untouched. |
 | 2026-07-29 | Favicon: an ingot as a data: URI | Gold trapezoid bar, inline SVG on all three pages. No request, no new CSP surface — `img-src` already allowed `data:`. Closes the open item recorded the same day. |
 | 2026-07-29 | The page teaches before it argues | The site assumed its reader arrived knowing what a benchmark is, and for everyone else it was jargon from the first control. A comprehension pass added the plain register: the exam metaphor in the hero, a Start-here section with a three-step record and a five-term glossary, plain openers on the method sections, and de-jargoned tool labels. Nothing was dumbed down; it was preceded. |

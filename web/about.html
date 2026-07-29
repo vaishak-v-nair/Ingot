@@ -44,14 +44,28 @@
     }
   }
   html { -webkit-text-size-adjust: 100%; }
+  /* The same ultra-wide scale rule as index.html, so the site scales as one composition.
+     Without it this page's left edge sat 300px right of the front page's at 1904px, and
+     clicking between them made the whole site jump sideways. */
+  @media (min-width: 94rem) {
+    html { font-size: clamp(16px, calc(16px + (100vw - 1504px) / 96), 19.5px); }
+  }
+  /* 1.0625rem is the 17px this page has always set, expressed against the root so the
+     ultra-wide scale reaches it. A px value here would opt the body text out of the scale
+     and shrink it relative to everything else. */
   body {
     margin: 0; background: var(--paper); color: var(--ink);
-    font-family: var(--sans); font-size: 17px; line-height: 1.6;
+    font-family: var(--sans); font-size: 1.0625rem; line-height: 1.6;
     overflow-x: hidden;
   }
   /* 54rem, the same shell as index.html and registry.html. It was 66rem, which put this
      page's left edge 92px further out than every other page at 1440. One site, one measure. */
   .wrap { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
+  /* Nav and footer join the front page's wide shell, so the one persistent element sits at
+     the same coordinates on every page. Content stays a centered 54rem measure. */
+  @media (min-width: 78.5rem) {
+    nav .wrap, footer .wrap { max-width: 76rem; }
+  }
   a { color: inherit; }
 
   /* ---------- hero ---------- */
@@ -100,62 +114,72 @@
   .kicker {
     font-family: var(--mono); font-size: .72rem; letter-spacing: .2em;
     text-transform: uppercase; color: var(--gold); margin-bottom: 1.1rem;
+    display: flex; align-items: center; gap: .7rem;
   }
+  .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
   .sub { color: var(--dim); max-width: 54ch; margin: 0 0 2.2rem; }
 
-  /* ---------- the hole ---------- */
-  .facts { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
-  .fact {
-    border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem; background: var(--card);
-    position: relative; overflow: hidden;
-  }
-  .fact::after {
-    content: ""; position: absolute; inset: auto 0 0 0; height: 3px;
-    background: linear-gradient(90deg, var(--gold-hot), transparent);
-  }
+  /* ---------- ruled records, not cards ----------
+     DESIGN.md: three bordered boxes in a row is the most recognisable generated-page
+     layout there is, and this page had five such grids while the front page had none.
+     Same fix as there: dividing rules instead of fences. A 2px ink rule opens the record,
+     a hairline closes it, and cells divide with left rules. */
+  .facts, .flow { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+                  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .flow { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .fact, .step { padding: 1.25rem 1.3rem 1.25rem 0; }
+  .fact + .fact, .step + .step { border-left: 1px solid var(--line); padding-left: 1.3rem; }
   .fact b { display: block; font-family: var(--mono); font-size: 2rem; letter-spacing: -.04em; line-height: 1.1; }
   .fact span { display: block; margin-top: .5rem; font-size: .9rem; color: var(--dim); }
 
+  /* The emphatic statement is a stamped pull quote, not a warning box. Set in the display
+     serif between its own rules, because a sentence this load-bearing earns the face. */
   .punch {
-    margin-top: 2.5rem; padding: 1.8rem; border-radius: 14px;
-    border: 1px solid color-mix(in srgb, var(--ember) 45%, var(--line));
-    background: color-mix(in srgb, var(--ember) 7%, var(--card));
-    font-size: clamp(1.1rem, 2.6vw, 1.5rem); font-weight: 560; letter-spacing: -.01em;
+    margin-top: 2.5rem; padding: 1.5rem 0;
+    border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(1.3rem, 2.9vw, 1.75rem); line-height: 1.35; letter-spacing: 0;
   }
 
-  /* ---------- flow ---------- */
-  .flow { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-  .step { border: 1px solid var(--line); border-radius: 14px; padding: 1.4rem; background: var(--card); }
   .step .n {
     font-family: var(--mono); font-size: .72rem; color: var(--gold); letter-spacing: .12em;
   }
-  .step h3 { margin: .5rem 0 .4rem; font-size: 1.05rem; font-weight: 620; }
+  .step h3 { margin: .5rem 0 .4rem; font-size: 1.05rem; font-weight: 600; }
   .step p { margin: 0; font-size: .92rem; color: var(--dim); }
 
   /* ---------- chart ---------- */
-  .chart-card { border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 1.6rem; }
+  /* A border around a figure is functional, like the front page's pre blocks — but it
+     shares their 10px radius, not a larger one of its own. */
+  .chart-card { border: 1px solid var(--line); border-radius: 10px; background: var(--card); padding: 1.6rem; }
   .chart-scroll { overflow-x: auto; }
   svg { display: block; max-width: 100%; height: auto; }
   .legend { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.1rem; font-size: .84rem; color: var(--dim); font-family: var(--mono); }
   .swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; vertical-align: -1px; margin-right: .4rem; }
 
-  .honest { margin-top: 2rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
-  .honest div { border-left: 3px solid var(--gold); padding: .3rem 0 .3rem 1rem; }
-  .honest b { font-family: var(--mono); }
+  /* The colored-left-border card is on the blacklist by name. Same ruled record. */
+  .honest { margin-top: 2rem; display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+            border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .honest div { padding: 1.1rem 1.2rem 1.1rem 0; }
+  .honest div + div { border-left: 1px solid var(--line); padding-left: 1.2rem; }
+  .honest b { font-family: var(--mono); color: var(--gold); }
   .honest p { margin: .3rem 0 0; font-size: .9rem; color: var(--dim); }
 
-  /* ---------- refusals ---------- */
-  .refuse { display: grid; gap: .8rem; }
-  .refuse li {
-    list-style: none; border: 1px solid var(--line); border-radius: 12px;
-    padding: 1rem 1.2rem; background: var(--card); font-size: .95rem;
-  }
-  .refuse b { color: var(--ember); }
-  ul.refuse { padding: 0; margin: 0; }
+  /* ---------- refusals: the numbered record, as on the front page ---------- */
+  ul.refuse { padding: 0; margin: 0; list-style: none; counter-reset: refusal;
+              border-top: 2px solid var(--ink); }
+  .refuse li { counter-increment: refusal; position: relative;
+               padding: 1.1rem 0 1.1rem 2.9rem; border-bottom: 1px solid var(--line);
+               font-size: .95rem; color: var(--dim); }
+  .refuse li::before { content: counter(refusal, decimal-leading-zero);
+                       position: absolute; left: 0; top: 1.18rem;
+                       font-family: var(--mono); font-size: .78rem; color: var(--ember); }
+  .refuse b { color: var(--ink); }
 
-  /* ---------- acts ---------- */
-  .acts { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); counter-reset: act; }
-  .act { border: 1px solid var(--line); border-radius: 14px; padding: 1.5rem; background: var(--card); }
+  /* ---------- acts: a ruled timeline, not three boxes ---------- */
+  .acts { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+          border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .act { padding: 1.4rem 1.4rem 1.4rem 0; }
+  .act + .act { border-left: 1px solid var(--line); padding-left: 1.4rem; }
   .act .badge {
     font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
     color: var(--paper); background: var(--ink); padding: .2rem .5rem; border-radius: 4px;
@@ -169,21 +193,45 @@
 
   nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
         background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
-  nav .wrap { display: flex; align-items: center; gap: 1.25rem; padding-top: .75rem; padding-bottom: .75rem; }
+  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
+              padding-top: .75rem; padding-bottom: .75rem; }
   nav .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
                text-transform: uppercase; color: var(--gold); margin-right: auto; }
-  nav a { font-size: .85rem; color: var(--dim); text-decoration: none; }
+  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
+          position: relative; transition: color .15s; padding: .25rem 0; }
   nav a:hover { color: var(--ink); }
+  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
+                 height: 1px; background: var(--gold); transition: right .18s ease; }
+  nav a:hover::after { right: 0; }
+  nav a[aria-current] { color: var(--ink); }
   .hero { padding-top: 4rem; }
+
+  /* ---------- motion, same contract as the front page ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .js section > .wrap, .js footer > .wrap {
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .65s ease-out, transform .65s ease-out; }
+    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
+    .js section > .wrap .kicker::before { width: 0; transition: width .6s ease .25s; }
+    .js section > .wrap.in .kicker::before { width: 1.9rem; }
+    .dot { animation: breathe 2.6s ease-in-out infinite; }
+  }
+  @keyframes breathe { 50% { opacity: .4; } }
 </style>
 </head>
 <body>
 
+<!-- The same navigation as every other page, in the same order. This page used to carry
+     its own three-link dialect, which failed the trunk test: nothing told you the site had
+     a Method or a Start-here, and the links sat in different places page to page. -->
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
-    <a href="index.html">&larr; Back to the scanner</a>
+    <a href="index.html#plain">Start here</a>
+    <a href="index.html#trust">Privacy</a>
+    <a href="index.html#method">Method</a>
     <a href="registry.html">Registry</a>
+    <a href="about.html" aria-current="page">About</a>
     <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
   </div>
 </nav>
@@ -356,5 +404,19 @@
   </div>
 </footer>
 
+<script type="module">
+// The same settle-in reveal as the front page, under the same contract: keyed on a .js
+// class this script adds, so a script that never runs costs the motion and not the page.
+const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+if (MOTION) {
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+}
+</script>
 </body>
 </html>

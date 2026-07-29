@@ -116,15 +116,30 @@ const html = `<!doctype html>
             --gold: #e0aa3e; --ok: #7fbf85; }
   }
   html { -webkit-text-size-adjust: 100%; }
+  /* The same ultra-wide scale and shell rules as the rest of the site, so the nav sits at
+     identical coordinates on every page and the composition grows past 94rem instead of
+     drowning in margins. */
+  @media (min-width: 94rem) {
+    html { font-size: clamp(16px, calc(16px + (100vw - 1504px) / 96), 19.5px); }
+  }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); overflow-x: hidden; }
   a { color: inherit; }
   .wrap { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
+  @media (min-width: 78.5rem) {
+    nav .wrap, footer .wrap { max-width: 76rem; }
+  }
   nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
         background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
-  nav .wrap { display: flex; align-items: center; gap: 1.25rem; padding-top: .75rem; padding-bottom: .75rem; }
+  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
+              padding-top: .75rem; padding-bottom: .75rem; }
   .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-right: auto; }
-  nav a { font-size: .85rem; color: var(--dim); text-decoration: none; }
+  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
+          position: relative; transition: color .15s; padding: .25rem 0; }
   nav a:hover { color: var(--ink); }
+  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
+                 height: 1px; background: var(--gold); transition: right .18s ease; }
+  nav a:hover::after { right: 0; }
+  nav a[aria-current] { color: var(--ink); }
   header { padding: 3rem 0 1rem; }
   h1 { font-family: var(--display); font-weight: 400;
        font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.06; margin: 0 0 .6rem; letter-spacing: -.015em; }
@@ -143,10 +158,20 @@ const html = `<!doctype html>
   th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
   th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; }
   td.num, th.num { font-family: var(--mono); }
-  .hit { border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; margin-bottom: .6rem; background: var(--card); }
+  /* Findings are a ruled record, exactly as on the front page. A border around each match
+     adds no information and makes the most important content on the site look templated. */
+  .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
   .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
   .quote { margin-top: .45rem; font-size: .92rem; color: var(--ink); }
-  mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px; }
+  mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px;
+         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* Motion, under the same contract as the rest of the site. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js section > .wrap, .js footer > .wrap {
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .65s ease-out, transform .65s ease-out; }
+    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
+  }
   pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
         border-radius: 10px; padding: 1rem; overflow-x: auto; }
   ul { color: var(--dim); }
@@ -158,7 +183,10 @@ const html = `<!doctype html>
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
-    <a href="index.html">Scanner</a>
+    <a href="index.html#plain">Start here</a>
+    <a href="index.html#trust">Privacy</a>
+    <a href="index.html#method">Method</a>
+    <a href="registry.html" aria-current="page">Registry</a>
     <a href="about.html">About</a>
     <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
   </div>
@@ -168,6 +196,11 @@ const html = `<!doctype html>
   <h1>Which benchmarks appear in which training corpora</h1>
   <p class="lede">A public record, scanned with ${esc(registry.scanner)}. Everything here is
   public, so every number can be re-derived from the same files.</p>
+  <!-- The verdict, before the tables. It used to sit three screens down, after two tables
+       a reader had to interpret unaided — the page buried its own conclusion. -->
+  <p class="plain"><strong>${totalFlagged} distinct items flagged of ${totalItems.toLocaleString()}
+  scanned — all ${totalFlagged} inspected, and none is contamination.</strong> Why that is the
+  finding, and not a disappointment, is explained under the evidence.</p>
   <pre>node scripts/fetch-benchmarks.ts &amp;&amp; node scripts/registry-scan.ts</pre>
 </header>
 
@@ -241,6 +274,20 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
   </div>
 </footer>
 
+<script type="module">
+// The same settle-in reveal as the rest of the site: keyed on a .js class this script
+// adds, so a script that never runs costs the motion and not the page.
+const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+if (MOTION) {
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+}
+</script>
 </body>
 </html>
 `;
