@@ -87,24 +87,43 @@ trust product undermines the trust.
 2. **No framework, no build step beyond `scripts/build-web.ts`.**
 3. **Numbers on any page must trace to `results/`.** `scripts/check-published-numbers.ts`
    gates this in CI across the README, the docs and `web/index.html`.
-4. **One build, one host.** `.github/workflows/pages.yml` is the only thing that publishes,
-   and every gate above runs inside it. A second host building the site independently would
-   serve pages that skipped all three — see the deployment note below.
+4. **Every host runs the same gates.** Gates 1–3 are *checks*, not properties of the HTML,
+   so a host that builds the site its own way would publish pages that passed none of them.
+   They therefore live in `scripts/check-site.ts` and `scripts/check-published-numbers.ts`,
+   and both hosts call the same two files. Adding a host means calling them, not
+   reimplementing them.
 
 ## Deployment
 
-`push to main` → GitHub Actions (fetch benchmarks from cache → build bundle and indexes →
-three gates) → GitHub Pages at <https://vaishak-v-nair.github.io/Ingot/>. Nothing else
-publishes. There is no `vercel.json`, no Netlify config, and no reference to any other host
-anywhere in the repository; `package.json` `homepage` and every link in the README and docs
-point at Pages.
+Two hosts, one build definition, identical gates:
 
-A second host is not a spare tyre here, it is a way to serve ungated pages. The whole claim
-of this project is that its published numbers trace to `results/` and that the page makes no
-third-party request — both of those are *checks that live in the workflow*, not properties of
-the HTML. A host that builds the site itself skips them and can serve a page that contradicts
-the one Pages serves, with no signal that it has. If a nicer URL is wanted, a `CNAME` on Pages
-gives that without a second build.
+| | build | gates |
+|---|---|---|
+| **Vercel** (primary) | `scripts/vercel-build.ts` via `vercel.json` | `check-site.ts` → `check-published-numbers.ts` |
+| **GitHub Pages** | `.github/workflows/pages.yml` | the same two scripts |
+
+Both fetch benchmarks, build the bundle and indexes, build the registry page, then refuse
+to publish if either gate exits non-zero. Run `node scripts/vercel-build.ts` locally to
+reproduce exactly what the host does.
+
+Vercel is primary because it sits alongside the other projects in one dashboard, and
+because **it can set response headers, which GitHub Pages cannot at all.** That turns the
+first hard constraint from a build-time assertion into something the browser enforces:
+`vercel.json` sends a CSP of `default-src 'self'` with `connect-src 'self'` and
+`font-src 'self'`, so a third-party request does not merely fail review — it fails to
+happen. For a product whose claim is *check this yourself*, having the browser enforce the
+claim is worth more than the build asserting it.
+
+The CSP was verified against the real page served with those exact headers: no forms
+(so `form-action 'none'` is safe), no inline event handlers, no `<base>`, and the report
+download is an `<a download href="blob:">` click, which is not subject to CSP fetch
+directives. A tracked reload logged zero violations.
+
+Vercel's build cache cannot be configured — the docs are explicit that you cannot choose
+what is cached, and what persists is `node_modules/**`. So `vercel-build.ts` stages the
+benchmarks in `node_modules/.cache/ingot-bench`. Without it, every deploy re-downloads MMLU
+from HuggingFace and a rate-limit there becomes a failed deploy of a site that did not
+change. It is a cache, so every failure path falls through to fetching.
 
 ## Open, not yet done
 
@@ -124,4 +143,5 @@ gives that without a second build.
 | 2026-07-29 | Instrument Serif + JetBrains Mono, self-hosted | The system font stack was the only undesigned thing on the page. Self-hosting keeps the network panel empty. |
 | 2026-07-29 | Serif at weight 400, no negative tracking below h1 | The face has no bold and is narrow; the old grotesque's settings produced synthetic bold and closed counters. |
 | 2026-07-29 | Front page carries the C4 findings | The site advertised the old null result while the 21.33 GB scan and the report were invisible to visitors. |
-| 2026-07-29 | GitHub Pages is the only host | Pages was already serving the gated build; a second host was connected on the assumption that something extra was needed to deploy at all. It was not, and it published from the wrong directory with none of the three gates running. Custom domain via CNAME covers the one thing the alternative offered. |
+| 2026-07-29 | Vercel is primary; the gates move out of the workflow | Superseded a same-day entry that made Pages the only host. That entry was right that an ungated second host is a liability and wrong about the fix: the problem was never *which* host, it was that the gates lived inside one host's workflow as inline bash. Extracting them to `check-site.ts` removes the objection entirely, and Vercel then wins on two things Pages cannot do — one dashboard with the other projects, and response headers. |
+| 2026-07-29 | CSP enforces the no-third-party-request claim | The claim was previously only asserted at build time. A header makes the browser enforce it, which is a stronger guarantee than a check the visitor has to trust. Only possible because the host can set headers. |

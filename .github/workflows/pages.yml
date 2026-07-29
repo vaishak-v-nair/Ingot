@@ -57,26 +57,15 @@ jobs:
       - name: Build the registry page
         run: node scripts/build-registry-page.ts
 
+      # Was inline bash here, which made the gate a property of this workflow rather than
+      # of the site — a second host building the same repository would have published
+      # pages that passed none of it. It is scripts/check-site.ts so every host runs the
+      # identical check and so it can be run locally before pushing.
       - name: Check the site is complete before publishing it
-        run: |
-          set -euo pipefail
-          for f in web/index.html web/about.html web/registry.html web/ingot.js \
-                   web/sample-corpus.jsonl web/indexes/mmlu.idx.bin.gz \
-                   web/indexes/gsm8k.idx.bin.gz web/indexes/humaneval.idx.bin.gz \
-                   web/fonts/instrument-serif-400.woff2 web/fonts/jetbrains-mono-400.woff2; do
-            test -s "$f" || { echo "::error::missing or empty: $f"; exit 1; }
-          done
-          grep -q 'id="drop"' web/index.html
+        run: node scripts/check-site.ts
 
-          # The privacy claim is that this page makes no third-party request. A CDN font
-          # or script slipping in would break it silently and nobody would notice from a
-          # rendered page, so it is asserted here instead.
-          if grep -REn '(src|href)="https?://' web/index.html web/about.html \
-               | grep -v 'github\.com'; then
-            echo "::error::a page references an external resource; the network panel must stay empty"
-            exit 1
-          fi
-          echo "site ok, no external resources"
+      - name: Check every published figure still traces to results/
+        run: node scripts/check-published-numbers.ts
 
       # Measured, not assumed: enablement:true was tried and GitHub refused it with
       # "Resource not accessible by integration" on POST /repos/{owner}/{repo}/pages.
