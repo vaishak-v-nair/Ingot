@@ -53,6 +53,11 @@
      section-heading size closes the counters up. The h1 can carry -.015em because at
      59px there is room; a 28px heading cannot. */
   h3 { font-family: var(--display); font-weight: 400; letter-spacing: 0; }
+  /* The sentence that says what this is. Full ink and a size above body copy, because it
+     is the definition rather than supporting text: set in --dim at body size it reads as a
+     caption under the headline and the eye skips it, which defeats the point of adding it. */
+  .says-what { font-size: clamp(1.12rem, 2.4vw, 1.34rem); line-height: 1.45; max-width: 40ch;
+               margin: 0 0 .85rem; color: var(--ink); }
   .lede { color: var(--dim); max-width: 46ch; margin: 0 0 .8rem; font-size: 1.02rem; }
   .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .76rem;
              border: 1px solid var(--line); border-radius: 999px; padding: .42rem .8rem; background: var(--card); }
@@ -132,6 +137,12 @@
 
 <header class="wrap">
   <h1>Is your benchmark inside your training data?</h1>
+  <!-- The h1 is a question, and a question only works on someone who already knows the
+       problem. This line is for everyone else: it says what the product is before the
+       page says how to use it. Without it a visitor who has not met the word
+       "contamination" reads a headline they cannot answer, then instructions for a tool
+       whose purpose nobody told them. -->
+  <p class="says-what">Ingot checks whether an AI was tested on questions it had already seen.</p>
   <p class="lede">Drop a corpus. It is scanned here, in this tab, on your machine — and every
   match is shown with the surrounding text so you can judge it yourself.</p>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; open devtools and watch</span></p>
