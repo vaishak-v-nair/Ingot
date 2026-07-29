@@ -87,6 +87,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot registry — which benchmarks appear in which corpora</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239a6a00'/%3E%3C/svg%3E">
 <meta name="description" content="A public record of which benchmarks appear inside which public training corpora, reproducible from the same files.">
 <style>
   /* Same two faces the rest of the site serves, from the same origin. This page is
