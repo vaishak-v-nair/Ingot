@@ -52,9 +52,18 @@ export async function scanFile(
   const started = performance.now();
   const session = new ScanSession(index, { maxCorpusDocFrequency: options.maxCorpusDocFrequency });
 
-  const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
-  let carry = '';
+  // Bytes are counted BEFORE the decoder: a decoded string's .length is UTF-16 code
+  // units, and dividing that by the file's byte size makes the progress bar (and the
+  // ETA built on it) wrong by up to 3× on CJK-heavy corpora.
   let bytesRead = 0;
+  const byteCounter = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      bytesRead += chunk.byteLength;
+      controller.enqueue(chunk);
+    },
+  });
+  const reader = file.stream().pipeThrough(byteCounter).pipeThrough(new TextDecoderStream()).getReader();
+  let carry = '';
   // A line the parser cannot read is skipped, and skipped lines must reach the report:
   // a file where every line skips is an unread file, and an unread file that presented
   // as a clean scan would be the exact silent failure this project documents.
@@ -68,7 +77,6 @@ export async function scanFile(
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    bytesRead += value.length;
     carry += value;
 
     let newlineAt = carry.indexOf('\n');

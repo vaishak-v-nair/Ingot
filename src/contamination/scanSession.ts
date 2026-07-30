@@ -85,6 +85,10 @@ export class ScanSession {
 
   corpusDocs = 0;
   corpusTokens = 0;
+  /** Text slots spent on runs that can still survive the frequency filter. */
+  private survivorTextCaptured = 0;
+  /** Text slots spent on runs already certain to be dropped (feeds droppedSamples). */
+  private droppedTextCaptured = 0;
 
   constructor(index: NgramIndex, options: SessionOptions = {}) {
     this.index = index;
@@ -122,9 +126,21 @@ export class ScanSession {
           continue;
         }
         // Evidence is captured now, because the text is only available on this pass.
-        // Whether it survives is decided once document frequencies are known.
+        // Whether it survives is decided once document frequencies are known — but
+        // frequencies only grow, so a run whose rarest matched gram is ALREADY past the
+        // threshold is certain to be dropped. Text slots are allocated by that certainty:
+        // possible survivors draw from the deep pool, certain drops from a smaller one
+        // that feeds droppedSamples. Without this split, the drops-dominate regime at web
+        // scale fills every slot with future discards, and a genuine leak found late in a
+        // 20 GB scan is counted but has no words to show.
         let hit: ContaminationHit | null = null;
-        if (this.provisional.length < MAX_STORED_HITS * 4) {
+        let rarestNow = Number.POSITIVE_INFINITY;
+        for (const key of run.keys) rarestNow = Math.min(rarestNow, this.gramDocCount.get(key) ?? 1);
+        const certainDrop = rarestNow > this.maxDocFrequency;
+        const wantText = certainDrop
+          ? this.droppedTextCaptured < MAX_STORED_HITS
+          : this.survivorTextCaptured < MAX_STORED_HITS * 4;
+        if (wantText) {
           const last = Math.min(count - 1, run.end + n - 1);
           const ctxFirst = Math.max(0, run.start - CONTEXT_TOKENS);
           const ctxLast = Math.min(count - 1, last + CONTEXT_TOKENS);
@@ -137,6 +153,8 @@ export class ScanSession {
             contextBefore: text.slice(starts[ctxFirst], starts[run.start]),
             contextAfter: text.slice(ends[last], ends[ctxLast]),
           };
+          if (certainDrop) this.droppedTextCaptured++;
+          else this.survivorTextCaptured++;
         }
         this.provisional.push({ run, hit });
       }

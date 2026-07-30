@@ -10,10 +10,16 @@ import { loadIndexFromBytes, scanFile } from './browserScan.ts';
  * no cooperative flags, nothing to leak, the thread simply ends.
  */
 self.onmessage = async (e: MessageEvent) => {
-  const { indexBytes, file } = e.data as { indexBytes: ArrayBuffer; file: File };
+  const { indexBytes, file, command } = e.data as {
+    indexBytes: ArrayBuffer;
+    file: File;
+    /** The reproducible invocation for the receipt — the page knows the benchmark id. */
+    command?: string;
+  };
   try {
     const index = await loadIndexFromBytes(new Uint8Array(indexBytes));
     const report = await scanFile(index, file, {
+      command,
       onProgress: (docs, tokens, bytesRead) =>
         self.postMessage({ type: 'progress', docs, tokens, bytesRead }),
     });

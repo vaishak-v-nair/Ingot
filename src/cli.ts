@@ -219,6 +219,12 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
   if (exact.droppedGeneric) {
     lines.push(`    ${exact.droppedGeneric} match(es) dropped as ordinary language by corpus frequency`);
   }
+  if (report.load && report.load.skipped > 0) {
+    lines.push(
+      `    ${report.load.skipped.toLocaleString()} of ${report.load.totalLines.toLocaleString()} line(s)` +
+        ` skipped as unreadable — reported rather than silently dropped`,
+    );
+  }
   if (near.unavailableReason) lines.push(`    near-duplicate tier: ${near.unavailableReason}`);
   lines.push('');
 
@@ -278,6 +284,23 @@ export async function runContaminate(argv: string[]): Promise<number> {
     maxCorpusDocFrequency: maxDocFreq,
     command,
   });
+
+  // Zero readable documents is a refusal, never a clean result — the same contract the
+  // browser enforces. This is the path that feeds the published registry, so exiting 0
+  // here with "0 of N items appear" would be the exact silent failure the report
+  // documents. Refuse loudly and exit non-zero.
+  if (report.corpusDocs === 0) {
+    const load = report.load ?? { totalLines: 0, skipped: 0 };
+    process.stderr.write(
+      `\n  REFUSED — this corpus was not scanned.\n` +
+        (load.totalLines === 0
+          ? `  The file is empty: no lines to read.\n`
+          : `  None of its ${load.totalLines.toLocaleString()} line(s) could be read as a JSONL record` +
+            ` (one {"text": …} object per line); ${load.skipped.toLocaleString()} were skipped.\n`) +
+        `  Nothing was checked, so this is not a clean result.\n\n`,
+    );
+    process.exit(2);
+  }
 
   const jsonPath = flags.get('json');
   if (jsonPath) {

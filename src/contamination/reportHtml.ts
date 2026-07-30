@@ -46,10 +46,33 @@ export function renderContaminationReport(report: ContaminationReport): string {
           .join('\n')
       : '';
 
+  // Truthful at the cap: the JSON report is this same object, so matches whose text was
+  // never retained are in neither artifact. Saying "the full list is in the JSON" past
+  // the cap was a lie this template used to tell.
   const truncated =
     exact.totalHits > exact.hits.length
-      ? `    <p class="note">${num(exact.totalHits - exact.hits.length)} further match(es) were found and are not
-      shown here. The full list is in the JSON report.</p>`
+      ? `    <p class="note">${num(exact.totalHits - exact.hits.length)} further match(es) were counted beyond the
+      ${num(exact.hits.length)} whose text is stored here. They are in every total above; their text was not
+      retained. The JSON report carries the same ${num(exact.hits.length)} stored matches.</p>`
+      : '';
+
+  const droppedSection =
+    (exact.droppedGeneric ?? 0) > 0 && exact.droppedSamples?.length
+      ? `
+  <h2>Dropped as ordinary language — read them</h2>
+  <p class="note">${
+    exact.droppedSamples.length < (exact.droppedGeneric ?? 0)
+      ? `The first ${num(exact.droppedSamples.length)} of ${num(exact.droppedGeneric ?? 0)} discards; the rest are counted but their text was not retained.`
+      : `All ${num(exact.droppedGeneric ?? 0)} discards, in full.`
+  } "Dropped" is itself a judgement, and this section is how you check it.</p>
+${exact.droppedSamples
+  .map(
+    (h) => `      <div class="hit">
+        <code>${esc(h.benchmarkItemId)} &rarr; ${esc(h.corpusDocId)}${h.corpusDocFrequency ? ` &middot; in ${num(h.corpusDocFrequency)} docs` : ''}</code>
+        <p class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</p>
+      </div>`,
+  )
+  .join('\n')}`
       : '';
 
   const notChecked =
@@ -123,7 +146,19 @@ export function renderContaminationReport(report: ContaminationReport): string {
   <h1>${esc(report.benchmark)} in ${esc(report.corpus)}</h1>
   <p class="sub">Contamination scan · ${esc(r.generatedAt)} · ${esc(r.scannerVersion)}</p>
 
-  <div class="verdict">
+  ${
+    report.corpusDocs === 0
+      ? `<div class="verdict" style="border-color: var(--bad)">
+    <div class="big dirty">refused</div>
+    <div class="label">this corpus was not scanned</div>
+    <p style="margin:.9rem 0 0">${
+      (report.load?.totalLines ?? 0) === 0
+        ? 'The file is empty — there were no lines to read.'
+        : `None of its ${num(report.load?.totalLines ?? 0)} line(s) could be read as a JSONL record
+    (one {&quot;text&quot;: …} object per line); ${num(report.load?.skipped ?? 0)} were skipped.`
+    } Nothing was checked, so this is not a clean result.</p>
+  </div>`
+      : `<div class="verdict">
     <div class="big ${clean ? 'clean' : 'dirty'}">${num(exact.itemsHit)}</div>
     <div class="label">of ${num(exact.itemsTotal)} benchmark items appear in this corpus</div>
     <p style="margin:.9rem 0 0">${
@@ -131,7 +166,8 @@ export function renderContaminationReport(report: ContaminationReport): string {
         ? 'No verbatim overlap was found. That is a result rather than the absence of one: every item that could be checked was checked, and the ones that could not are named below.'
         : 'Read the matches below before concluding anything. Canonical text with one natural phrasing looks identical to leakage in any count, and only the words tell you which this is.'
     }</p>
-  </div>
+  </div>`
+  }
 
   <h2>What was checked</h2>
   <div class="scroll"><table>
@@ -139,7 +175,11 @@ export function renderContaminationReport(report: ContaminationReport): string {
     <tr><th>corpus</th><td>${esc(report.corpus)} · ${num(report.corpusDocs)} documents · ${num(report.corpusTokens)} tokens</td></tr>
     <tr><th>matches kept</th><td>${num(exact.totalHits)}</td></tr>
     <tr><th>dropped as ordinary language</th><td>${num(exact.droppedGeneric ?? 0)}</td></tr>
-    <tr><th>could not be checked</th><td>${num(uncheckable)} item${uncheckable === 1 ? '' : 's'}</td></tr>
+    <tr><th>could not be checked</th><td>${num(uncheckable)} item${uncheckable === 1 ? '' : 's'}</td></tr>${
+      report.load && report.load.skipped > 0
+        ? `\n    <tr><th>lines skipped</th><td>${num(report.load.skipped)} of ${num(report.load.totalLines)} — unreadable as records, reported rather than silently dropped</td></tr>`
+        : ''
+    }
     <tr><th>scan time</th><td>${(report.elapsedMs / 1000).toFixed(1)}s</td></tr>${
       near?.unavailableReason ? `\n    <tr><th>near-duplicate tier</th><td>${esc(near.unavailableReason)}</td></tr>` : ''
     }
@@ -154,6 +194,7 @@ ${evidence}
 ${truncated}`
     : ''
 }
+${droppedSection}
 ${notChecked}
 
   <h2>Receipt — reproduce this without asking anyone</h2>

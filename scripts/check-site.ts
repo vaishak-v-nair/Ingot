@@ -31,6 +31,7 @@ const REQUIRED = [
   'web/about.html',
   'web/registry.html',
   'web/ingot.js',
+  'web/scan.worker.js',
   'web/sample-corpus.jsonl',
   'web/indexes/mmlu.idx.bin.gz',
   'web/indexes/gsm8k.idx.bin.gz',

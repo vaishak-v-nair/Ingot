@@ -91,6 +91,11 @@ export async function scanCorpus(
   // file they concatenate to — which is the only way a sharded corpus and a whole one can
   // be compared. Both hashes accumulate across the whole sequence for the same reason.
   let readBytes = 0;
+  // Same accounting as the browser path: a corpus where every line skips must surface as
+  // an unread corpus, never as a clean scan. The CLI feeds the published registry, which
+  // makes it the worst possible place for the green-zero silent failure.
+  let totalLines = 0;
+  let skippedLines = 0;
   for (const path of paths) {
     const lines = openLines(path, (n) => {
       readBytes += n;
@@ -102,9 +107,10 @@ export async function scanCorpus(
         if (trimmed.length === 0) continue;
         fullHasher.update(trimmed);
         portable.add(trimmed);
+        totalLines++;
 
         const parsed = parseCorpusLine(trimmed, session.corpusDocs + 1, options.textField, options.idField);
-        if (!parsed) continue;
+        if (!parsed) { skippedLines++; continue; }
 
         session.addDocument(parsed.docId, parsed.text);
 
@@ -124,7 +130,7 @@ export async function scanCorpus(
   const corpusBytes = single ? statSync(paths[0]).size : readBytes;
   const name = options.corpusName ?? (paths.length === 1 ? basename(paths[0]) : `${basename(paths[0])} +${paths.length - 1} more`);
 
-  return session.finish({
+  const report = session.finish({
     corpusName: name,
     corpusHash: await portable.digest(corpusBytes),
     corpusHashFull: fullHasher.digest('hex'),
@@ -133,4 +139,6 @@ export async function scanCorpus(
     command: options.command ?? `node src/cli.ts contaminate --index <index> --corpus ${name}`,
     elapsedMs: Date.now() - started,
   });
+  report.load = { totalLines, skipped: skippedLines };
+  return report;
 }
