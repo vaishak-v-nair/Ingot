@@ -144,6 +144,8 @@ const html = `<!doctype html>
   h1 { font-family: var(--display); font-weight: 400;
        font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.06; margin: 0 0 .6rem; letter-spacing: -.015em; }
   .lede { color: var(--dim); max-width: 52ch; margin: 0 0 1rem; }
+  /* The focus contract, same token as the front page. */
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   section { padding: 2.5rem 0; border-top: 1px solid var(--line); }
   /* No negative tracking at this size. Instrument Serif is narrow already; the -.02em that
      suited the old grotesque closes its counters up. Only h1 has room for -.015em. */
@@ -183,7 +185,7 @@ const html = `<!doctype html>
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
-    <a href="index.html#plain">Start here</a>
+    <a href="index.html#plain">What is this?</a>
     <a href="index.html#trust">Privacy</a>
     <a href="index.html#method">Method</a>
     <a href="registry.html" aria-current="page">Registry</a>
@@ -207,6 +209,9 @@ const html = `<!doctype html>
 <section>
   <div class="wrap">
     <h2>Results at n=${DEFAULT_N}, the Ingot default</h2>
+    <p class="plain">In plain words: n=${DEFAULT_N} means ${DEFAULT_N} identical words in a row is
+    what counts as a match, and an <em>unscannable</em> item is one too short to ever produce a
+    match at that length — named, never silently skipped.</p>
     <p>${registry.benchmarks.length} benchmarks against ${registry.corpora.length} corpora.
     <strong>${totalFlagged} distinct benchmark items flagged out of
     ${totalItems.toLocaleString()}</strong>${flagRows !== totalFlagged ? `, appearing as ${flagRows} rows below because an item found in two corpora is one finding, not two` : ''}.</p>

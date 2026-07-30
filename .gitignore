@@ -15,6 +15,7 @@ dist/
 
 # Build artifacts from scripts/build-web.ts and build-registry-page.ts
 web/ingot.js
+web/scan.worker.js
 web/registry.html
 # Note the trailing /*, not /. Excluding the directory itself makes the negation below
 # unreachable: git never descends into an ignored directory to reconsider a file.

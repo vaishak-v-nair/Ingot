@@ -139,7 +139,24 @@
   progress::-moz-progress-bar { background: linear-gradient(90deg, var(--gold), var(--hot)); }
   #status { font-family: var(--mono); font-size: .8rem; color: var(--dim); min-height: 1.4em; margin-top: .5rem; }
 
-  .verdict { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 1.5rem; margin: 1.25rem 0; }
+  /* The verdict is a ruled stamp, not a card: the record opens with 4px of ink the way
+     the assay does, and the number sits on the rule. The last boxes died here. */
+  .verdict { border: 0; border-radius: 0; background: none; border-top: 4px solid var(--ink);
+             border-bottom: 1px solid var(--line); padding: 1.3rem 0 1.35rem; margin: 1.5rem 0; }
+  /* Refusals are designed, not dumped: an ember rule, the cause in plain words, one
+     action. For a tool whose brand is disciplined refusal, these are the most on-brand
+     screens it owns. */
+  .refusal { border-top: 4px solid var(--ember); border-bottom: 1px solid var(--line);
+             padding: 1.2rem 0 1.3rem; margin: 1.25rem 0; }
+  .refusal b { display: block; font-size: 1.05rem; margin-bottom: .4rem; }
+  .refusal p { margin: 0; color: var(--dim); max-width: 56ch; }
+  .refusal .linklike { margin-top: .7rem; }
+  .linklike { background: none; border: 0; padding: 0; font: inherit; font-size: .88rem;
+              color: var(--gold); text-decoration: underline; text-underline-offset: 3px;
+              cursor: pointer; }
+  .samplelink { margin: .65rem 0 0; font-size: .85rem; color: var(--dim); }
+  /* The focus contract: the gold rule, drawn around whatever the keyboard is on. */
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .big { font-family: var(--mono); font-size: 2.6rem; line-height: 1; font-weight: 600; }
   .big.clean { color: var(--ok); } .big.dirty { color: var(--bad); }
   .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
@@ -327,9 +344,14 @@
   .tour-ring { position: absolute; z-index: 50; pointer-events: none;
                border: 2px solid var(--gold); border-radius: 12px;
                box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--paper) 62%, transparent); }
+  /* A ruled annotation, not a popover: paper ground, ink rule, no radius, no shadow —
+     the page's own dialect. The ring and the dimming carry the focus. */
   .tour-card { position: absolute; z-index: 51; width: min(24rem, calc(100vw - 2rem));
-               background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-               padding: 1rem 1.15rem 1.05rem; box-shadow: 0 10px 32px rgba(0,0,0,.18); }
+               background: var(--paper); border: 0; border-radius: 0;
+               border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+               padding: .9rem 1.15rem 1rem; }
+  .tour-card .esc { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em;
+                    color: var(--dim); margin-left: auto; align-self: center; }
   .tour-card .step { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em;
                      text-transform: uppercase; color: var(--gold); margin-bottom: .45rem; }
   .tour-card p { margin: 0 0 .8rem; font-size: .93rem; line-height: 1.5; }
@@ -348,7 +370,7 @@
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
-    <a href="#plain">Start here</a>
+    <a href="#plain">What is this?</a>
     <a href="#trust">Privacy</a>
     <a href="#method">Method</a>
     <a href="registry.html">Registry</a>
@@ -368,7 +390,7 @@
        "contamination" reads a headline they cannot answer, then instructions for a tool
        whose purpose nobody told them. -->
   <p class="says-what">Ingot checks whether an AI was tested on questions it had already seen.</p>
-  <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; open devtools and watch</span></p>
+  <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; press F12 and watch the network stay empty</span></p>
 </header>
 
 <div class="wrap tool">
@@ -386,25 +408,25 @@
     <strong>Drop training data here</strong>
     <p>JSONL — one <code>{"text": …}</code> record per line. Any size — it streams.</p>
     <div class="btns">
-      <label class="btn primary" for="file">Choose a file</label>
-      <button class="btn" id="try" type="button">Try a sample corpus</button>
-      <button class="btn" id="tour" type="button">Watch it work — no file needed</button>
+      <button class="btn primary" id="tour" type="button">Watch it work — no file needed</button>
+      <label class="btn" for="file">Choose a file</label>
     </div>
-    <input type="file" id="file" accept=".jsonl,.json,.txt">
+    <p class="samplelink"><button class="linklike" id="try" type="button">or scan the sample corpus directly</button></p>
+    <input type="file" id="file" accept=".jsonl,.json">
   </div>
 
   <progress id="bar" max="100" value="0" hidden></progress>
+  <button class="linklike" id="cancel" type="button" hidden>cancel the scan</button>
   <div id="status"></div>
   <div id="out"></div>
 </div>
 
 <!-- The plain-words register. Everything below this section was written for a reader who
-     already knows what a benchmark is; this section is for everyone else, and it comes
-     first because a visitor who cannot answer the headline's question needs the metaphor
-     before the measurements. The expert layer is never dumbed down — it is preceded. -->
+     already knows what a benchmark is; this section is for everyone else, sitting directly
+     beneath the tool it decodes. The expert layer is never dumbed down — it is preceded. -->
 <section id="plain">
   <div class="wrap">
-    <div class="kicker">Start here</div>
+    <div class="kicker">What is this?</div>
     <h3>The exam, the study pile, and the leak</h3>
     <p class="sub">An AI is graded by standard exams — <em>benchmarks</em>. It learns from a
     mountain of text — its <em>training data</em>. If the exam questions are already in the
@@ -432,19 +454,20 @@
       <figcaption>57 seconds, voiced and captioned. Nothing plays or downloads until you
       press play.</figcaption>
     </figure>
-    <details class="more">
-      <summary>Five words this page keeps using</summary>
-      <div class="scroll">
-        <table>
-          <tr><th>term</th><th>plain meaning</th></tr>
-          <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
-          <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
-          <tr><td class="num">token</td><td>roughly one word</td></tr>
-          <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
-          <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
-        </table>
-      </div>
-    </details>
+    <!-- Open, not folded. The folds hold expert depth; this table is the decoder ring for
+         the exact reader who would never guess a gold line hides definitions. -->
+    <p class="sub" style="margin:1.6rem 0 .6rem">Six words this page keeps using:</p>
+    <div class="scroll">
+      <table>
+        <tr><th>term</th><th>plain meaning</th></tr>
+        <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
+        <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
+        <tr><td class="num">token</td><td>roughly one word</td></tr>
+        <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
+        <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
+        <tr><td class="num">canonical</td><td>famous text the whole world quotes — it matches, but it is not leakage</td></tr>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -458,7 +481,11 @@
       <div class="card"><b>0</b><span>bytes of your corpus sent anywhere. There is no server to send them to.</span></div>
       <div class="card"><b>same code</b><span>as the command line runs, so a scan here and a scan in CI give the same numbers for the same bytes. A test asserts it.</span></div>
       <div class="card"><b>hashes only</b><span>in the published benchmark indexes — one-way hashes and item ids, never benchmark text.</span></div>
+      <div class="card"><b>enforced</b><span>the page ships <code>connect-src 'self'</code> — the browser itself refuses to send data anywhere else. Check the response headers. Or pick the exam, go offline, and scan.</span></div>
     </div>
+    <p class="sub" style="margin:1.1rem 0 0">Never dropping a confidential corpus in a browser? Same
+    scanner, same numbers, on your terminal:
+    <code>npx ingot-scan contaminate --index gsm8k --corpus your-corpus.jsonl</code></p>
   </div>
 </section>
 
@@ -542,8 +569,20 @@
     </div>
     <p class="sub" style="margin-top:1.4rem"><strong>"2.4% of MMLU is contaminated in C4" is wrong,
     and that is the finding.</strong> We inspected 200 retained matches and found no contamination —
-    we found NATO Article 5, Patrick Henry, the Fifth Amendment. MMLU quotes famous documents; web
-    text contains them. The overlap is exact, reproducible and evidentially worthless.</p>
+    we found NATO Article 5, Patrick Henry, the Fifth Amendment: canonical text, the famous passages
+    the whole world quotes. MMLU quotes famous documents; web text contains them. The overlap is
+    exact, reproducible and evidentially worthless.</p>
+    <!-- One real match from results/pretraining-c4.json, baked in and asserted by
+         check-published-numbers.ts. The words are the product; here are the words,
+         visible without running anything. -->
+    <div class="hit hit--lead" style="margin:1.8rem 0 1.4rem">
+      <div class="meta">
+        <span><b>Found</b> mmlu-5951</span>
+        <span>c4-en · doc5541</span>
+        <span>n=10 · exact</span>
+      </div>
+      <div class="quote">…NATO’s founding treaty states in Article 5 that NATO members “<mark>agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and</mark> that “if such an armed attack occurs, each of them, in exercise…</div>
+    </div>
     <p class="sub">A false positive you can <em>see</em> is a judgment you make in one second; as a
     rate, it is one you cannot evaluate at all. The full write-up, including the two published
     numbers this project had to retract, is in
@@ -676,16 +715,21 @@ for (const b of INDEXES) {
 }
 
 let index = null;
+let indexBytes = null;
 let loading = null;
 
 async function loadIndex(id) {
   index = null;
+  indexBytes = null;
   $('benchmeta').textContent = 'loading index…';
   const started = performance.now();
   const res = await fetch(`./indexes/${id}.idx.bin.gz`);
   if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
   const bytes = new Uint8Array(await res.arrayBuffer());
   index = await loadIndexFromBytes(bytes);
+  // Retained so the scan worker gets the same bytes without a second fetch — the
+  // pick-the-exam-then-go-offline story depends on never needing the network again.
+  indexBytes = bytes;
   const secs = ((performance.now() - started) / 1000).toFixed(1);
   $('benchmeta').textContent =
     `${index.itemIds.length.toLocaleString()} items · n=${index.n} · ` +
@@ -694,7 +738,14 @@ async function loadIndex(id) {
 }
 
 function selectIndex(id) {
-  loading = loadIndex(id).catch((e) => { $('benchmeta').textContent = String(e.message); });
+  // A failed load is our failure, not the reader's file — say so, in order, and offer
+  // the one action that helps. The run() guard keeps the drop zone honest meanwhile.
+  loading = loadIndex(id).catch(() => {
+    $('benchmeta').innerHTML =
+      `the benchmark list did not load — our side, not your file. ` +
+      `<button class="linklike" id="retry-index" type="button">retry</button>`;
+    $('retry-index').addEventListener('click', () => selectIndex(benchSel.value));
+  });
   return loading;
 }
 
@@ -722,7 +773,9 @@ $('try').addEventListener('click', async () => {
     const body = await res.blob();
     run(new File([body], 'sample-corpus.jsonl', { type: 'application/x-ndjson' }), true);
   } catch (err) {
-    $('out').innerHTML = `<div class="verdict"><strong>Could not load the sample.</strong><div class="muted">${esc(String(err.message || err))}</div></div>`;
+    $('out').innerHTML = `<div class="refusal"><b>The sample did not load.</b>
+      <p>Our side, not yours — the demo corpus could not be fetched
+      (${esc(String(err.message || err))}). Reload the page, or drop a file of your own.</p></div>`;
   }
 });
 
@@ -751,15 +804,28 @@ const TOUR = [
 ];
 
 let tourAt = -1, tourRing = null, tourCard = null;
+let tourPrevFocus = null;
+let tourAutoAt = 0;
 
-function tourStop() {
+function tourWriteFlag() { try { localStorage.setItem('ingot-tour-done', '1'); } catch { /* fine */ } }
+
+function tourStop(reason) {
+  if (tourAt < 0) return;
   tourAt = -1;
   tourRing?.remove(); tourCard?.remove();
   tourRing = tourCard = null;
   removeEventListener('keydown', tourKey);
   removeEventListener('resize', tourPlace);
+  // A reflex scroll inside the first two seconds of an auto-start is noise, not a
+  // dismissal — the flag stays unwritten, so the next visit gets one more chance.
+  // Anything explicit (Esc, Skip, Done) or any later scroll is intent, and sticks.
+  const reflex = reason === 'scroll' && tourAutoAt > 0 && performance.now() - tourAutoAt < 2000;
+  if (!reflex) tourWriteFlag();
+  tourAutoAt = 0;
+  tourPrevFocus?.focus?.();
+  tourPrevFocus = null;
 }
-function tourKey(e) { if (e.key === 'Escape') tourStop(); }
+function tourKey(e) { if (e.key === 'Escape') tourStop('explicit'); }
 
 function tourPlace() {
   if (tourAt < 0) return;
@@ -793,8 +859,14 @@ async function tourStep(i) {
   el.scrollIntoView({ block: 'center', behavior: MOTION ? 'smooth' : 'auto' });
   tourPlace();
   if (step.waitFor) {
-    while (tourAt === i && !step.waitFor()) await new Promise((r) => setTimeout(r, 150));
+    // Time-boxed: if the sample scan fails, the tour ends with the error visible in the
+    // results area instead of hanging forever on a disabled button.
+    const deadline = performance.now() + 20000;
+    while (tourAt === i && !step.waitFor() && performance.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 150));
+    }
     if (tourAt !== i) return;
+    if (!step.waitFor()) return tourStop('error');
     await new Promise((r) => setTimeout(r, 900));
     if (tourAt === i) tourStep(i + 1);
   } else {
@@ -814,34 +886,40 @@ function tourStart() {
   tourCard.setAttribute('aria-label', 'Guided demo');
   tourCard.innerHTML = `<div class="step"></div><p></p>
     <div class="btns"><button class="btn primary next" type="button">Next</button>
-    <button class="btn skip" type="button">Skip</button></div>`;
+    <button class="btn skip" type="button">Skip</button><span class="esc">esc exits</span></div>`;
   document.body.append(tourRing, tourCard);
   tourCard.querySelector('.next').addEventListener('click', () => tourStep(tourAt + 1));
-  tourCard.querySelector('.skip').addEventListener('click', tourStop);
+  tourCard.querySelector('.skip').addEventListener('click', () => tourStop('explicit'));
   addEventListener('keydown', tourKey);
   addEventListener('resize', tourPlace);
   // Taking the wheel back ends the tour. Programmatic scrollIntoView never fires wheel or
   // touchmove, so these only trip on a real hand — the user scrolling away IS a dismissal,
   // and a tour that fights the scrollbar is a hostage situation.
-  addEventListener('wheel', tourStop, { passive: true, once: true });
-  addEventListener('touchmove', tourStop, { passive: true, once: true });
+  addEventListener('wheel', () => tourStop('scroll'), { passive: true, once: true });
+  addEventListener('touchmove', () => tourStop('scroll'), { passive: true, once: true });
+  // Focus moves into the dialog so a keyboard can operate it, and returns on close.
+  tourPrevFocus = document.activeElement;
   tourStep(0);
+  tourCard.querySelector('.next').focus();
 }
 
 $('tour').addEventListener('click', tourStart);
 
 /**
- * First visit only: the demo introduces itself once, after the page has settled, and
- * never again — the flag is written at auto-start, not completion, so even someone who
- * skips it instantly is never re-hijacked. Krug's rule: sizzle in the user's way drains
- * goodwill, so the invitation must be cheap to decline (Esc, Skip, or just scrolling)
- * and must never repeat. A visitor who wants it back has the button.
+ * First visit: the demo introduces itself once the page has settled. The never-again
+ * flag is written on intent — Esc, Skip, Done, or any scroll after the first two
+ * seconds — but a reflex scroll inside those two seconds leaves it unwritten, so an
+ * accidental dismissal costs one more auto-start, never a hijacking. Krug's rule:
+ * sizzle in the user's way drains goodwill, so declining stays free and explicit
+ * dismissal stays permanent. A visitor who wants it back has the button.
  */
 try {
   if (!localStorage.getItem('ingot-tour-done')) {
     setTimeout(() => {
-      localStorage.setItem('ingot-tour-done', '1');
-      if (tourAt < 0 && !document.querySelector('#out .hit')) tourStart();
+      if (tourAt < 0 && !document.querySelector('#out .hit')) {
+        tourAutoAt = performance.now();
+        tourStart();
+      }
     }, 1600);
   }
 } catch { /* storage disabled: never auto-run rather than run every visit */ }
@@ -887,7 +965,60 @@ function railResult(report, file) {
     </dl>`;
 }
 
+let scanning = false;
+let scanWorker = null;
+let scanStartedAt = 0;
+let cancelReject = null;
+let wasCancelled = false;
+
+const beforeUnloadGuard = (e) => { e.preventDefault(); e.returnValue = ''; };
+
+function fmtRemaining(bytesRead, total) {
+  const elapsed = (performance.now() - scanStartedAt) / 1000;
+  if (elapsed < 3 || bytesRead === 0) return '';
+  const secs = (total - bytesRead) / (bytesRead / elapsed);
+  if (!Number.isFinite(secs) || secs < 1) return '';
+  const m = Math.floor(secs / 60), s = Math.round(secs % 60);
+  return ` · about ${m > 0 ? `${m}m` : `${s}s`} left`;
+}
+
+function scanEnded() {
+  scanning = false;
+  $('bar').hidden = true;
+  $('cancel').hidden = true;
+  removeEventListener('beforeunload', beforeUnloadGuard);
+}
+
+$('cancel').addEventListener('click', () => {
+  if (!scanning) return;
+  wasCancelled = true;
+  scanWorker?.terminate();
+  scanWorker = null;
+  cancelReject?.(new Error('cancelled'));
+  scanEnded();
+  $('status').textContent = 'scan cancelled — nothing was uploaded, nothing was kept';
+  railLive.innerHTML = '';
+});
+
+function refusal(title, body) {
+  return `<div class="refusal"><b>${title}</b><p>${body}</p></div>`;
+}
+
 async function run(file, isSample = false) {
+  if (scanning) {
+    $('status').textContent = 'a scan is already running — cancel it first';
+    return;
+  }
+  // The browser path reads plain JSONL. Refusing a .gz beats decoding it to garbage,
+  // skipping every line, and calling the wreckage clean.
+  if (/\.gz$/i.test(file.name)) {
+    $('out').innerHTML = refusal('This file is gzip-compressed.',
+      `The browser scanner reads plain JSONL. Unzip it first (<code>gunzip ${esc(file.name)}</code>),
+      or use the command line, which reads .gz directly:
+      <code>npx ingot-scan contaminate --index ${esc(benchSel.value)} --corpus ${esc(file.name)}</code>`);
+    return;
+  }
+
   $('out').innerHTML = '';
   $('bar').hidden = false;
   $('bar').value = 0;
@@ -896,32 +1027,86 @@ async function run(file, isSample = false) {
 
   try {
     await loading;
-    if (!index) throw new Error('no index loaded');
+    if (!index || !indexBytes) {
+      throw new Error('the benchmark index has not loaded — retry it above, then drop the file again');
+    }
 
-    const report = await scanFile(index, file, {
-      onProgress: (docs, tokens, bytes) => {
-        $('bar').value = Math.min(100, (bytes / file.size) * 100);
-        $('status').textContent =
-          `${docs.toLocaleString()} documents · ${tokens.toLocaleString()} tokens · ${(bytes / 1e6).toFixed(0)} MB`;
-        railScanning(file, docs, tokens, bytes);
-      },
-    });
+    scanning = true;
+    wasCancelled = false;
+    scanStartedAt = performance.now();
+    $('cancel').hidden = false;
+    addEventListener('beforeunload', beforeUnloadGuard);
 
-    $('bar').hidden = true;
+    const onProgress = (docs, tokens, bytes) => {
+      $('bar').value = Math.min(100, (bytes / file.size) * 100);
+      $('status').textContent =
+        `${docs.toLocaleString()} documents · ${tokens.toLocaleString()} tokens · ` +
+        `${(bytes / 1e6).toFixed(0)} MB${fmtRemaining(bytes, file.size)}`;
+      railScanning(file, docs, tokens, bytes);
+    };
+
+    // The scan runs in a worker so the tab stays responsive for the whole 48 minutes;
+    // cancel is terminate(), which cannot leak. The fallback keeps file:// and older
+    // browsers working on the main thread, same scanner either way.
+    let report;
+    if (typeof Worker === 'function') {
+      report = await new Promise((resolve, reject) => {
+        cancelReject = reject;
+        scanWorker = new Worker('./scan.worker.js', { type: 'module' });
+        scanWorker.onmessage = (e) => {
+          const m = e.data;
+          if (m.type === 'progress') onProgress(m.docs, m.tokens, m.bytesRead);
+          else if (m.type === 'done') { scanWorker = null; resolve(m.report); }
+          else if (m.type === 'error') { scanWorker = null; reject(new Error(m.message)); }
+        };
+        scanWorker.onerror = (e) => { scanWorker = null; reject(new Error(e.message || 'the scan worker failed')); };
+        const copy = indexBytes.slice().buffer;
+        scanWorker.postMessage({ indexBytes: copy, file }, [copy]);
+      });
+    } else {
+      report = await scanFile(index, file, { onProgress });
+    }
+
+    cancelReject = null;
+    scanEnded();
     render(report, file, isSample);
   } catch (err) {
-    $('bar').hidden = true;
+    cancelReject = null;
+    scanWorker?.terminate();
+    scanWorker = null;
+    scanEnded();
+    if (wasCancelled) { wasCancelled = false; return; }
     $('status').textContent = '';
     // A half-ticked counter left in the margin would read as a scan still in progress.
     railLive.innerHTML = '';
-    $('out').innerHTML = `<div class="verdict"><strong>Could not scan.</strong><div class="muted">${esc(String(err.message || err))}</div></div>`;
+    $('out').innerHTML = refusal('The scan did not run.', esc(String(err.message || err)));
   }
 }
+
+const hitRow = (h) => `
+        <div class="hit">
+          <code>${esc(h.benchmarkItemId)} &rarr; ${esc(h.corpusDocId)}${h.corpusDocFrequency ? ` &middot; in ${h.corpusDocFrequency} doc${h.corpusDocFrequency === 1 ? '' : 's'}` : ''}</code>
+          <div class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</div>
+        </div>`;
 
 function render(report, file, isSample) {
   const exact = report.tiers.find((t) => t.tier === 'exact');
   const hitCount = exact.itemsHit;
   const clean = hitCount === 0;
+  const load = report.load ?? { totalLines: 0, skipped: 0 };
+
+  // Zero readable documents is a refusal, never a verdict. A green 0 over an unread
+  // file would be the exact silent failure docs/silent-failures.md is about.
+  if (report.corpusDocs === 0) {
+    $('status').textContent = '';
+    railLive.innerHTML = '';
+    $('out').innerHTML = refusal('This file was not scanned.',
+      `None of its ${load.totalLines.toLocaleString()} line${load.totalLines === 1 ? '' : 's'} could be
+      read as a JSONL record — one <code>{"text": …}</code> object per line. Nothing was checked, so
+      this is not a clean result. Fix the format, or scan other formats on the command line:
+      <code>npx ingot-scan contaminate --index ${esc(report.benchmark)} --corpus ${esc(file.name)}</code>`);
+    return;
+  }
 
   $('status').textContent =
     `${report.corpusDocs.toLocaleString()} documents · ${report.corpusTokens.toLocaleString()} tokens · ` +
@@ -959,6 +1144,7 @@ function render(report, file, isSample) {
       <tr><th>matches kept</th><td class="num">${exact.totalHits}</td></tr>
       <tr><th>dropped as ordinary language</th><td class="num">${exact.droppedGeneric ?? 0}</td></tr>
       <tr><th>could not be checked</th><td class="num">${uncheckable} item${uncheckable === 1 ? '' : 's'} shorter than ${report.n} tokens</td></tr>
+      ${load.skipped > 0 ? `<tr><th>lines skipped</th><td class="num">${load.skipped.toLocaleString()} of ${load.totalLines.toLocaleString()} — unreadable as records, reported rather than silently dropped</td></tr>` : ''}
     </table></div>`;
 
   if (exact.hits.length > 0) {
@@ -979,17 +1165,36 @@ function render(report, file, isSample) {
         </div>`;
         return;
       }
-      html += `
-        <div class="hit">
-          <code>${esc(h.benchmarkItemId)} &rarr; ${esc(h.corpusDocId)}</code>
-          <div class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</div>
-        </div>`;
+      html += hitRow(h);
     });
     if (isSample) {
       html += `<p class="muted">Both matches are canonical text — a prime sequence and the ten digits —
         that appear in a HumanEval docstring because they appear everywhere. Neither is contamination,
         and you can tell in a second because the tool showed you the words rather than a percentage.</p>`;
     }
+    // Nothing is cut silently: the cap is labelled, the rest render on demand, and the
+    // JSON download always carries every match the report counted.
+    if (exact.hits.length > 25) {
+      html += `<p class="muted" id="more-row"><button class="linklike" id="more-hits" type="button">show
+        the other ${(exact.hits.length - 25).toLocaleString()} matches</button>${
+        exact.totalHits > exact.hits.length
+          ? ` — ${exact.totalHits.toLocaleString()} in total; every one is in the JSON download below`
+          : ''}</p><div id="more-out"></div>`;
+    } else if (exact.totalHits > exact.hits.length) {
+      html += `<p class="muted">${exact.totalHits.toLocaleString()} matches in total — every one is in
+        the JSON download below.</p>`;
+    }
+  }
+
+  // The frequency filter's discards, readable. "Dropped as ordinary language" is itself
+  // a judgement, and a reader gets to check it rather than trust it.
+  if ((exact.droppedGeneric ?? 0) > 0 && exact.droppedSamples?.length) {
+    const capNote = exact.droppedSamples.length < exact.droppedGeneric
+      ? ` — first ${exact.droppedSamples.length} of ${exact.droppedGeneric}; all are in the JSON download`
+      : '';
+    html += `<details class="more"><summary>dropped as ordinary language — read them${capNote}</summary>
+      ${exact.droppedSamples.map(hitRow).join('')}
+    </details>`;
   }
 
   if (uncheckable > 0) {
@@ -1036,6 +1241,24 @@ ${esc(r.command)}</pre>
   }
 
   // Wired after the HTML lands, since innerHTML replaces the nodes each render.
+  const moreBtn = $('more-hits');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', () => {
+      // Chunked, so hundreds of matches render without freezing the page they land on.
+      moreBtn.disabled = true;
+      moreBtn.textContent = 'rendering…';
+      const rest = exact.hits.slice(25);
+      let at = 0;
+      const chunk = () => {
+        $('more-out').insertAdjacentHTML('beforeend', rest.slice(at, at + 40).map(hitRow).join(''));
+        at += 40;
+        if (at < rest.length) requestAnimationFrame(chunk);
+        else $('more-row').remove();
+      };
+      requestAnimationFrame(chunk);
+    });
+  }
+
   $('dl-html').addEventListener('click', () =>
     download(renderContaminationReport(report), reportFileName(report, 'html'), 'text/html'),
   );

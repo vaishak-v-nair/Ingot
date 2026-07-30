@@ -182,11 +182,17 @@ export class ScanSession {
 
     // A run survives if its RAREST gram is rare: one distinctive phrase inside a passage
     // is enough, while text common end to end is ordinary language.
+    const droppedSamples: ContaminationHit[] = [];
     for (const { run, hit } of this.provisional) {
       let rarest = Number.POSITIVE_INFINITY;
       for (const key of run.keys) rarest = Math.min(rarest, this.gramDocCount.get(key) ?? 1);
       if (rarest > this.maxDocFrequency) {
         droppedGeneric++;
+        // Kept (capped) so the discard count is inspectable: "dropped as ordinary
+        // language" is itself a judgement, and the reader gets to check it.
+        if (hit && droppedSamples.length < MAX_STORED_HITS) {
+          droppedSamples.push({ ...hit, corpusDocFrequency: Number.isFinite(rarest) ? rarest : undefined });
+        }
         continue;
       }
       exactTotal++;
@@ -208,6 +214,7 @@ export class ScanSession {
         totalHits: exactTotal,
         hits: exactHits,
         droppedGeneric,
+        droppedSamples: droppedSamples.length > 0 ? droppedSamples : undefined,
         unavailableReason:
           this.truncatedRuns > 0
             ? `${this.truncatedRuns} matches beyond the ${MAX_PROVISIONAL_RUNS} buffer were not frequency-checked`

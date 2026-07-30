@@ -73,12 +73,14 @@
     position: relative; padding: 6.5rem 0 5rem; overflow: hidden;
     border-bottom: 1px solid var(--line);
   }
+  /* The crucible wash, same restraint as the front page: one radial of heat behind the
+     molten headline, no blur, no blobs. Blurred gradient blobs are the most recognisable
+     generated-page backdrop there is — the one page arguing credibility cannot wear it. */
   .hero::before {
-    content: ""; position: absolute; inset: -40% -20% auto -20%; height: 130%;
-    background:
-      radial-gradient(48rem 26rem at 18% 8%, color-mix(in srgb, var(--gold-hot) 30%, transparent), transparent 68%),
-      radial-gradient(38rem 22rem at 88% 22%, color-mix(in srgb, var(--ember) 22%, transparent), transparent 70%);
-    filter: blur(6px); pointer-events: none;
+    content: ""; position: absolute; inset: -30% 0 auto 0; height: 120%;
+    background: radial-gradient(58% 52% at 42% 16%,
+      color-mix(in srgb, var(--gold-hot) 10%, transparent), transparent 70%);
+    pointer-events: none;
   }
   .eyebrow {
     font-family: var(--mono); font-size: .74rem; letter-spacing: .22em;
@@ -93,6 +95,8 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1rem 0 0; color: var(--dim); }
+  /* The focus contract, same token as the front page. */
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   /* The plain register, above the expert lede — never instead of it. */
   .says { font-size: clamp(1.1rem, 2.4vw, 1.4rem); max-width: 44ch; margin: 1.6rem 0 0;
           color: var(--ink); line-height: 1.45; }
@@ -230,7 +234,7 @@
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
-    <a href="index.html#plain">Start here</a>
+    <a href="index.html#plain">What is this?</a>
     <a href="index.html#trust">Privacy</a>
     <a href="index.html#method">Method</a>
     <a href="registry.html">Registry</a>
@@ -255,9 +259,9 @@
   <div class="wrap">
     <div class="kicker">The product today</div>
     <h2>Contamination leads because it is not an inference</h2>
-    <p class="sub">A shared 10-gram between a benchmark and a corpus is a fact you can display side by
-    side. Authorship is a statistical claim about a distribution. Both are worth building; only one of
-    them can be handed to a skeptic who then agrees.</p>
+    <p class="sub">A shared 10-gram — ten identical words in a row — between a benchmark and a corpus
+    is a fact you can display side by side. Authorship is a statistical claim about a distribution.
+    Both are worth building; only one of them can be handed to a skeptic who then agrees.</p>
     <div class="flow">
       <div class="step"><div class="n">SHIPPED</div><h3>Contamination scanning</h3><p>Index the benchmark, stream the corpus once, show every match with its surrounding text. 7.0 MB/sec end to end on real gzipped corpus shards, in the browser or on the command line.</p></div>
       <div class="step"><div class="n">SHIPPED · LIMITED</div><h3>Batch provenance</h3><p>Human-authored or machine-generated, measured against named reference corpora. Honest detection floor is 50% contamination, and the four reasons are known.</p></div>
@@ -271,11 +275,13 @@
     <div class="kicker">The hole</div>
     <h2>Nine figures of spend, certified by the seller</h2>
     <p class="sub">Every number here is public. None of it depends on anyone's résumé.</p>
+    <!-- Every figure carries its public source by name, print-style — this site's own
+         constitution is that numbers trace, and marketing numbers are not exempt. The
+         "2–3 yrs" estimate that used to sit here had no nameable source, so it is gone. -->
     <div class="facts">
-      <div class="fact"><b>$1B+</b><span>discussed by a single lab for RL environments in one year, with sector spend projected to grow 3–5×</span></div>
-      <div class="fact"><b>$85–200<small>/hr</small></b><span>the going rate for credentialed expert data</span></div>
-      <div class="fact"><b>Aug 2026</b><span>EU AI Act documented-provenance requirement begins enforcement</span></div>
-      <div class="fact"><b>2–3 yrs</b><span>how far out purpose-built defences are assessed to be</span></div>
+      <div class="fact"><b>$1B+</b><span>discussed by a single lab for RL environments in one year — The Information, September 2025</span></div>
+      <div class="fact"><b>$85–200<small>/hr</small></b><span>the going rate for credentialed expert data — Mercor's published expert rates</span></div>
+      <div class="fact"><b>Aug 2026</b><span>the EU AI Act's high-risk obligations, documented provenance included, begin applying — Regulation (EU) 2024/1689</span></div>
     </div>
     <p class="punch">Quality and neutrality now outrank price when labs choose a vendor. So vendors began publishing provenance paperwork —
     <em>about their own labour</em>. Self-certification survives exactly as long as nobody's money is at risk.</p>
@@ -286,7 +292,10 @@
   <div class="wrap">
     <div class="kicker">How the provenance scanner works</div>
     <h2>Six signals, none of them a vibe check</h2>
-    <p class="sub">Structural statistics measured against two named reference corpora, one human-authored and one machine-generated. No model call, no network, deterministic and reproducible. This is the second product, and the numbers below are the honest limits of what it can do today.</p>
+    <p class="sub">In plain words: does delivered data read like it was written by the humans it was
+    billed as? Structural statistics measured against two named reference corpora, one human-authored
+    and one machine-generated. No model call, no network, deterministic and reproducible. This is the
+    second product, and the numbers below are the honest limits of what it can do today.</p>
     <div class="flow">
       <div class="step"><div class="n">01 · LOAD</div><h3>Refuse, don't guess</h3><p>Schema mismatches, unparseable lines and zero-variance batches are reported, never silently dropped.</p></div>
       <div class="step"><div class="n">02 · MEASURE</div><h3>Burstiness &amp; scaffolding</h3><p>Sentence-length variation, reused openings and closings, cluster tightness, duplicate rate, author fingerprints.</p></div>
@@ -390,7 +399,7 @@
     <h2>One company, three acts</h2>
     <div class="acts">
       <div class="act now"><span class="badge">Now · built</span><h3>Contamination &amp; provenance</h3><p>Is the benchmark inside the corpus, and was the delivered data produced by the human it was billed as. Run either before payment, or before training.</p></div>
-      <div class="act"><span class="badge">Act II</span><h3>Reward-signal integrity</h3><p>Red-team a reward function or rubric to find what scores high while failing the task. Same disease, one layer up.</p></div>
+      <div class="act"><span class="badge">Act II</span><h3>Reward-signal integrity</h3><p>Red-team a reward function or rubric — the scoring rules a model is trained against — to find what scores high while failing the task. Same disease, one layer up.</p></div>
       <div class="act"><span class="badge">Act III</span><h3>Provenance of record</h3><p>Third-party AI Act documentation a regulator accepts precisely because it isn't self-issued.</p></div>
     </div>
     <p class="punch" style="margin-top:2.5rem">Mercor will not certify Mercor. Anthropic will not ship a product that audits Anthropic's own training data.

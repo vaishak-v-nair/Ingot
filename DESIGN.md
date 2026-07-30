@@ -124,6 +124,24 @@ runs once, everything sits behind `prefers-reduced-motion: no-preference`, and t
 pre-reveal state is keyed on a `.js` class the script adds — a script that never runs costs
 the settling, never the content. Bounce, parallax and looping ornament remain banned.
 
+## States
+
+Failure is designed, not dumped (2026-07-30). The refusal treatment: a 4px ember rule opens
+the record, the cause in plain words — "our side, not your file" when it is — and one action
+that helps: a retry, an unzip command, the CLI line. Raw error strings never reach the page
+alone. For a product whose brand is disciplined refusal, these are its most on-brand screens.
+
+- **Zero readable documents is a refusal, never a verdict.** A file whose every line skips
+  renders "This file was not scanned", naming the line count. The green 0 is reserved for
+  scans that read something; `report.load` carries the counts that prove it.
+- Nothing about the evidence is silent: skipped lines get a table row whenever they occur,
+  matches beyond the first 25 render on demand, the frequency filter's discards are readable
+  under a fold, and the JSON download always carries everything.
+- Long scans are escorted: a cancel beside the progress thread, time-remaining in the status
+  line, a leave-page warning while running, one scan at a time, and the scan itself in a
+  worker so the tab never stutters. A focus contract (2px gold outline, `:focus-visible`)
+  joins the motion contract on all three pages.
+
 ## Hard constraints
 
 1. **Zero external network requests.** No CDN fonts, no analytics, no remote images. The
@@ -202,9 +220,11 @@ dividing lines instead of fences, because the boxes were decoration around conte
 already had structure. If a card seems necessary, the content probably needs a rule, a
 numeral, or a measure — not a border.
 
-Two boxes survive, both in the results view: the verdict block and the sample-corpus notice.
-They are listed as open below rather than quietly excused. An earlier version of this section
-claimed there were none, which was wrong on the surface a visitor is most likely to look at.
+None survive (2026-07-30). The verdict became a ruled stamp — 4px ink rule, the count sitting
+on the rule the way the assay's numbers do; the sample notice takes the same record with a
+gold rule; the tour's caption card dropped its radius and shadow for the page's own ruled
+dialect. The verdict was the hard case — a single number as the content — and the rule held
+it, which is the proof the open item was waiting for.
 
 ## The receipt rail
 
@@ -227,17 +247,12 @@ overlap, and that is the correct trade for the rail being droppable.
 - **The guided demo ("Watch it work") exists only on the front page**, and its captions are
   hand-written English. If the scan flow gains a step, the tour's step list in `index.html`
   must gain one too — nothing checks this yet.
-- **Two cards left, both in the results view.** `.verdict` and the sample-corpus notice are
-  still bordered rounded boxes. The verdict block is the harder one: it is the only place a
-  single number is the content, so a rule may not be enough to hold it. It is also the most
-  visible thing on the page after a scan, which is the argument for fixing it rather than
-  writing an exception into this file.
 - **Section rhythm is still uniform.** Every section is kicker, serif heading, prose,
-  optional record. Ten times. Nothing goes full-bleed and no scale changes between them.
-  The specimen treatment proves the page can carry a change of pace; nowhere else does.
-- **The plain-words register exists only on the front page.** `about.html` and the generated
-  registry page still speak in one register, to experts. The Start-here treatment — metaphor
-  first, glossary, jargon decoded in place — should travel to both.
+  optional record. Nothing goes full-bleed and no scale changes between them. Deliberately
+  deferred (review 2026-07-30, decision 7.5B) until the baked-in findings specimen has been
+  live long enough to judge the page's real pace; tracked in `TODOS.md`.
+- **`.gz` corpora are refused, not scanned, in the browser.** The refusal names the
+  workaround; native `DecompressionStream` support is tracked in `TODOS.md`.
 - **The guidance video is built and live** (2026-07-29; re-cut 2026-07-30): 56.5s, voiced
   (Kokoro bf_emma) and captioned, produced from the HyperFrames project in `video/ingot-guide/`
   (source committed; re-render with `npm run render -- --quality high` there — the bare script
@@ -279,3 +294,13 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-30 | The front page halves its words | Measured against six reference sites (Linear, Stripe, Plausible, Resend, Raycast, Vercel — all land on hero ≤ 30 words, ≤ 2 sentences per section, exhibits doing the explaining), the page ran 1,844 words. Now 1,390 total and ~450 of visible running prose: the hero lede is gone, Start-here is one paragraph and three one-line steps, and every deep paragraph folded into a `details.more` disclosure. Nothing was deleted — all 35 gated figures still trace. |
 | 2026-07-30 | Disclosures are ruled, not boxed | `details.more` is a hairline, a mono small-caps summary and a `+`/`−` marker — the editorial fold of a broadsheet, not a widget. A bordered accordion would have re-imported the card language the page just removed. |
 | 2026-07-30 | The film re-rendered at high quality, QA'd before shipping | The first render used the pinned script's default quality: 485 kbps at 1080p, soft type. Re-cut: CLI 0.7.82 → 0.7.83, `--quality high`, type scaled to fill the 16:9 frame, scene-2 entrance tightened from 0.7s of empty canvas to 0.25s, captions moved fully below the footer rule (the 48s caption used to cross it). Frames extracted and inspected at seven timestamps before the files replaced the live ones. |
+| 2026-07-30 | The last boxes die: verdict, sample notice, tour card | Whole-site design review (7 passes + a cold-read outside voice). The verdict — the one place a single number is the content — became a ruled stamp on a 4px ink rule; the sample notice takes the gold-rule variant; the tour card became a ruled annotation on paper. "No cards anywhere" is finally true everywhere. |
+| 2026-07-30 | A false clean verdict becomes impossible | The browser scan now counts skipped lines (`report.load`); zero readable documents renders a designed refusal instead of the green 0, `.txt` left the accept list, and `.gz` is refused with the workaround named. The CLI and downloadable report always disclosed skips — the page was the only surface that didn't. |
+| 2026-07-30 | The scan is escorted: worker, cancel, ETA, leave-guard, one at a time | A 48-minute scan had no exit but closing the tab. The scan moved to a worker (terminate() is cancel — nothing to leak), the status line gained time-remaining, `beforeunload` guards a running scan, and a second drop is refused instead of interleaved. |
+| 2026-07-30 | Nothing about the evidence is silent | The 25-match cap is labelled and expandable (chunked render); the frequency filter's discards are readable under a fold and always in the JSON; skipped lines get a table row. A tool that shows you the words cannot curate them wordlessly. |
+| 2026-07-30 | The trust section states its strongest proofs | A fourth cell names the browser-enforced CSP (`connect-src 'self'`) and the pick-the-exam-then-go-offline move; one `npx ingot-scan` line serves the engineer who will never drop a confidential corpus in a browser. Verifiable facts, stated at the only moment they matter. |
+| 2026-07-30 | The glossary unfolds, and "canonical" joins it | Folding the decoder ring behind the same gold line as the expert depth inverted the voice rule — the lay reader can't guess definitions live there. Six terms now render open in Start-here; folds are for expert depth only. The promise pill decodes itself ("press F12"). |
+| 2026-07-30 | One real specimen is baked into the findings section, gated | The page argued "it shows you the words" while showing none before commitment. The NATO Article 5 ten-gram (mmlu-5951) renders as a static specimen, and `check-published-numbers.ts` asserts both the item id and the exact matched text against `results/pretraining-c4.json` — a drifted specimen fails the build. |
+| 2026-07-30 | The tour flag is intent-aware | Supersedes flag-at-auto-start, and narrows it: Esc, Skip, Done, or any scroll after two seconds still writes the permanent flag, but a reflex scroll inside the first two seconds of an auto-start leaves it unwritten — an accident costs one more invitation, never a hijacking. Focus now moves into the tour dialog and back out; its wait for the sample scan is time-boxed. |
+| 2026-07-30 | Entry hierarchy: demo, commit, and the sample as a link | Three near-equal buttons were a coin flip for newcomers. "Watch it work" is primary, "Choose a file" secondary, and the sample scan demoted to a text link — every path survives at its honest weight. The nav's first link and the section kicker became "What is this?", which is what the destination actually is. |
+| 2026-07-30 | About's numbers cite by name or die; the blobs die regardless | Market figures now carry print-style sources (The Information, Sept 2025; Mercor's published rates; Regulation (EU) 2024/1689) and the unsourceable "2–3 yrs" estimate was cut — the constitution covers marketing numbers too. The hero's blurred gradient blobs, the one generated-page tell on the credibility page, became the front page's own single crucible wash; the molten h1 stays. |

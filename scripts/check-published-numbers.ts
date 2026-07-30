@@ -47,6 +47,7 @@ const c4 = json<{
     corpusTokens: number;
     corpusHash: string;
     throughputMBs: number;
+    samples?: { benchmarkItemId: string; matchedText: string }[];
   }[];
 }>('results/pretraining-c4.json');
 
@@ -110,6 +111,20 @@ const claims: Claim[] = [
   // prove two reports name the same bytes. A stale one is worse than none: it would claim
   // provenance for a corpus that is no longer the corpus that was scanned.
   { doc: SITE, label: 'site: corpus hash', expected: mmlu.corpusHash },
+  // The front page bakes in one real specimen match (the NATO Article 5 ten-gram) so every
+  // visitor sees the product's output without running anything. It must stay the match the
+  // results file actually contains — a drifted specimen would be a fabricated exhibit on a
+  // page whose whole argument is evidence.
+  ...(mmlu.samples?.some((s) => s.benchmarkItemId === 'mmlu-5951')
+    ? [
+        { doc: SITE, label: 'site: specimen item', expected: 'mmlu-5951' },
+        {
+          doc: SITE,
+          label: 'site: specimen text',
+          expected: mmlu.samples.find((s) => s.benchmarkItemId === 'mmlu-5951')!.matchedText,
+        },
+      ]
+    : [{ doc: SITE, label: 'site: specimen source missing from results', expected: 'SPECIMEN-SOURCE-MISSING' }]),
   { doc: SITE, label: 'site: total discarded by filter', expected: `${droppedTotal}` },
   { doc: SITE, label: 'site: single-shard documents', expected: shard.results[0].corpusDocs.toLocaleString('en-US') },
 ];

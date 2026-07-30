@@ -55,6 +55,11 @@ export async function scanFile(
   const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
   let carry = '';
   let bytesRead = 0;
+  // A line the parser cannot read is skipped, and skipped lines must reach the report:
+  // a file where every line skips is an unread file, and an unread file that presented
+  // as a clean scan would be the exact silent failure this project documents.
+  let totalLines = 0;
+  let skippedLines = 0;
   // Shared with the command line, so the same file yields the same corpus identity on
   // either surface. Two implementations of one sampling rule would drift, and reports
   // that cannot be compared are reports nobody can check.
@@ -74,9 +79,10 @@ export async function scanFile(
       if (line.length === 0) continue;
 
       hasher.add(line);
+      totalLines++;
 
       const parsed = parseCorpusLine(line, session.corpusDocs + 1, options.textField, options.idField);
-      if (!parsed) continue;
+      if (!parsed) { skippedLines++; continue; }
       session.addDocument(parsed.docId, parsed.text);
 
       if (options.onProgress && session.corpusDocs % 5000 === 0) {
@@ -90,17 +96,21 @@ export async function scanFile(
   const tail = carry.trim();
   if (tail.length > 0) {
     hasher.add(tail);
+    totalLines++;
     const parsed = parseCorpusLine(tail, session.corpusDocs + 1, options.textField, options.idField);
     if (parsed) session.addDocument(parsed.docId, parsed.text);
+    else skippedLines++;
   }
 
-  return session.finish({
+  const report = session.finish({
     corpusName: file.name,
     corpusHash: await hasher.digest(file.size),
     corpusBytes: file.size,
     command: options.command ?? `node src/cli.ts contaminate --index <index> --corpus ${file.name}`,
     elapsedMs: Math.round(performance.now() - started),
   });
+  report.load = { totalLines, skipped: skippedLines };
+  return report;
 }
 
 export { NgramIndex, decodeIndex, gunzipIfNeeded };

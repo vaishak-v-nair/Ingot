@@ -166,6 +166,9 @@ export type TierResult = {
   hits: ContaminationHit[];
   /** Matches discarded as ordinary language by corpus document frequency. */
   droppedGeneric?: number;
+  /** Capped sample of what the frequency filter discarded, so "dropped: 115" is a
+      disclosure a reader can open rather than a count they have to trust. */
+  droppedSamples?: ContaminationHit[];
   /** Set when the tier could not run. */
   unavailableReason?: string;
 };
@@ -246,6 +249,9 @@ export type ContaminationReport = {
   indexStats: IndexStats;
   /** Benchmark items nothing could match, named so a reader knows what was NOT checked. */
   uncheckableItemIds: string[];
+  /** How the corpus read went. A scan that skipped every line must never present as a
+      clean result — zero readable documents is a refusal, not an absence of overlap. */
+  load?: { totalLines: number; skipped: number };
   elapsedMs: number;
   scannerVersion: string;
   generatedAt: string;

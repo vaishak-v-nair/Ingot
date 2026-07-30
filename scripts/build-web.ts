@@ -32,6 +32,16 @@ execFileSync(
   { stdio: 'inherit', ...NPX_OPTS },
 );
 
+// The scan worker: same scanner, its own thread. Bundled separately because a worker
+// entry point cannot share the page's module graph, and self-contained so the page
+// stays runnable offline once loaded.
+execFileSync(
+  'npx',
+  ['--yes', 'esbuild', 'src/contamination/scanWorker.ts', '--bundle', '--format=esm',
+   '--outfile=web/scan.worker.js', '--platform=browser', '--target=es2022', '--minify'],
+  { stdio: 'inherit', ...NPX_OPTS },
+);
+
 if (bundleOnly) {
   process.stdout.write('\n  bundle only; skipping indexes\n\n');
   process.exit(0);
