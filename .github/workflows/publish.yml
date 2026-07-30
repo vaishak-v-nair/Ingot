@@ -1,0 +1,42 @@
+name: publish
+
+# Publishes ingot-scan to npm via TRUSTED PUBLISHING (OIDC): no token is stored
+# anywhere, and the 2FA-bypass tokens npm is deprecating are never needed. GitHub
+# proves the workflow's identity to npm, npm mints a short-lived credential, and
+# provenance is attached automatically.
+#
+# One-time setup on npmjs.com (account side, done by a human):
+#   package ingot-scan → Settings → Trusted publisher → GitHub Actions →
+#   owner: vaishak-v-nair · repo: Ingot · workflow: publish.yml · environment: (blank)
+#
+# Release flow after that: bump the version (npm version patch), push with the tag,
+# publish a GitHub Release for it — this workflow does the rest.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # the OIDC token npm exchanges for a publish credential
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      # The same gates a local publish would pass. prepack builds dist during publish.
+      - name: Build the browser bundles
+        run: node scripts/build-web.ts --bundle-only
+
+      - name: Run the test suite
+        run: node --test test/*.test.ts
+
+      - name: Publish to npm
+        run: npm publish
