@@ -42,7 +42,11 @@ export async function loadIndexFromBytes(bytes: Uint8Array): Promise<NgramIndex>
 
 /**
  * Streams a JSONL File through the scanner without loading it into memory.
- * A 5 GB file works the same as a 5 MB one.
+ * A 5 GB file works the same as a 5 MB one, and a gzipped shard works the same as the
+ * file it expands to: decompression is streamed, and — matching the command line's
+ * documented rule — corpus bytes are counted UNCOMPRESSED, because that is what the
+ * corpus is. Scanning `shard.jsonl.gz` and the `shard.jsonl` it expands to must produce
+ * the same corpus hash or the two reports could not be compared.
  */
 export async function scanFile(
   index: NgramIndex,
@@ -52,17 +56,39 @@ export async function scanFile(
   const started = performance.now();
   const session = new ScanSession(index, { maxCorpusDocFrequency: options.maxCorpusDocFrequency });
 
-  // Bytes are counted BEFORE the decoder: a decoded string's .length is UTF-16 code
-  // units, and dividing that by the file's byte size makes the progress bar (and the
-  // ETA built on it) wrong by up to 3× on CJK-heavy corpora.
-  let bytesRead = 0;
-  const byteCounter = new TransformStream<Uint8Array, Uint8Array>({
+  // Gzip is detected by its magic bytes, not the filename — a renamed shard is still a
+  // shard. Real pretraining corpora ship gzipped; expanding 20 GB onto disk first is a
+  // cost with nothing to show for it.
+  const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+  const isGzip = head.length === 2 && head[0] === 0x1f && head[1] === 0x8b;
+  if (isGzip && typeof DecompressionStream === 'undefined') {
+    throw new Error(
+      'this browser cannot decompress gzip — unzip the file first, or use the command line, which reads .gz directly',
+    );
+  }
+
+  // Two counters, two jobs. Progress is measured in bytes CONSUMED FROM THE FILE,
+  // because file.size is the only total we know — for a gzipped file that is compressed
+  // bytes. The corpus itself is measured in bytes fed to the text decoder — uncompressed,
+  // the same number the CLI counts — because the hash digest is bound to it.
+  let fileBytesRead = 0;
+  let corpusBytes = 0;
+  const fileCounter = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, controller) {
-      bytesRead += chunk.byteLength;
+      fileBytesRead += chunk.byteLength;
       controller.enqueue(chunk);
     },
   });
-  const reader = file.stream().pipeThrough(byteCounter).pipeThrough(new TextDecoderStream()).getReader();
+  const corpusCounter = new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      corpusBytes += chunk.byteLength;
+      controller.enqueue(chunk);
+    },
+  });
+
+  let byteStream = file.stream().pipeThrough(fileCounter);
+  if (isGzip) byteStream = byteStream.pipeThrough(new DecompressionStream('gzip'));
+  const reader = byteStream.pipeThrough(corpusCounter).pipeThrough(new TextDecoderStream()).getReader();
   let carry = '';
   // A line the parser cannot read is skipped, and skipped lines must reach the report:
   // a file where every line skips is an unread file, and an unread file that presented
@@ -94,7 +120,7 @@ export async function scanFile(
       session.addDocument(parsed.docId, parsed.text);
 
       if (options.onProgress && session.corpusDocs % 5000 === 0) {
-        options.onProgress(session.corpusDocs, session.corpusTokens, bytesRead);
+        options.onProgress(session.corpusDocs, session.corpusTokens, fileBytesRead);
         // Yield so the page stays responsive during a long scan.
         await new Promise((r) => setTimeout(r, 0));
       }
@@ -112,8 +138,8 @@ export async function scanFile(
 
   const report = session.finish({
     corpusName: file.name,
-    corpusHash: await hasher.digest(file.size),
-    corpusBytes: file.size,
+    corpusHash: await hasher.digest(corpusBytes),
+    corpusBytes,
     command: options.command ?? `node src/cli.ts contaminate --index <index> --corpus ${file.name}`,
     elapsedMs: Math.round(performance.now() - started),
   });

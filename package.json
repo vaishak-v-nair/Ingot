@@ -50,6 +50,7 @@
     "prepack": "node scripts/build-dist.ts",
     "dist": "node scripts/build-dist.ts",
     "test": "node --test test/*.test.ts",
+    "e2e": "node e2e/run.ts",
     "validate": "node scripts/contamination-validate.ts",
     "bench": "node scripts/bench-scan.ts",
     "registry": "node scripts/registry-scan.ts",

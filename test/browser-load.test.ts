@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { scanFile } from '../src/contamination/browserScan.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
@@ -171,6 +172,69 @@ test('the CLI scan path counts skips and reports an unread corpus', async () => 
   assert.equal(report.corpusDocs, 0);
   assert.equal(report.load?.totalLines, 3);
   assert.equal(report.load?.skipped, 3);
+});
+
+/**
+ * The command line's documented rule holds in the browser: corpus bytes are counted
+ * UNCOMPRESSED, because that is what the corpus is. A gzipped shard and the file it
+ * expands to are the same scan with the same corpus hash — across both surfaces.
+ */
+test('a gzipped corpus scans identically to the file it expands to, on both surfaces', async () => {
+  const items: BenchmarkItem[] = Array.from({ length: 10 }, (_, i) => ({
+    id: `g${i}`,
+    text: words(40, 79000 + i),
+  }));
+  const index = NgramIndex.build('gz', items, { n: 10 });
+  const rows = [
+    JSON.stringify({ id: 'leak', text: `${words(12, 79100)} ${items[0].text}` }),
+    ...Array.from({ length: 20 }, (_, i) => JSON.stringify({ id: `c${i}`, text: words(50, 79200 + i) })),
+  ];
+  const plain = rows.join('\n') + '\n';
+  const gz = gzipSync(Buffer.from(plain, 'utf8'));
+
+  const a = await scanFile(index, new File([plain], 'c.jsonl'));
+  const b = await scanFile(index, new File([gz], 'c.jsonl.gz'));
+
+  assert.equal(b.corpusHash, a.corpusHash, 'same corpus, same identity');
+  assert.equal(b.receipt.corpusBytes, a.receipt.corpusBytes, 'bytes are the corpus, not the container');
+  assert.equal(b.corpusDocs, a.corpusDocs);
+  assert.equal(b.corpusTokens, a.corpusTokens);
+  const ea = a.tiers.find((t) => t.tier === 'exact')!;
+  const eb = b.tiers.find((t) => t.tier === 'exact')!;
+  assert.equal(eb.totalHits, ea.totalHits);
+  assert.ok(ea.totalHits >= 1, 'the planted leak was found');
+
+  // And the CLI, scanning the same gzipped bytes from disk, names the same corpus.
+  const scratch = mkdtempSync(join(tmpdir(), 'ingot-gz-'));
+  const p = join(scratch, 'c.jsonl.gz');
+  writeFileSync(p, gz);
+  const cli = await scanCorpus(index, p);
+  assert.equal(cli.corpusHash, a.corpusHash, 'browser and CLI agree on the gzipped shard');
+});
+
+test('gzip is detected by magic bytes, not the filename', async () => {
+  const plain = JSON.stringify({ id: 'a', text: words(30, 79300) }) + '\n';
+  const gz = gzipSync(Buffer.from(plain, 'utf8'));
+  const report = await scanFile(bench(), new File([gz], 'renamed.jsonl'));
+  assert.equal(report.corpusDocs, 1);
+  assert.equal(report.load?.skipped, 0);
+});
+
+test('progress for a gzipped file is measured against the compressed size', async () => {
+  const rows: string[] = [];
+  for (let i = 0; i < 5001; i++) {
+    rows.push(JSON.stringify({ id: `p${i}`, text: 'plain filler text that compresses well '.repeat(4) + i }));
+  }
+  const gz = gzipSync(Buffer.from(rows.join('\n') + '\n', 'utf8'));
+  const file = new File([gz], 'big.jsonl.gz');
+  let lastBytes = 0;
+  await scanFile(bench(), file, { onProgress: (_d, _t, b) => { lastBytes = b; } });
+
+  assert.ok(lastBytes > 0, 'progress fired');
+  assert.ok(
+    lastBytes <= file.size,
+    `progress (${lastBytes}) must track the compressed file (${file.size}), not the expanded corpus`,
+  );
 });
 
 test('a clean scan leaves droppedSamples absent rather than empty', async () => {

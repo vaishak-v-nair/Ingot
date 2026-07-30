@@ -406,13 +406,14 @@
 
   <div class="drop" id="drop">
     <strong>Drop training data here</strong>
-    <p>JSONL — one <code>{"text": …}</code> record per line. Any size — it streams.</p>
+    <p>JSONL — one <code>{"text": …}</code> record per line. Plain or gzipped — any size,
+    it streams.</p>
     <div class="btns">
       <button class="btn primary" id="tour" type="button">Watch it work — no file needed</button>
       <label class="btn" for="file">Choose a file</label>
     </div>
     <p class="samplelink"><button class="linklike" id="try" type="button">or scan the sample corpus directly</button></p>
-    <input type="file" id="file" accept=".jsonl,.json">
+    <input type="file" id="file" accept=".jsonl,.json,.gz">
   </div>
 
   <progress id="bar" max="100" value="0" hidden></progress>
@@ -1009,16 +1010,6 @@ async function run(file, isSample = false) {
     $('status').textContent = 'a scan is already running — cancel it first';
     return;
   }
-  // The browser path reads plain JSONL. Refusing a .gz beats decoding it to garbage,
-  // skipping every line, and calling the wreckage clean.
-  if (/\.gz$/i.test(file.name)) {
-    $('out').innerHTML = refusal('This file is gzip-compressed.',
-      `The browser scanner reads plain JSONL. Unzip it first (<code>gunzip ${esc(file.name)}</code>),
-      or use the command line, which reads .gz directly:
-      <code>npx ingot-scan contaminate --index ${esc(benchSel.value)} --corpus ${esc(file.name)}</code>`);
-    return;
-  }
-
   // Set before any await: a guard that yields before it guards is not a guard — two
   // files dropped during index load would otherwise both pass the check above and
   // interleave their writes to the bar, the status line, and the rail. Cancel is

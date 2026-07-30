@@ -29,6 +29,26 @@ jobs:
       - name: Run the test suite
         run: node --test test/*.test.ts
 
+  e2e:
+    name: the real page in a real browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # The suite drives the shipped page — index.html, ingot.js, scan.worker.js — in
+      # headless Chrome (preinstalled on the runner) against synthetic indexes, so it
+      # needs no benchmark downloads and asserts exact numbers: the worker round-trip,
+      # the refusal states, cancel and double-drop, and gzip-vs-plain hash parity.
+      - name: Build the browser bundles
+        run: node scripts/build-web.ts --bundle-only
+
+      - name: Run the e2e suite
+        run: node e2e/run.ts
+
   package:
     name: npx works for a stranger
     runs-on: ubuntu-latest
