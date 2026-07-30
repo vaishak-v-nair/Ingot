@@ -43,6 +43,14 @@ are exams, training data is the study pile, contamination is the exam leaking in
 - The plain layer is added **above** the expert layer, never instead of it. No measured number,
   caveat or method detail is deleted to make room for accessibility — the expert reader lost
   nothing in the comprehension pass and must lose nothing in future ones.
+- **Depth folds, it does not delete.** Since 2026-07-30 the deep prose — retractions, standard
+  errors, the two canonicality tests, the glossary — sits behind `details.more` ruled disclosures:
+  a hairline, a mono small-caps summary, a `+` that becomes `−`. The content stays in the DOM, so
+  every gated figure still traces and the expert reader is one click away, but the visible page
+  reads at the density of the best product sites measured (Linear ~400 words, Resend ~610).
+- **Word budget, measured not vibed:** hero ≤ 30 words; a section is one heading, at most two
+  sentences of prose, and one exhibit (table, record, specimen) that does the explaining; the
+  front page holds ~450 words of visible running prose. Numbers replace adjectives everywhere.
 
 ## Typography
 
@@ -230,11 +238,12 @@ overlap, and that is the correct trade for the rail being droppable.
 - **The plain-words register exists only on the front page.** `about.html` and the generated
   registry page still speak in one register, to experts. The Start-here treatment — metaphor
   first, glossary, jargon decoded in place — should travel to both.
-- **The guidance video is built and live** (2026-07-29): 56.5s, voiced (Kokoro bf_emma) and
-  captioned, produced from the HyperFrames project in `video/ingot-guide/` (source committed;
-  re-render with `npm run render` there). Click-to-play from a poster in Start-here — zero
-  bytes until pressed. If the scan flow changes, the film's S4 steps and the tour's captions
-  both need the same edit; neither is gated yet.
+- **The guidance video is built and live** (2026-07-29; re-cut 2026-07-30): 56.5s, voiced
+  (Kokoro bf_emma) and captioned, produced from the HyperFrames project in `video/ingot-guide/`
+  (source committed; re-render with `npm run render -- --quality high` there — the bare script
+  renders at draft bitrate, which is the 485 kbps mistake the re-cut fixed). Click-to-play from
+  a poster in Start-here — zero bytes until pressed. If the scan flow changes, the film's S4
+  steps and the tour's captions both need the same edit; neither is gated yet.
 - `about.html` keeps its molten-gradient h1. Palette, measure and type now match the rest
   of the site, so this is the only remaining difference, and it is deliberate: a one-off
   hero treatment on the one page that argues rather than measures.
@@ -267,3 +276,6 @@ overlap, and that is the correct trade for the rail being droppable.
 | 2026-07-29 | The page teaches before it argues | The site assumed its reader arrived knowing what a benchmark is, and for everyone else it was jargon from the first control. A comprehension pass added the plain register: the exam metaphor in the hero, a Start-here section with a three-step record and a five-term glossary, plain openers on the method sections, and de-jargoned tool labels. Nothing was dumbed down; it was preceded. |
 | 2026-07-29 | Motion: from "nothing" to "settling" | Supersedes the same-day minimal rule after the no-motion page was judged stiff. The fix is not decoration: every animation narrates measurement — settle, count, sweep, breathe — runs once, honours reduced-motion, and fails static. Bounce remains banned, and heat joined the palette as temperature rather than fill. |
 | 2026-07-29 | Build subprocesses spawn with `windowsHide` and no shell | `execFileSync('npx', …, { shell: true })` routes through cmd.exe, which gets a console window — a window flashing open and shut for every bundle, and much worse with several builds running at once. The shell was only there because npx on Windows is `npx.cmd`; naming the file directly removes the reason for it. See `scripts/npx.ts`. |
+| 2026-07-30 | The front page halves its words | Measured against six reference sites (Linear, Stripe, Plausible, Resend, Raycast, Vercel — all land on hero ≤ 30 words, ≤ 2 sentences per section, exhibits doing the explaining), the page ran 1,844 words. Now 1,390 total and ~450 of visible running prose: the hero lede is gone, Start-here is one paragraph and three one-line steps, and every deep paragraph folded into a `details.more` disclosure. Nothing was deleted — all 35 gated figures still trace. |
+| 2026-07-30 | Disclosures are ruled, not boxed | `details.more` is a hairline, a mono small-caps summary and a `+`/`−` marker — the editorial fold of a broadsheet, not a widget. A bordered accordion would have re-imported the card language the page just removed. |
+| 2026-07-30 | The film re-rendered at high quality, QA'd before shipping | The first render used the pinned script's default quality: 485 kbps at 1080p, soft type. Re-cut: CLI 0.7.82 → 0.7.83, `--quality high`, type scaled to fill the 16:9 frame, scene-2 entrance tightened from 0.7s of empty canvas to 0.25s, captions moved fully below the footer rule (the 48s caption used to cross it). Frames extracted and inspected at seven timestamps before the files replaced the live ones. |

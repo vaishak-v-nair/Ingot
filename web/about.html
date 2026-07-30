@@ -92,7 +92,10 @@
     background: linear-gradient(96deg, var(--gold-hot), var(--ember) 62%, var(--gold));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1.6rem 0 0; color: var(--dim); }
+  .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1rem 0 0; color: var(--dim); }
+  /* The plain register, above the expert lede — never instead of it. */
+  .says { font-size: clamp(1.1rem, 2.4vw, 1.4rem); max-width: 44ch; margin: 1.6rem 0 0;
+          color: var(--ink); line-height: 1.45; }
   .stamp {
     display: inline-flex; align-items: center; gap: .6rem; margin-top: 2.2rem;
     font-family: var(--mono); font-size: .8rem; padding: .55rem .9rem;
@@ -240,9 +243,10 @@
   <div class="wrap">
     <div class="eyebrow">Why this exists</div>
     <h1>Every model quotes a benchmark.<br><span class="molten">Nobody can show it wasn't in the data.</span></h1>
-    <p class="lede">Ingot is independent verification for the AI training data supply chain. The first
-    product answers a question with a checkable answer — is this benchmark inside this corpus — and
-    shows the matching text rather than a score you have to take on faith.</p>
+    <p class="says">In plain words: Ingot checks whether an AI was tested on questions it had
+    already seen — and shows you the words.</p>
+    <p class="lede">Ingot is independent verification for the AI training data supply chain: is this
+    benchmark inside this corpus — answered with matching text, not a score you take on faith.</p>
     <div class="stamp"><span class="dot"></span>runs on your machine · no upload · no retention · no API key</div>
   </div>
 </header>
