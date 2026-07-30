@@ -44,29 +44,29 @@
 
       /* Scenes: each an absolute page region between the frame rules. */
       .clip { position: absolute; inset: 0; }
-      .scene { padding: 200px 240px 0 240px; }
+      .scene { padding: 190px 220px 0 220px; }
       .kicker { display: flex; align-items: center; gap: 18px; font-family: var(--mono);
                 font-size: 24px; letter-spacing: 0.22em; color: var(--gold); opacity: 0; }
       .kicker::before { content: ""; width: 46px; height: 2px; background: var(--gold); }
       .beat { font-family: var(--serif); font-weight: 400; color: var(--ink);
-              font-size: 84px; line-height: 1.08; letter-spacing: 0; opacity: 0; }
+              font-size: 94px; line-height: 1.08; letter-spacing: 0; opacity: 0; }
 
       /* S1: the grade slip — a ruled record, never a card. */
-      #s1-b1 { margin-top: 48px; max-width: 1100px; }
-      #s1-b2 { margin-top: 16px; max-width: 1100px; }
-      #s1-slip { margin-top: 72px; width: 760px; border-top: 4px solid var(--ink);
-                 border-bottom: 1px solid var(--line); padding: 30px 0; opacity: 0; }
+      #s1-b1 { margin-top: 64px; max-width: 1300px; }
+      #s1-b2 { margin-top: 20px; max-width: 1300px; }
+      #s1-slip { margin-top: 84px; width: 920px; border-top: 4px solid var(--ink);
+                 border-bottom: 1px solid var(--line); padding: 36px 0; opacity: 0; }
       #s1-slip .row { display: flex; justify-content: space-between; align-items: baseline;
                       font-family: var(--mono); }
-      #s1-slip .label { font-size: 22px; letter-spacing: 0.2em; color: var(--dim); }
-      #s1-slip .grade { font-size: 84px; color: var(--ink); letter-spacing: -0.02em; }
+      #s1-slip .label { font-size: 24px; letter-spacing: 0.2em; color: var(--dim); }
+      #s1-slip .grade { font-size: 96px; color: var(--ink); letter-spacing: -0.02em; }
       #s1-slip .meta { margin-top: 10px; font-family: var(--mono); font-size: 20px;
                        color: var(--gold); letter-spacing: 0.12em; }
 
       /* S2: the study pile. */
-      #s2-pile { margin-top: 56px; width: 1240px; position: relative; }
-      .pile-row { font-family: var(--mono); font-size: 26px; color: var(--dim);
-                  padding: 18px 0; border-bottom: 1px solid var(--line);
+      #s2-pile { margin-top: 64px; width: 1420px; position: relative; }
+      .pile-row { font-family: var(--mono); font-size: 30px; color: var(--dim);
+                  padding: 22px 0; border-bottom: 1px solid var(--line);
                   white-space: nowrap; overflow: hidden; opacity: 0; }
       #s2-slip { position: absolute; top: -110px; left: 320px; width: 520px;
                  background: var(--paper); border-top: 4px solid var(--ink);
@@ -75,62 +75,62 @@
       #s2-slip .row { display: flex; justify-content: space-between; font-family: var(--mono); }
       #s2-slip .label { font-size: 18px; letter-spacing: 0.2em; color: var(--dim); }
       #s2-slip .name { font-size: 26px; color: var(--ink); }
-      #s2-verdict { margin-top: 60px; font-size: 64px; max-width: 1250px; }
+      #s2-verdict { margin-top: 66px; font-size: 74px; max-width: 1420px; }
       #s2-verdict .mk { background-image: linear-gradient(rgba(255, 157, 31, 0.32),
                         rgba(255, 157, 31, 0.32)); background-repeat: no-repeat;
                         background-size: 0% 100%; padding: 0 6px; }
-      #s2-close { margin-top: 26px; font-family: var(--serif); font-size: 54px;
+      #s2-close { margin-top: 28px; font-family: var(--serif); font-size: 62px;
                   color: var(--ink); opacity: 0; }
 
       /* S3: the specimen — the product's whole claim at display scale. */
-      #s3-specimen { margin-top: 64px; font-family: var(--mono); font-size: 46px;
-                     line-height: 1.55; color: var(--dim); max-width: 1340px; opacity: 0; }
+      #s3-specimen { margin-top: 72px; font-family: var(--mono); font-size: 52px;
+                     line-height: 1.55; color: var(--dim); max-width: 1440px; opacity: 0; }
       #s3-specimen .mk { color: var(--ink);
                          background-image: linear-gradient(rgba(255, 157, 31, 0.34),
                            rgba(255, 157, 31, 0.34));
                          background-repeat: no-repeat; background-size: 0% 100%;
                          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-      #s3-meta { margin-top: 44px; display: flex; gap: 56px; font-family: var(--mono);
-                 font-size: 24px; letter-spacing: 0.18em; color: var(--dim);
-                 border-top: 2px solid var(--ink); padding-top: 22px; width: 1340px;
+      #s3-meta { margin-top: 48px; display: flex; gap: 56px; font-family: var(--mono);
+                 font-size: 25px; letter-spacing: 0.18em; color: var(--dim);
+                 border-top: 2px solid var(--ink); padding-top: 24px; width: 1440px;
                  opacity: 0; }
       #s3-meta b { color: var(--gold); font-weight: 400; }
-      #s3-payoff { margin-top: 54px; font-family: var(--serif); font-size: 84px;
+      #s3-payoff { margin-top: 60px; font-family: var(--serif); font-size: 106px;
                    color: var(--ink); opacity: 0; }
 
       /* S4: the numbered record. */
-      #s4-record { margin-top: 56px; width: 1340px; border-top: 4px solid var(--ink); }
-      .step-row { display: flex; gap: 44px; align-items: baseline; padding: 40px 0;
+      #s4-record { margin-top: 60px; width: 1440px; border-top: 4px solid var(--ink); }
+      .step-row { display: flex; gap: 44px; align-items: baseline; padding: 50px 0;
                   border-bottom: 1px solid var(--line); opacity: 0; }
-      .step-row .n { font-family: var(--mono); font-size: 30px; color: var(--ember); }
-      .step-row .t { font-family: var(--serif); font-size: 58px; color: var(--ink); }
-      .step-row .d { font-family: var(--sans); font-size: 28px; color: var(--dim);
-                     margin-left: auto; max-width: 520px; text-align: right; }
-      #s4-foot { margin-top: 40px; display: flex; align-items: center; gap: 16px;
-                 font-family: var(--mono); font-size: 26px; color: var(--dim); opacity: 0; }
+      .step-row .n { font-family: var(--mono); font-size: 32px; color: var(--ember); }
+      .step-row .t { font-family: var(--serif); font-size: 66px; color: var(--ink); }
+      .step-row .d { font-family: var(--sans); font-size: 30px; color: var(--dim);
+                     margin-left: auto; max-width: 580px; text-align: right; }
+      #s4-foot { margin-top: 44px; display: flex; align-items: center; gap: 16px;
+                 font-family: var(--mono); font-size: 28px; color: var(--dim); opacity: 0; }
       #s4-foot .dot { width: 14px; height: 14px; border-radius: 999px; background: #2f6b34; }
       #s4-foot b { color: var(--ink); font-weight: 400; }
 
       /* S5: the receipt and the lockup. */
-      #s5-receipt { margin-top: 40px; width: 900px; border-top: 4px solid var(--ink); }
-      .r-row { display: flex; justify-content: space-between; padding: 22px 0;
+      #s5-receipt { margin-top: 44px; width: 1020px; border-top: 4px solid var(--ink); }
+      .r-row { display: flex; justify-content: space-between; padding: 26px 0;
                border-bottom: 1px solid var(--line); font-family: var(--mono);
-               font-size: 28px; opacity: 0; }
+               font-size: 30px; opacity: 0; }
       .r-row .k { color: var(--dim); letter-spacing: 0.14em; }
       .r-row .v { color: var(--ink); }
-      #s5-lockup { margin-top: 64px; opacity: 0; }
-      #s5-word { font-family: var(--mono); font-size: 112px; letter-spacing: 0.3em;
+      #s5-lockup { margin-top: 68px; opacity: 0; }
+      #s5-word { font-family: var(--mono); font-size: 124px; letter-spacing: 0.3em;
                  color: var(--gold); }
-      #s5-tag { margin-top: 8px; font-family: var(--serif); font-size: 52px; color: var(--ink); }
+      #s5-tag { margin-top: 10px; font-family: var(--serif); font-size: 58px; color: var(--ink); }
       #s5-url { margin-top: 22px; display: flex; align-items: center; gap: 16px;
                 font-family: var(--mono); font-size: 27px; color: var(--dim); }
       #s5-url .dot { width: 14px; height: 14px; border-radius: 999px; background: #2f6b34; }
 
       /* Captions: burned in, timed to the voice. */
-      .cap { position: absolute; left: 0; right: 0; top: auto; bottom: 74px; display: flex;
+      .cap { position: absolute; left: 0; right: 0; top: auto; bottom: 46px; display: flex;
              justify-content: center; opacity: 0; }
       .cap span { font-family: var(--sans); font-size: 31px; color: var(--ink);
-                  max-width: 1240px; text-align: center; line-height: 1.4; }
+                  max-width: 1460px; text-align: center; line-height: 1.35; }
     </style>
   </head>
   <body>
@@ -251,16 +251,16 @@
       /* S1 — kinetic-type-beats: waterfall-entry on the lines, spring-pop on the slip. */
       tl.fromTo("#s1-kicker", rise, settled, 0.5);
       tl.fromTo("#s1-b1", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 1.0);
-      tl.fromTo("#s1-b2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 3.9);
-      tl.fromTo("#s1-slip", { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.2)" }, 5.6);
+      tl.fromTo("#s1-b2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 3.6);
+      tl.fromTo("#s1-slip", { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.2)" }, 5.4);
 
       /* S2 — composed: pile settles, the slip sinks into it (scale-swap), the marker
          highlight strikes, the verdict lands. All absolute global times. */
-      tl.fromTo("#s2-kicker", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 9.9);
-      [["#p1", 10.3], ["#p2", 10.45], ["#p3", 10.6], ["#p4", 10.75]].forEach(([id, at]) => {
+      tl.fromTo("#s2-kicker", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 9.7);
+      [["#p1", 9.9], ["#p2", 10.05], ["#p3", 10.2], ["#p4", 10.35]].forEach(([id, at]) => {
         tl.fromTo(id, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, at);
       });
-      tl.fromTo("#s2-slip", { y: 0, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power1.out" }, 12.2);
+      tl.fromTo("#s2-slip", { y: 0, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power1.out" }, 12.0);
       tl.to("#s2-slip", { y: 210, opacity: 0, scale: 0.82, duration: 2.6, ease: "power2.in" }, 13.4);
       tl.fromTo("#s2-verdict", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 15.2);
       tl.to("#s2-mk", { backgroundSize: "100% 100%", duration: 0.7, ease: "power2.out" }, 16.4);
@@ -279,7 +279,7 @@
       tl.fromTo("#st1", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 38.2);
       tl.fromTo("#st2", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 39.7);
       tl.fromTo("#st3", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 43.2);
-      tl.fromTo("#s4-foot", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 44.6);
+      tl.fromTo("#s4-foot", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 44.4);
 
       /* S5 — titlecard-reveal: the receipt settles, one restrained lockup move, hold. */
       [["#r1", 47.9], ["#r2", 48.35], ["#r3", 48.8]].forEach(([id, at]) => {
