@@ -310,7 +310,9 @@
      dot, and it is a status light. All of it sits behind prefers-reduced-motion, and the
      hidden pre-reveal state is keyed on a .js class the script adds, so a script that
      never runs costs the settling and not the content. */
-  @media (prefers-reduced-motion: no-preference) {
+  /* screen-scoped: print rendering never scrolls, so an IntersectionObserver reveal
+     that print can see leaves every below-fold section as blank paper. */
+  @media screen and (prefers-reduced-motion: no-preference) {
     .js section > .wrap, .js footer > .wrap {
       opacity: 0; transform: translateY(14px);
       transition: opacity .65s ease-out, transform .65s ease-out; }

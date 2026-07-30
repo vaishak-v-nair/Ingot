@@ -153,6 +153,17 @@ check(
   (await browser.eval<number>(`document.getElementById('out').innerHTML.trim().length`)) === 0,
 );
 
+// ---- S7: print never sees the scroll-reveal's hidden state ----
+// Print rendering does not scroll, so an IntersectionObserver reveal that applies in
+// print leaves every below-fold section as blank paper. Found by /qa 2026-07-30.
+await freshPage();
+await browser.send('Emulation.setEmulatedMedia', { media: 'print' });
+const printOpacity = await browser.eval<string>(
+  `getComputedStyle(document.querySelector('#findings > .wrap')).opacity`,
+);
+check('S7 sections are visible under print media', printOpacity === '1', `opacity=${printOpacity}`);
+await browser.send('Emulation.setEmulatedMedia', { media: '' });
+
 browser.close();
 server.close();
 

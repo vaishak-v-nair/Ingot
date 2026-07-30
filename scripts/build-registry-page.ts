@@ -168,7 +168,9 @@ const html = `<!doctype html>
   mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px;
          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   /* Motion, under the same contract as the rest of the site. */
-  @media (prefers-reduced-motion: no-preference) {
+  /* screen-scoped: print rendering never scrolls, so a reveal print can see leaves
+     every below-fold section as blank paper. */
+  @media screen and (prefers-reduced-motion: no-preference) {
     .js section > .wrap, .js footer > .wrap {
       opacity: 0; transform: translateY(14px);
       transition: opacity .65s ease-out, transform .65s ease-out; }

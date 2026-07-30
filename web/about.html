@@ -214,7 +214,9 @@
   .hero { padding-top: 4rem; }
 
   /* ---------- motion, same contract as the front page ---------- */
-  @media (prefers-reduced-motion: no-preference) {
+  /* screen-scoped: print rendering never scrolls, so a reveal print can see leaves
+     every below-fold section as blank paper. */
+  @media screen and (prefers-reduced-motion: no-preference) {
     .js section > .wrap, .js footer > .wrap {
       opacity: 0; transform: translateY(14px);
       transition: opacity .65s ease-out, transform .65s ease-out; }
