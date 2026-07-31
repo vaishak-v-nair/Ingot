@@ -197,6 +197,55 @@ if (existsSync(resolve('results/canonicality.json'))) {
   );
 }
 
+// The distillation pass ships with its two verdict artifacts — the triage runs and the
+// train-split check — and the page quotes all three. Same rule as everywhere else: the
+// phrases carrying the figures are asserted against the files that produced them.
+if (existsSync(resolve('results/sft-slimorca.json'))) {
+  const sft = json<{
+    results: { benchmark: string; n: number; itemsHit: number; itemsTotal: number; corpusDocs: number; corpusHash: string; rate: number }[];
+  }>('results/sft-slimorca.json');
+  claims.push(
+    { doc: REGISTRY, label: 'registry: slimorca documents', expected: sft.results[0].corpusDocs.toLocaleString('en-US') },
+    { doc: REGISTRY, label: 'registry: slimorca corpus hash', expected: sft.results[0].corpusHash },
+    ...sft.results.map((r) => ({
+      doc: REGISTRY,
+      label: `registry: slimorca ${r.benchmark} n=${r.n} flagged`,
+      expected: `${r.itemsHit} / ${r.itemsTotal.toLocaleString('en-US')}`,
+    })),
+  );
+  for (const p of ['results/sft-slimorca-triage.json', 'results/sft-slimorca-train-check.json']) {
+    if (!existsSync(resolve(p))) {
+      claims.push({ doc: REGISTRY, label: `verdict artifact missing: ${p}`, expected: 'VERDICT-ARTIFACT-MISSING' });
+    }
+  }
+  if (existsSync(resolve('results/sft-slimorca-triage.json'))) {
+    const t = json<{ rows: { verdict: string }[] }>('results/sft-slimorca-triage.json');
+    const count = (v: string): number => t.rows.filter((r) => r.verdict === v).length;
+    claims.push({
+      doc: REGISTRY,
+      label: 'registry: slimorca triage verdicts',
+      expected: `${count('leaked')} leaked · ${count('partial')} partial · ${count('phrase')} phrase-level`,
+    });
+  }
+  if (existsSync(resolve('results/sft-slimorca-train-check.json'))) {
+    const tc = json<{
+      summary: { flaggedTestItems: number; testItemsReproducedVerbatim: number; itemsWithTrainSiblingInDocs: number };
+    }>('results/sft-slimorca-train-check.json');
+    claims.push(
+      {
+        doc: REGISTRY,
+        label: 'registry: train siblings beside flagged test items',
+        expected: `${tc.summary.itemsWithTrainSiblingInDocs} of ${tc.summary.flaggedTestItems} flagged`,
+      },
+      {
+        doc: REGISTRY,
+        label: 'registry: test questions reproduced verbatim',
+        expected: `${tc.summary.testItemsReproducedVerbatim} test questions appear verbatim`,
+      },
+    );
+  }
+}
+
 const docs = new Map<string, string>();
 for (const claim of claims) {
   if (!docs.has(claim.doc)) docs.set(claim.doc, readFileSync(resolve(claim.doc), 'utf8'));

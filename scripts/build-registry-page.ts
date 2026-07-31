@@ -49,13 +49,37 @@ type Canon = {
   caveat: string;
 };
 
+type Triage = {
+  thresholds: { leaked: { coverage: number; excess: number }; partial: { coverage: number; excess: number } };
+  rows: {
+    benchmark: string; itemId: string; itemTokens: number; longestRun: number;
+    coverage: number; excess: number; verdict: 'leaked' | 'partial' | 'phrase';
+  }[];
+};
+type TrainCheck = {
+  summary: {
+    flaggedTestItems: number;
+    testItemsReproducedVerbatim: number;
+    itemsWithTrainSiblingInDocs: number;
+    distinctTrainQuestionsFound: number;
+  };
+  items: {
+    testItemId: string;
+    testQuestion: string;
+    testQuestionInMatchedDocs: boolean;
+    trainSiblingsInThoseDocs: { trainId: string; question: string; docs: string[] }[];
+  }[];
+};
+
+const opt = <T>(path: string): T | null =>
+  existsSync(resolve(path)) ? (JSON.parse(readFileSync(resolve(path), 'utf8')) as T) : null;
+
 const registry = JSON.parse(readFileSync(resolve('results/registry.json'), 'utf8')) as Registry;
-const pretrain = existsSync(resolve('results/pretraining-c4.json'))
-  ? (JSON.parse(readFileSync(resolve('results/pretraining-c4.json'), 'utf8')) as Pretrain)
-  : null;
-const canon = existsSync(resolve('results/canonicality.json'))
-  ? (JSON.parse(readFileSync(resolve('results/canonicality.json'), 'utf8')) as Canon)
-  : null;
+const pretrain = opt<Pretrain>('results/pretraining-c4.json');
+const canon = opt<Canon>('results/canonicality.json');
+const sft = opt<Pretrain>('results/sft-slimorca.json');
+const sftTriage = opt<Triage>('results/sft-slimorca-triage.json');
+const trainCheck = opt<TrainCheck>('results/sft-slimorca-train-check.json');
 
 const esc = (s: string): string => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 const num = (n: number): string => n.toLocaleString('en-US');
@@ -258,6 +282,109 @@ ${controls}
 </section>`;
 }
 
+// ---------------------------------------------------------------------------------------
+// The distillation pass: the first corpus in the registry assembled AFTER the benchmarks,
+// so a match could have been a real leak — which is exactly why its verdict is measured
+// (triage runs, train-split check) rather than asserted.
+// ---------------------------------------------------------------------------------------
+
+function sftSection(): string {
+  if (!sft || !sftTriage || !trainCheck) return '';
+  const rows10 = sft.results.filter((r) => r.n === sft.defaultN);
+  const docs = rows10[0]?.corpusDocs ?? 0;
+  const gb = (sft.corpus.uncompressedBytes / 1e9).toFixed(2);
+  const t = sftTriage.rows;
+  const leaked = t.filter((r) => r.verdict === 'leaked').length;
+  const partial = t.filter((r) => r.verdict === 'partial').length;
+  const phrase = t.filter((r) => r.verdict === 'phrase').length;
+  const top = t[0];
+  const s = trainCheck.summary;
+
+  const table = sft.results
+    .map(
+      (r) => `        <tr>
+          <td>${esc(r.benchmark)}</td>
+          <td class="num">${r.n}</td>
+          <td class="num">${r.itemsHit} / ${num(r.itemsTotal)}</td>
+          <td class="num">${(r.rate * 100).toFixed(3)}%</td>
+          <td class="num">${r.totalMatches}</td>
+          <td class="num">${(r as PretrainRow).droppedGeneric}</td>
+          <td class="num">${r.uncheckableItems}</td>
+        </tr>`,
+    )
+    .join('\n');
+
+  const gsm = rows10.find((r) => r.benchmark === 'gsm8k');
+  const exhibits = gsm ? curate(gsm.samples, 2).map((x) => hitBlock(x, docs)).join('\n') : '';
+
+  const clip = (q: string): string => (q.length > 180 ? `${q.slice(0, 180)}…` : q);
+  const siblings = trainCheck.items
+    .map(
+      (it) => `        <tr>
+          <td><b>${esc(it.testItemId)}</b> (test${it.testQuestionInMatchedDocs ? ', REPRODUCED' : ', not reproduced'})<br>${esc(clip(it.testQuestion))}</td>
+          <td>${it.trainSiblingsInThoseDocs
+            .map((tr) => `<b>${esc(tr.trainId)}</b> — verbatim in ${tr.docs.length} doc${tr.docs.length === 1 ? '' : 's'}<br>${esc(clip(tr.question))}`)
+            .join('<br><br>') || '—'}</td>
+        </tr>`,
+    )
+    .join('\n');
+
+  return `<section>
+  <div class="wrap">
+    <h2>The distillation pass — the first corpus where leakage was possible</h2>
+    <p class="plain">SlimOrca is ${num(docs)} GPT-4 completions over FLAN prompts, assembled in
+    2023 — <em>after</em> every benchmark here was published. The leak window was open, so for the
+    first time a match could be more than canonical text. Every flagged item was therefore
+    measured rather than eyeballed: the longest verbatim run between the item and each document
+    that matched it, published beside the scan.</p>
+    <dl class="assay">
+      <div><dt>Corpus</dt><dd>${esc(sft.corpus.name)}<small>${esc(sft.corpus.licence)} · derived — both SHA-256s in the manifest</small></dd></div>
+      <div><dt>Size</dt><dd><strong>${gb} GB</strong><small>${num(docs)} documents · ${(rows10[0] as PretrainRow).linesSkipped} lines skipped</small></dd></div>
+      <div><dt>Tokens</dt><dd>${num(rows10[0]?.corpusTokens ?? 0)}<small>one pass, streamed</small></dd></div>
+      <div><dt>Method</dt><dd>n = ${sft.defaultN} and ${sft.legacyN}<small>exact, ${esc(sft.scanner)}</small></dd></div>
+      <div><dt>Corpus hash</dt><dd class="hash">${esc(rows10[0]?.corpusHash ?? '')}<small>same bytes, same number</small></dd></div>
+    </dl>
+    <div class="scroll">
+      <table>
+        <tr><th>benchmark</th><th class="num">n</th><th class="num">flagged</th><th class="num">rate</th><th class="num">matches</th><th class="num">discarded</th><th class="num">unscannable</th></tr>
+${table}
+      </table>
+    </div>
+    <p class="plain" style="margin-top:1.4rem"><strong>GSM8K's train split is inside this corpus;
+    its test split is not.</strong> ${s.itemsWithTrainSiblingInDocs} of ${s.flaggedTestItems} flagged
+    test questions are template siblings of train-split questions that appear verbatim in the very
+    same documents — and ${s.testItemsReproducedVerbatim} test questions appear verbatim themselves.
+    Across all three benchmarks the triage reads ${leaked} leaked · ${partial} partial · ${phrase} phrase-level,
+    and the longest verbatim run anywhere is ${top?.longestRun ?? 0} tokens
+    of a ${top?.itemTokens ?? 0}-token item.</p>
+    <p>A scanner that stopped at the flag would have called this a test-set leak. The words say
+    otherwise — and they also say the fine-tuning set carries the training questions, which is
+    worth knowing before quoting a GSM8K number for any model tuned on it.</p>
+${exhibits}
+    <details class="more">
+      <summary>Every flagged test question beside the train question found with it</summary>
+      <div class="scroll">
+      <table>
+        <tr><th>flagged test item</th><th>train-split question, verbatim in its documents</th></tr>
+${siblings}
+      </table>
+      </div>
+      <p>Texts clipped for the page; full questions and document lists are in
+      results/sft-slimorca-train-check.json.</p>
+    </details>
+    <details class="more">
+      <summary>How the triage measures a leak — and the artifact it almost published</summary>
+      <p>For every flagged item: the longest common token run against each document its evidence
+      names, as a fraction of the item. A leak reproduces most of itself; boilerplate reproduces
+      the phrase and stops. The verdicts also require <em>excess</em> — tokens beyond the flagging
+      ${sft.defaultN}-gram — because every flagged item carries ${sft.defaultN}/length coverage by
+      construction, and on its first run coverage alone labelled three short items "leaked" on
+      exactly that floor. Thresholds and per-item numbers: results/sft-slimorca-triage.json.</p>
+    </details>
+  </div>
+</section>`;
+}
+
 const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -402,16 +529,20 @@ const html = `<!doctype html>
   public, so every number can be re-derived from the same files.</p>
   <!-- The verdict, before the tables. It used to sit three screens down, after two tables
        a reader had to interpret unaided — the page buried its own conclusion. -->
-  <p class="plain"><strong>Two passes so far.${pretrain ? ` Against ${ptGB} GB of C4 web text:
+  <p class="plain"><strong>${sft ? 'Three passes' : 'Two passes'} so far.${pretrain ? ` Against ${ptGB} GB of C4 web text:
   ${ptFlagged} distinct items flagged, every retained match inspected, and none is
-  contamination.` : ''} Against two instruction-tuning sets: ${totalFlagged} distinct items of
-  ${num(totalItems)}, all canonical text.</strong> Why a page full of matches and no
-  contamination is the finding — and not a disappointment — is explained beside the evidence.</p>
+  contamination.` : ''}${sft ? ` Against a 2023 distillation set where a leak was chronologically
+  possible: GSM8K's train split found verbatim, its test split not reproduced.` : ''} Against two
+  instruction-tuning sets: ${totalFlagged} distinct items of
+  ${num(totalItems)}, all canonical text.</strong> Why a page full of matches and no leaked
+  test set is the finding — and not a disappointment — is explained beside the evidence.</p>
   <pre>node scripts/fetch-benchmarks.ts &amp;&amp; node scripts/registry-scan.ts${pretrain ? `
-node scripts/fetch-pretraining.ts --shards ${pretrain.corpus.shardCount} &amp;&amp; node scripts/pretraining-scan.ts` : ''}</pre>
+node scripts/fetch-pretraining.ts --shards ${pretrain.corpus.shardCount} &amp;&amp; node scripts/pretraining-scan.ts` : ''}${sft ? `
+node scripts/fetch-sft.ts &amp;&amp; node scripts/pretraining-scan.ts --corpus ../corpora/slimorca --out sft-slimorca` : ''}</pre>
 </header>
 
 ${ptSection}
+${sftSection()}
 <section>
   <div class="wrap">
     <h2>The instruction-tuning pass at n=${DEFAULT_N}, the Ingot default</h2>
@@ -473,7 +604,12 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
       into this pile. A match means the item's posing text existed on the public web before the
       benchmark was assembled.</li>
       <li>The pretraining pass has run at n=${pretrain.defaultN} only; the n=${pretrain.legacyN}
-      comparability pass is not yet published.</li>` : ''}
+      comparability pass is not yet published.</li>` : ''}${sft ? `
+      <li>SlimOrca is a derived corpus — ShareGPT turns flattened to text by
+      scripts/fetch-sft.ts. The manifest records the source file's SHA-256 beside the derived
+      file's, so the derivation is checkable end to end.</li>
+      <li>The train-versus-test sibling check was run for GSM8K only; the other benchmarks'
+      flagged items were triaged by measured run length, not against a train split.</li>` : ''}
       <li>The instruction-tuning corpora are 2023-era fine-tuning sets of a few million tokens.
       A null result there says almost nothing about pretraining — which is why the pretraining
       pass exists.</li>
@@ -490,7 +626,7 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
 <footer>
   <div class="wrap">
     Ingot · ${esc(registry.scanner)} · Apache-2.0<br>
-    Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ' and results/canonicality.json' : ''}.
+    Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ', results/canonicality.json' : ''}${sft ? ', results/sft-slimorca.json and its triage and train-check companions' : ''}.
     Do not edit this page by hand — rebuild it with
     <strong>node scripts/build-registry-page.ts</strong>.
   </div>

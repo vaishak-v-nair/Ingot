@@ -1,0 +1,1134 @@
+{
+  "scanner": "ingot-0.1.0",
+  "defaultN": 10,
+  "legacyN": 13,
+  "corpus": {
+    "name": "slimorca",
+    "licence": "MIT",
+    "source": "https://huggingface.co/datasets/Open-Orca/SlimOrca/resolve/main/oo-labeled_correct.gpt4.sharegpt.jsonl",
+    "fetchedAt": "2026-07-31T12:39:51.622Z",
+    "shardCount": 1,
+    "compressedBytes": 297315218,
+    "uncompressedBytes": 921470002,
+    "shards": [
+      {
+        "name": "slimorca.jsonl.gz",
+        "bytes": 297315218,
+        "sha256": "47138bbdafb68e8824f10b3828f0a37a8e3171247d407e8b38d47d5a2849795c"
+      }
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "gsm8k",
+      "path": "data/bench/gsm8k.jsonl",
+      "licence": "MIT",
+      "note": "test split, question text"
+    },
+    {
+      "name": "humaneval",
+      "path": "data/bench/humaneval.jsonl",
+      "licence": "MIT",
+      "note": "prompt: signature + docstring"
+    },
+    {
+      "name": "mmlu",
+      "path": "data/bench/mmlu.jsonl",
+      "licence": "MIT",
+      "note": "test split, question + choices"
+    }
+  ],
+  "complete": true,
+  "results": [
+    {
+      "benchmark": "gsm8k",
+      "corpus": "slimorca",
+      "n": 10,
+      "itemsTotal": 1319,
+      "itemsHit": 4,
+      "rate": 0.003032600454890068,
+      "totalMatches": 16,
+      "uncheckableItems": 0,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 278560,
+      "throughputMBs": 3.3079767446869615,
+      "droppedGeneric": 47,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "gsm8k-10",
+        "gsm8k-25",
+        "gsm8k-410",
+        "gsm8k-582"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-410894",
+          "corpusOffset": 48,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "answer.\n\nQuestion: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-411725",
+          "corpusOffset": 339,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "following question.\nJoseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-25",
+          "corpusDocId": "slimorca-417651",
+          "corpusOffset": 150,
+          "matchedText": "the original price. What was the original price of the",
+          "contextBefore": "Eunice spent $7500 on a used car, which is 25% less than ",
+          "contextAfter": " car?\nA: The price $7500 is 100% - 25% = 75% of the original",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-10",
+          "corpusDocId": "slimorca-420851",
+          "corpusOffset": 582,
+          "matchedText": "hour for the first 40 hours she works each week",
+          "contextBefore": "answer: 700\nWhat was the question?\nQuestion: Janice gets paid $10 an ",
+          "contextAfter": ", and $15 each hour of overtime after that. If Janice works 60",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-431184",
+          "corpusOffset": 257,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "question?\nQuestion: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-410",
+          "corpusDocId": "slimorca-450593",
+          "corpusOffset": 283,
+          "matchedText": "calculate the total amount of money the company paid to the",
+          "contextBefore": "laid off 1/3 of its employees due to tough economic times, ",
+          "contextAfter": " remaining employees.\nA: 600000\nStep-by-step reasoning process: 1 / 3 of",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-10",
+          "corpusDocId": "slimorca-455305",
+          "corpusOffset": 43,
+          "matchedText": "hour for the first 40 hours she works each week",
+          "contextBefore": "by-step and justify your answer.\n\nLizzy: Janice gets paid $10 an ",
+          "contextAfter": ", and $15 each hour of overtime after that. If Janice works 60",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-10",
+          "corpusDocId": "slimorca-468138",
+          "corpusOffset": 473,
+          "matchedText": "hour for the first 40 hours she works each week",
+          "contextBefore": "burritos left. The answer is 10.\n[Question]Janice gets paid $10 an ",
+          "contextAfter": ", and $15 each hour of overtime after that. If Janice works 60",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-25",
+          "corpusDocId": "slimorca-475766",
+          "corpusOffset": 329,
+          "matchedText": "the original price. What was the original price of the",
+          "contextBefore": "Eunice spent $7500 on a used car, which is 25% less than ",
+          "contextAfter": " car?\n[Answer]The price $7500 is 100% - 25% = 75% of the original",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-25",
+          "corpusDocId": "slimorca-484362",
+          "corpusOffset": 50,
+          "matchedText": "the original price. What was the original price of the",
+          "contextBefore": "Eunice spent $7500 on a used car, which is 25% less than ",
+          "contextAfter": " car? Think carefully first, then make a decision:\n\nTo find the original",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-25",
+          "corpusDocId": "slimorca-488751",
+          "corpusOffset": 147,
+          "matchedText": "the original price. What was the original price of the",
+          "contextBefore": "Eunice spent $7500 on a used car, which is 25% less than ",
+          "contextAfter": " car?\n\nLet x be the number of pages of the old edition",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-10",
+          "corpusDocId": "slimorca-490692",
+          "corpusOffset": 43,
+          "matchedText": "hour for the first 40 hours she works each week",
+          "contextBefore": "by-step and justify your answer.\n\n[Question]Janice gets paid $10 an ",
+          "contextAfter": ", and $15 each hour of overtime after that. If Janice works 60",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-10",
+          "corpusDocId": "slimorca-495681",
+          "corpusOffset": 79,
+          "matchedText": "hour for the first 40 hours she works each week",
+          "contextBefore": "180 = $1020. The answer is 1020.\n[Question]Janice gets paid $10 an ",
+          "contextAfter": ", and $15 each hour of overtime after that. If Janice works 60",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-496211",
+          "corpusOffset": 595,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "the question: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-410",
+          "corpusDocId": "slimorca-502055",
+          "corpusOffset": 328,
+          "matchedText": "calculate the total amount of money the company paid to the",
+          "contextBefore": "laid off 1/3 of its employees due to tough economic times, ",
+          "contextAfter": " remaining employees.\n\nTwo aeroplanes require 240 legos / airplane x 2 airplanes = 480",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-25",
+          "corpusDocId": "slimorca-512186",
+          "corpusOffset": 600,
+          "matchedText": "the original price. What was the original price of the",
+          "contextBefore": "Question: Venny spent $15000 on a used car which cost 40% of ",
+          "contextAfter": " car?\nAnswer:\n\nLet the original price of the car be x. The",
+          "corpusDocFrequency": 5
+        }
+      ]
+    },
+    {
+      "benchmark": "gsm8k",
+      "corpus": "slimorca",
+      "n": 13,
+      "itemsTotal": 1319,
+      "itemsHit": 1,
+      "rate": 0.000758150113722517,
+      "totalMatches": 4,
+      "uncheckableItems": 0,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 168987,
+      "throughputMBs": 5.452904673140538,
+      "droppedGeneric": 19,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "gsm8k-582"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-410894",
+          "corpusOffset": 48,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "answer.\n\nQuestion: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-411725",
+          "corpusOffset": 339,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "following question.\nJoseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-431184",
+          "corpusOffset": 257,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "question?\nQuestion: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-582",
+          "corpusDocId": "slimorca-496211",
+          "corpusOffset": 595,
+          "matchedText": "The first movie is 1 hour and 30 minutes long while the second movie is",
+          "contextBefore": "the question: Joseph and his friends watched two movies in his house. ",
+          "contextAfter": " 30 minutes longer than the first. Before the movies, they spent 10",
+          "corpusDocFrequency": 4
+        }
+      ]
+    },
+    {
+      "benchmark": "humaneval",
+      "corpus": "slimorca",
+      "n": 10,
+      "itemsTotal": 164,
+      "itemsHit": 4,
+      "rate": 0.024390243902439025,
+      "totalMatches": 14,
+      "uncheckableItems": 0,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 210071,
+      "throughputMBs": 4.386469346078231,
+      "droppedGeneric": 64,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "HumanEval-107",
+        "HumanEval-71",
+        "HumanEval-78",
+        "HumanEval-94"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-94",
+          "corpusDocId": "slimorca-39011",
+          "corpusOffset": 55,
+          "matchedText": "you are given a list of integers. You need to find the",
+          "contextBefore": "a task first, then some input of the task.\nIn this task, ",
+          "contextAfter": " median of the list of integers and return that as the output",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-64351",
+          "corpusOffset": 32,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "1: How many 3 digit numbers can be formed using the digits ",
+          "contextAfter": " if no repetitions of digits are allowed?\nQuestion 2: How many 3",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-64351",
+          "corpusOffset": 62,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "2: How many 3 digit numbers can be formed using the digits ",
+          "contextAfter": " if repetitions of digits are allowed?\n\nWould the answer to these two",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-106676",
+          "corpusOffset": 171,
+          "matchedText": "1   2   3   4   5   6   7   8   9    A  B  C  D  E  F",
+          "contextBefore": "character your name's (and self's) different facets before uncovering their combined meaning.      ",
+          "contextAfter": "  G  H  I    J  K  L  M  N  O  P  Q  R",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-94",
+          "corpusDocId": "slimorca-181833",
+          "corpusOffset": 53,
+          "matchedText": "you are given a list of integers you need to",
+          "contextBefore": "how you used the guidelines to solve the task.\n\nIn this task, ",
+          "contextAfter": " calculate and return the range of the integers which is the difference",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-94",
+          "corpusDocId": "slimorca-291537",
+          "corpusOffset": 4,
+          "matchedText": "you are given a list of integers. You need to find the",
+          "contextBefore": "Definition: In this task, ",
+          "contextAfter": " median of the list of integers and return that as the output",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-71",
+          "corpusDocId": "slimorca-387029",
+          "corpusOffset": 245,
+          "matchedText": "the sum of any two sides is greater than the third side",
+          "contextBefore": "1: Determine if the triangle is valid.\nA triangle is valid if ",
+          "contextAfter": ". In this case: \n1 + 2 > 3\n2 + 3 > 1\n1 + 3 > 2",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "slimorca-430049",
+          "corpusOffset": 100,
+          "matchedText": "are:\n1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "numbers are positive integers (excluding zero). So, the first 13 natural numbers ",
+          "contextAfter": ", 10, 11, 12, and 13.\n\nStep 2: Find the sum of these",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-431487",
+          "corpusOffset": 225,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "least integer, the 14 consecutive integers will be -4, -3, -2, -1, ",
+          "contextAfter": ". The positive integers in the list are 1, 2, 3, 4, 5",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "slimorca-431487",
+          "corpusOffset": 241,
+          "matchedText": "are 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "4, 5, 6, 7, 8, 9. The positive integers in the list ",
+          "contextAfter": ". The range is the difference between the greatest and least positive integers",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-456461",
+          "corpusOffset": 538,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "integers, starting with -4. So, the integers are: -4, -3, -2, -1, ",
+          "contextAfter": ".\nThe positive integers in the list are: 1, 2, 3, 4, 5",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "slimorca-456461",
+          "corpusOffset": 554,
+          "matchedText": "are: 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "4, 5, 6, 7, 8, 9.\nThe positive integers in the list ",
+          "contextAfter": ".\nThe range of the positive integers in list K = the largest positive",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "slimorca-484006",
+          "corpusOffset": 214,
+          "matchedText": "are: 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "C) 7\n(D) 9\n(E) 10\na:\n\nThe first 13 natural numbers ",
+          "contextAfter": ", 10, 11, 12, 13.\n\nTo find the average, we need to find",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-500912",
+          "corpusOffset": 101,
+          "matchedText": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9",
+          "contextBefore": "refer to the Hindu-Arabic numeral system, which consists of 10 digits (",
+          "contextAfter": ") and is the most commonly used numeral system today.\n\nStep 2: Compare",
+          "corpusDocFrequency": 4
+        }
+      ]
+    },
+    {
+      "benchmark": "humaneval",
+      "corpus": "slimorca",
+      "n": 13,
+      "itemsTotal": 164,
+      "itemsHit": 1,
+      "rate": 0.006097560975609756,
+      "totalMatches": 1,
+      "uncheckableItems": 0,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 129722,
+      "throughputMBs": 7.103421177595164,
+      "droppedGeneric": 0,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "HumanEval-78"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "slimorca-106676",
+          "corpusOffset": 171,
+          "matchedText": "1   2   3   4   5   6   7   8   9    A  B  C  D  E  F",
+          "contextBefore": "character your name's (and self's) different facets before uncovering their combined meaning.      ",
+          "contextAfter": "  G  H  I    J  K  L  M  N  O  P  Q  R",
+          "corpusDocFrequency": 1
+        }
+      ]
+    },
+    {
+      "benchmark": "mmlu",
+      "corpus": "slimorca",
+      "n": 10,
+      "itemsTotal": 14042,
+      "itemsHit": 28,
+      "rate": 0.0019940179461615153,
+      "totalMatches": 51,
+      "uncheckableItems": 28,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 1112086,
+      "throughputMBs": 0.8285959916769027,
+      "droppedGeneric": 65,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "mmlu-1059",
+        "mmlu-10964",
+        "mmlu-11524",
+        "mmlu-11525",
+        "mmlu-1167",
+        "mmlu-12248",
+        "mmlu-1359",
+        "mmlu-13681",
+        "mmlu-276",
+        "mmlu-351",
+        "mmlu-3633",
+        "mmlu-3727",
+        "mmlu-3731",
+        "mmlu-3811",
+        "mmlu-3829",
+        "mmlu-4350",
+        "mmlu-4431",
+        "mmlu-4678",
+        "mmlu-480",
+        "mmlu-5658",
+        "mmlu-5703",
+        "mmlu-5712",
+        "mmlu-5721",
+        "mmlu-5774",
+        "mmlu-5827",
+        "mmlu-5966",
+        "mmlu-684",
+        "mmlu-6858"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3727",
+          "corpusDocId": "slimorca-32488",
+          "corpusOffset": 1754,
+          "matchedText": "the American Federation of Labor and Congress of Industrial Organizations (AFL-CIO",
+          "contextBefore": "Lee Saunders, president of the AFSCME, center, and Richard Trumka, president of ",
+          "contextAfter": "), right, during the Democratic National Convention (DNC) in Philadelphia, Pennsylvania, U.S",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11525",
+          "corpusDocId": "slimorca-64223",
+          "corpusOffset": 539,
+          "matchedText": "He was sentenced to life in prison without the possibility of parole",
+          "contextBefore": "of capital murder in the deaths of Chris Kyle and Chad Littlefield. ",
+          "contextAfter": ". The verdict indicates that the jury did not accept the argument that",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5703",
+          "corpusDocId": "slimorca-76906",
+          "corpusOffset": 738,
+          "matchedText": "Martin Luther King Jr.'s \"I Have a Dream\" speech",
+          "contextBefore": "said Giffords learned to talk again, reciting the U.S. Constitution and ",
+          "contextAfter": ".\n\nThe book reveals that because of her injuries, Giffords has lost 50",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-4678",
+          "corpusDocId": "slimorca-80328",
+          "corpusOffset": 410,
+          "matchedText": "which of the following statements accurately describes the relationship between",
+          "contextBefore": "the birth parents' identities. Question:\nThe answer is:\n\nIn a closed adoption, ",
+          "contextAfter": " the adoptive parents and the birth parents?\n\nA. The birth parents may",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5966",
+          "corpusDocId": "slimorca-116818",
+          "corpusOffset": 300,
+          "matchedText": "from each according to his abilities, to each according to his needs",
+          "contextBefore": "other according to their needs and abilities\", an echo of Karl Marx's \"",
+          "contextAfter": "\".  In the final paragraph of the essay, the phrase \"The America we",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5966",
+          "corpusDocId": "slimorca-134841",
+          "corpusOffset": 277,
+          "matchedText": "from each according to his abilities, to each according to his needs",
+          "contextBefore": "other according to their needs and abilities\", an echo of Karl Marx's \"",
+          "contextAfter": "\".  In the final paragraph of the essay, the phrase \"The America we",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5966",
+          "corpusDocId": "slimorca-144101",
+          "corpusOffset": 242,
+          "matchedText": "from each according to his abilities, to each according to his needs",
+          "contextBefore": "other according to their needs and abilities\", an echo of Karl Marx's \"",
+          "contextAfter": "\".  In the final paragraph of the essay, the phrase \"The America we",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11525",
+          "corpusDocId": "slimorca-148053",
+          "corpusOffset": 381,
+          "matchedText": "he was sentenced to life in prison without the possibility of parole",
+          "contextBefore": "of violating Pennsylvania's Abortion Act and performing illegal late-term abortions. Consequently, ",
+          "contextAfter": ".\n\nThe film, \"Gosnell: America's Biggest Serial Killer,\" focuses on the life and",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5703",
+          "corpusDocId": "slimorca-149469",
+          "corpusOffset": 181,
+          "matchedText": "Martin Luther King Jr.'s \"I Have a Dream\" speech",
+          "contextBefore": "lava-like stage.\n3. The show began with a voice-over from ",
+          "contextAfter": ", reflecting Beyoncé's recent focus on political themes in her art",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3633",
+          "corpusDocId": "slimorca-159156",
+          "corpusOffset": 143,
+          "matchedText": "is based on the life and teachings of Jesus Christ",
+          "contextBefore": "Whose life do Christians learn from?\" because it clearly states that Christianity ",
+          "contextAfter": ". This implies that Christians learn from the life of Jesus Christ.\n\nb",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6858",
+          "corpusDocId": "slimorca-175714",
+          "corpusOffset": 292,
+          "matchedText": "1 1  1  1  1  1  1  1  1\n   0 1",
+          "contextBefore": "0  0  0\n   0 0 0 0 0 0 0 0 0 ",
+          "contextAfter": " 0 0 0 1 0 0 0 0 0  0  0  1",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5966",
+          "corpusDocId": "slimorca-188620",
+          "corpusOffset": 296,
+          "matchedText": "from each according to his abilities, to each according to his needs",
+          "contextBefore": "other according to their needs and abilities\", an echo of Karl Marx's \"",
+          "contextAfter": "\".  In the final paragraph of the essay, the phrase \"The America we",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-1059",
+          "corpusDocId": "slimorca-208661",
+          "corpusOffset": 398,
+          "matchedText": "which of the following best describes the purpose of the",
+          "contextBefore": "Answer:\n\nBased on the article about Stanley Milgram's experiment in behavioral psychology, ",
+          "contextAfter": " experiment?\n\nA) To determine if administering electric shocks to students would improve",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-6858",
+          "corpusDocId": "slimorca-217176",
+          "corpusOffset": 325,
+          "matchedText": "1,  1,  1,  1,  1,  1,  1,  1,  1],\n       [0",
+          "contextBefore": "0,  0,  0,  0,  0,  0,  0,  0,  0],\n       [0,  0,  0,  ",
+          "contextAfter": ",  0,  0,  1,  2,  2,  2,  2,  2,  2,  2,  2],\n       [0",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-13681",
+          "corpusDocId": "slimorca-229967",
+          "corpusOffset": 188,
+          "matchedText": "the Central Intelligence Agency (CIA), the Federal Bureau of Investigation (FBI",
+          "contextBefore": "The raid, a carefully planned effort by the United States' Delta Force, ",
+          "contextAfter": "), and the Libyan government, lasted barely a minute. The successful capture of",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5658",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5712",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5827",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-1359",
+          "corpusDocId": "slimorca-238870",
+          "corpusOffset": 305,
+          "matchedText": "According to the article, which of the following is NOT a",
+          "contextBefore": "TV Answer: D playing computer games or watching TV Question:\nAnswer:\n\nQuestion: ",
+          "contextAfter": " way to build a strong relationship with your parents?\n\nOptions:\nA. Spending",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-480",
+          "corpusDocId": "slimorca-252897",
+          "corpusOffset": 211,
+          "matchedText": "2 3 4, 1 2 3 4, 1 2 3",
+          "contextBefore": "means that the song repeats 4 beats of 4 quarter notes (1 ",
+          "contextAfter": " 4, etc). Any instrument that plays notes and chords is a melody",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11525",
+          "corpusDocId": "slimorca-266664",
+          "corpusOffset": 481,
+          "matchedText": "He was sentenced to life in prison without the possibility of parole",
+          "contextBefore": "guilty of first-degree murder and the other charges brought against him. ",
+          "contextAfter": " for 25 years. Additionally, he received 19 years for other crimes he",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-684",
+          "corpusDocId": "slimorca-292140",
+          "corpusOffset": 135,
+          "matchedText": "A solution that has a higher concentration of solutes than",
+          "contextBefore": "an imbalance of solutes outside of a cell versus inside the cell. ",
+          "contextAfter": " another solution is said to be hypertonic, and water molecules tend to",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-684",
+          "corpusDocId": "slimorca-292140",
+          "corpusOffset": 181,
+          "matchedText": "a solution that has a lower concentration of solutes than",
+          "contextBefore": "solution will shrivel as water leaves the cell via osmosis. In contrast, ",
+          "contextAfter": " another solution is said to be hypotonic, and water molecules tend to",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5966",
+          "corpusDocId": "slimorca-312642",
+          "corpusOffset": 296,
+          "matchedText": "from each according to his abilities, to each according to his needs",
+          "contextBefore": "other according to their needs and abilities\", an echo of Karl Marx's \"",
+          "contextAfter": "\".  In the final paragraph of the essay, the phrase \"The America we",
+          "corpusDocFrequency": 5
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3811",
+          "corpusDocId": "slimorca-323845",
+          "corpusOffset": 207,
+          "matchedText": "not be deprived of “life, liberty, or property, without due process",
+          "contextBefore": "case.\n\nThe Fifth Amendment, among other rights, provides that a person should ",
+          "contextAfter": " of law.” While the Penry v. Lynaugh decision centers on the jury",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5721",
+          "corpusDocId": "slimorca-329168",
+          "corpusOffset": 196,
+          "matchedText": "government is not the solution to our problem; government is the problem",
+          "contextBefore": "markets and dismissing the role of government---following Ronald Regan's idea that \"",
+          "contextAfter": ". \"Of course, when the markets came crashing down in 2007, it was",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5774",
+          "corpusDocId": "slimorca-329168",
+          "corpusOffset": 196,
+          "matchedText": "government is not the solution to our problem; government is the problem",
+          "contextBefore": "markets and dismissing the role of government---following Ronald Regan's idea that \"",
+          "contextAfter": ". \"Of course, when the markets came crashing down in 2007, it was",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-4350",
+          "corpusDocId": "slimorca-339004",
+          "corpusOffset": 101,
+          "matchedText": "what is the probability that the product of the two",
+          "contextBefore": "and an integer is to be randomly selected from set t above , ",
+          "contextAfter": " integers will be negative ?\nA:\n\nTo solve the task, you are asked",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11525",
+          "corpusDocId": "slimorca-361312",
+          "corpusOffset": 900,
+          "matchedText": "was sentenced to life in prison without the possibility of parole",
+          "contextBefore": "from her abdomen after she was bludgeoned to death. Korena Roberts, 29, ",
+          "contextAfter": ". In Massachusetts, a Worcester woman, Julie Corey, pleaded not guilty to killing",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-12248",
+          "corpusDocId": "slimorca-363298",
+          "corpusOffset": 78,
+          "matchedText": "she and her husband have been trying to conceive for",
+          "contextBefore": "should Aubrey do immediately after finding out she is pregnant, considering that ",
+          "contextAfter": " some time",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "slimorca-365589",
+          "corpusOffset": 530,
+          "matchedText": "We hold these truths to be self-evident , that all men are created equal",
+          "contextBefore": "anyway it goes against the deepest belief Americans are supposed to have: \"",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "slimorca-396576",
+          "corpusOffset": 187,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "Independence, which also deduced human rights from the biblical belief in creation: \"",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-351",
+          "corpusDocId": "slimorca-404144",
+          "corpusOffset": 232,
+          "matchedText": "is one of the brightest stars in the night sky",
+          "contextBefore": "could be the question and solution-maybe?\nQues: Vega, Lyra's brightest star, ",
+          "contextAfter": ", and forms a corner of the famed Summer Triangle asterism. Beta Lyrae",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-351",
+          "corpusDocId": "slimorca-404144",
+          "corpusOffset": 338,
+          "matchedText": "is one of the brightest stars in the night sky",
+          "contextBefore": "To answer this question, we should know that: Vega, Lyra's brightest star, ",
+          "contextAfter": ", and forms a corner of the famed Summer Triangle asterism.\n\n\nAns: late",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-4431",
+          "corpusDocId": "slimorca-405776",
+          "corpusOffset": 95,
+          "matchedText": "that has a remainder of 1 when divided by 4",
+          "contextBefore": "4, we can follow these steps:\n\n1. Identify the first positive integer ",
+          "contextAfter": ": This would be 1 itself, as 1 divided by 4 is 0",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-351",
+          "corpusDocId": "slimorca-409755",
+          "corpusOffset": 49,
+          "matchedText": "is one of the brightest stars in the night sky",
+          "contextBefore": "Use stream of consciousness to answer the following. Vega, Lyra's brightest star, ",
+          "contextAfter": ", and forms a corner of the famed Summer Triangle asterism. Beta Lyrae",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-276",
+          "corpusDocId": "slimorca-413901",
+          "corpusOffset": 152,
+          "matchedText": "the Sun is an ellipse, with the Sun at one",
+          "contextBefore": "of Ellipses): This law states that the orbit of a planet around ",
+          "contextAfter": " of the two foci of the ellipse.\n\n2. Kepler's Second Law (The",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10964",
+          "corpusDocId": "slimorca-427298",
+          "corpusOffset": 129,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11524",
+          "corpusDocId": "slimorca-427298",
+          "corpusOffset": 129,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10964",
+          "corpusDocId": "slimorca-430480",
+          "corpusOffset": 829,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10964",
+          "corpusDocId": "slimorca-430480",
+          "corpusOffset": 1004,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "facilities are inherently unequal,\" ruling de jure racial segregation in schools as ",
+          "contextAfter": " of the United States Constitution. This case was a major victory for",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11524",
+          "corpusDocId": "slimorca-430480",
+          "corpusOffset": 829,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11524",
+          "corpusDocId": "slimorca-430480",
+          "corpusOffset": 1004,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "facilities are inherently unequal,\" ruling de jure racial segregation in schools as ",
+          "contextAfter": " of the United States Constitution. This case was a major victory for",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3731",
+          "corpusDocId": "slimorca-431840",
+          "corpusOffset": 127,
+          "matchedText": "system of checks and balances among the three branches of",
+          "contextBefore": "behind this is as follows:\n\n1. The U.S. Constitution establishes a ",
+          "contextAfter": " government: the Legislative Branch (Congress), the Executive Branch (President), and the Judicial",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10964",
+          "corpusDocId": "slimorca-443068",
+          "corpusOffset": 283,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11524",
+          "corpusDocId": "slimorca-443068",
+          "corpusOffset": 283,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-351",
+          "corpusDocId": "slimorca-453090",
+          "corpusOffset": 550,
+          "matchedText": "is one of the brightest stars in the night sky",
+          "contextBefore": "on August 21, 2017.\nAugust 21 , 2017.\n\nProblem:Vega, Lyra's brightest star, ",
+          "contextAfter": ", and forms a corner of the famed Summer Triangle asterism. Beta Lyrae",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-351",
+          "corpusDocId": "slimorca-453090",
+          "corpusOffset": 657,
+          "matchedText": "is one of the brightest stars in the night sky",
+          "contextBefore": "The relevant information to answer this question is: Vega, Lyra's brightest star, ",
+          "contextAfter": ", and forms a corner of the famed Summer Triangle asterism.\nVega",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-10964",
+          "corpusDocId": "slimorca-456330",
+          "corpusOffset": 306,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-11524",
+          "corpusDocId": "slimorca-456330",
+          "corpusOffset": 306,
+          "matchedText": "a violation of the Equal Protection Clause of the Fourteenth Amendment",
+          "contextBefore": "are inherently unequal.\" As a result, de jure racial segregation was ruled ",
+          "contextAfter": " of the United States Constitution. This ruling paved the way for integration",
+          "corpusDocFrequency": 4
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-1167",
+          "corpusDocId": "slimorca-477686",
+          "corpusOffset": 158,
+          "matchedText": "where r is the radius and h is the height",
+          "contextBefore": "to use the formula for the volume of a cylinder: V = πr²h, ",
+          "contextAfter": ".\n\nFirst, we need to find the radius (r) of the well. The",
+          "corpusDocFrequency": 1
+        }
+      ]
+    },
+    {
+      "benchmark": "mmlu",
+      "corpus": "slimorca",
+      "n": 13,
+      "itemsTotal": 14042,
+      "itemsHit": 4,
+      "rate": 0.0002848597065945022,
+      "totalMatches": 5,
+      "uncheckableItems": 237,
+      "corpusDocs": 517982,
+      "corpusTokens": 150699944,
+      "corpusBytes": 921470002,
+      "corpusHash": "e99263650d2340c89aa50b7367100224",
+      "elapsedMs": 193823,
+      "throughputMBs": 4.75418295042384,
+      "droppedGeneric": 12,
+      "linesRead": 517982,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "mmlu-3829",
+        "mmlu-5658",
+        "mmlu-5712",
+        "mmlu-5827"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5658",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5712",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-5827",
+          "corpusDocId": "slimorca-238701",
+          "corpusOffset": 311,
+          "matchedText": "Yesterday, December 7, 1941 -- a date which will live in infamy -- the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan",
+          "contextBefore": "the fight against fascism was the driving force behind decisions about intervention. \"",
+          "contextAfter": ",\" President Franklin D. Roosevelt explained the next day, when asking Congress for",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "slimorca-365589",
+          "corpusOffset": 530,
+          "matchedText": "We hold these truths to be self-evident , that all men are created equal",
+          "contextBefore": "anyway it goes against the deepest belief Americans are supposed to have: \"",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "mmlu-3829",
+          "corpusDocId": "slimorca-396576",
+          "corpusOffset": 187,
+          "matchedText": "We hold these truths to be self-evident, that all men are created equal",
+          "contextBefore": "Independence, which also deduced human rights from the biblical belief in creation: \"",
+          "contextAfter": ", that they are endowed by their Creator with certain unalienable Rights, that",
+          "corpusDocFrequency": 2
+        }
+      ]
+    }
+  ]
+}
