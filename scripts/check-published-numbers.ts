@@ -27,8 +27,12 @@ const MEASUREMENTS = 'docs/measurements.md';
 // The front page publishes numbers too, and until now nothing checked it. It is the
 // surface most people see and the one least likely to be updated when a scan is re-run.
 const SITE = 'web/index.html';
+// The registry page renders the same results a second time — generated, which is exactly
+// how it drifted once: the generator only knew the instruction-set file while the front
+// page had moved on to C4. Gating the generated page catches the stale-build failure mode.
+const REGISTRY = 'web/registry.html';
 
-for (const p of [REPORT, README, MEASUREMENTS, SITE, 'results/pretraining-c4.json']) {
+for (const p of [REPORT, README, MEASUREMENTS, SITE, REGISTRY, 'results/pretraining-c4.json']) {
   if (!existsSync(resolve(p))) {
     process.stderr.write(`\n  missing: ${p}\n\n`);
     process.exit(2);
@@ -127,6 +131,22 @@ const claims: Claim[] = [
     : [{ doc: SITE, label: 'site: specimen source missing from results', expected: 'SPECIMEN-SOURCE-MISSING' }]),
   { doc: SITE, label: 'site: total discarded by filter', expected: `${droppedTotal}` },
   { doc: SITE, label: 'site: single-shard documents', expected: shard.results[0].corpusDocs.toLocaleString('en-US') },
+  // The registry page's C4 section, checked row by row like the front page's.
+  { doc: REGISTRY, label: 'registry: corpus size', expected: `${(c4.corpus.uncompressedBytes / 1e9).toFixed(2)} GB` },
+  { doc: REGISTRY, label: 'registry: corpus documents', expected: mmlu.corpusDocs.toLocaleString('en-US') },
+  { doc: REGISTRY, label: 'registry: corpus tokens', expected: mmlu.corpusTokens.toLocaleString('en-US') },
+  { doc: REGISTRY, label: 'registry: corpus hash', expected: mmlu.corpusHash },
+  ...c4.results.map((r) => ({
+    doc: REGISTRY,
+    label: `registry: ${r.benchmark} flagged`,
+    expected: `${r.itemsHit} / ${r.itemsTotal.toLocaleString('en-US')}`,
+  })),
+  ...c4.results.map((r) => ({
+    doc: REGISTRY,
+    label: `registry: ${r.benchmark} rate`,
+    expected: `${(r.rate * 100).toFixed(3)}%`,
+  })),
+  { doc: REGISTRY, label: 'registry: total discarded by filter', expected: `${droppedTotal} matches` },
 ];
 
 // The canonicality run is optional: the report ships whether or not that scan has been run,
@@ -135,6 +155,7 @@ if (existsSync(resolve('results/canonicality.json'))) {
   const canon = json<{
     confirmedCanonical: string[];
     webCorpusOnly: string[];
+    webCorpus: { itemsFlagged: number };
     referenceCorpus: { documents: number };
     controlSet: { confirmed: number; total: number };
   }>('results/canonicality.json');
@@ -153,6 +174,24 @@ if (existsSync(resolve('results/canonicality.json'))) {
     {
       doc: SITE,
       label: 'site: control set result',
+      expected: `${canon.controlSet.confirmed} of ${canon.controlSet.total}`,
+    },
+    // The registry page carries the full cross-provenance section, so the same four
+    // figures are asserted there in the exact phrases the generator emits.
+    {
+      doc: REGISTRY,
+      label: 'registry: items confirmed canonical',
+      expected: `${canon.confirmedCanonical.length} of the ${canon.webCorpus.itemsFlagged}`,
+    },
+    {
+      doc: REGISTRY,
+      label: 'registry: items undetermined',
+      expected: `${canon.webCorpusOnly.length} are undetermined`,
+    },
+    { doc: REGISTRY, label: 'registry: reference corpus documents', expected: canon.referenceCorpus.documents.toLocaleString('en-US') },
+    {
+      doc: REGISTRY,
+      label: 'registry: control set result',
       expected: `${canon.controlSet.confirmed} of ${canon.controlSet.total}`,
     },
   );

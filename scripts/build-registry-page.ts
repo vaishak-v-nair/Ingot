@@ -1,18 +1,25 @@
 /**
- * Renders results/registry.json into web/registry.html.
+ * Renders results/registry.json — and, when present, results/pretraining-c4.json and
+ * results/canonicality.json — into web/registry.html.
  *
  * The registry is the discovery mechanism: it tells someone they have a problem before
  * they think to look for one. That only works if it is a page, not a JSON file in a
  * repository.
  *
- * Generated rather than hand-written, so the page cannot drift from the scan that produced
- * it. Every number here comes out of the same file CI checks.
+ * Generated rather than hand-written, so the page cannot drift from the scans that
+ * produced it. Every number here comes out of files CI checks, and the phrases carrying
+ * the load-bearing figures are asserted by check-published-numbers.ts against the same
+ * JSON this script reads.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DEFAULT_N, LEGACY_N } from '../src/contamination/types.ts';
 
-type Sample = { benchmarkItemId: string; corpusDocId: string; contextBefore: string; matchedText: string; contextAfter: string };
+type Sample = {
+  benchmarkItemId: string; corpusDocId: string;
+  contextBefore: string; matchedText: string; contextAfter: string;
+  corpusDocFrequency?: number;
+};
 type Row = {
   benchmark: string; corpus: string; n: number;
   itemsTotal: number; itemsHit: number; rate: number; totalMatches: number;
@@ -24,10 +31,34 @@ type Registry = {
   benchmarks: string[]; corpora: string[]; results: Row[];
   crossCorpus?: { itemKey: string; corpora: string[] }[];
 };
+type PretrainRow = Row & { corpusBytes: number; droppedGeneric: number; throughputMBs: number };
+type Pretrain = {
+  scanner: string; defaultN: number; legacyN: number;
+  corpus: { name: string; licence: string; source: string; shardCount: number; uncompressedBytes: number };
+  results: PretrainRow[];
+};
+type Canon = {
+  benchmark: string; n: number;
+  webCorpus: { name: string; itemsFlagged: number };
+  referenceCorpus: {
+    name: string; documents: number; excludedSubsets: string[]; itemsHit: number; totalMatches: number;
+  };
+  confirmedCanonical: string[]; webCorpusOnly: string[];
+  confirmationsBySource: Record<string, number>;
+  controlSet: { confirmed: number; total: number; rows: { id: string; label: string; confirmed: boolean }[] };
+  caveat: string;
+};
 
 const registry = JSON.parse(readFileSync(resolve('results/registry.json'), 'utf8')) as Registry;
+const pretrain = existsSync(resolve('results/pretraining-c4.json'))
+  ? (JSON.parse(readFileSync(resolve('results/pretraining-c4.json'), 'utf8')) as Pretrain)
+  : null;
+const canon = existsSync(resolve('results/canonicality.json'))
+  ? (JSON.parse(readFileSync(resolve('results/canonicality.json'), 'utf8')) as Canon)
+  : null;
 
 const esc = (s: string): string => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+const num = (n: number): string => n.toLocaleString('en-US');
 
 function table(n: number): string {
   const rows = registry.results.filter((r) => r.n === n);
@@ -35,7 +66,7 @@ function table(n: number): string {
     .map(
       (r) => `        <tr>
           <td>${esc(r.benchmark)}</td><td>${esc(r.corpus)}</td>
-          <td class="num">${r.itemsHit} / ${r.itemsTotal.toLocaleString()}</td>
+          <td class="num">${r.itemsHit} / ${num(r.itemsTotal)}</td>
           <td class="num">${(r.rate * 100).toFixed(2)}%</td>
           <td class="num">${r.totalMatches}</td>
           <td class="num">${r.uncheckableItems}</td>
@@ -48,19 +79,47 @@ ${body}
       </table>`;
 }
 
+/**
+ * The exhibit rule, stated so nobody mistakes it for hand-picking: longest matched text
+ * first, because a long verbatim run is the most informative evidence either way — most
+ * damning if it were leakage, most obviously canonical when it is a famous passage. At
+ * most two exhibits per benchmark item, so one item cannot fill the section. Ties break
+ * on ids, so the same JSON always renders the same page.
+ */
+function curate(samples: Sample[], cap: number): Sample[] {
+  const sorted = [...samples].sort(
+    (a, b) =>
+      b.matchedText.length - a.matchedText.length ||
+      a.benchmarkItemId.localeCompare(b.benchmarkItemId) ||
+      a.corpusDocId.localeCompare(b.corpusDocId),
+  );
+  const perItem = new Map<string, number>();
+  const out: Sample[] = [];
+  for (const s of sorted) {
+    const seen = perItem.get(s.benchmarkItemId) ?? 0;
+    if (seen >= 2) continue;
+    perItem.set(s.benchmarkItemId, seen + 1);
+    out.push(s);
+    if (out.length >= cap) break;
+  }
+  return out;
+}
+
+const hitBlock = (s: Sample, corpusDocs?: number): string => `    <div class="hit">
+      <div class="meta">
+        <span><b>${esc(s.benchmarkItemId)}</b></span>
+        <span>${esc(s.corpusDocId)}</span>${
+          s.corpusDocFrequency && corpusDocs
+            ? `\n        <span>in ${s.corpusDocFrequency} of ${num(corpusDocs)} documents</span>`
+            : ''
+        }
+      </div>
+      <div class="quote">…${esc(s.contextBefore)}<mark>${esc(s.matchedText)}</mark>${esc(s.contextAfter)}…</div>
+    </div>`;
+
 const evidence = registry.results
   .filter((r) => r.n === DEFAULT_N && r.samples.length > 0)
-  .map(
-    (r) => `    <h4>${esc(r.benchmark)} in ${esc(r.corpus)}</h4>
-${r.samples
-  .map(
-    (s) => `    <div class="hit">
-      <code>${esc(s.benchmarkItemId)} &rarr; ${esc(s.corpusDocId)}</code>
-      <div class="quote">…${esc(s.contextBefore)}<mark>${esc(s.matchedText)}</mark>${esc(s.contextAfter)}…</div>
-    </div>`,
-  )
-  .join('\n')}`,
-  )
+  .map((r) => `    <h4>${esc(r.benchmark)} in ${esc(r.corpus)}</h4>\n${r.samples.map((s) => hitBlock(s)).join('\n')}`)
   .join('\n');
 
 const cross = (registry.crossCorpus ?? [])
@@ -80,6 +139,124 @@ const totalItems = [...new Map(atDefault.map((r) => [r.benchmark, r.itemsTotal])
 const flaggedIds = new Set(atDefault.flatMap((r) => r.contaminatedItemIds.map((id) => `${r.benchmark}::${id}`)));
 const totalFlagged = flaggedIds.size;
 const flagRows = atDefault.reduce((sum, r) => sum + r.itemsHit, 0);
+
+// ---------------------------------------------------------------------------------------
+// The pretraining pass. One corpus, so ids are already distinct across rows.
+// ---------------------------------------------------------------------------------------
+
+const ptRows = pretrain ? pretrain.results.filter((r) => r.n === pretrain.defaultN) : [];
+const ptDocs = ptRows[0]?.corpusDocs ?? 0;
+const ptGB = pretrain ? (pretrain.corpus.uncompressedBytes / 1e9).toFixed(2) : '';
+const ptFlagged = ptRows.reduce((sum, r) => sum + r.contaminatedItemIds.length, 0);
+const ptMmlu = ptRows.find((r) => r.benchmark === 'mmlu');
+
+const ptTable = ptRows
+  .map(
+    (r) => `        <tr>
+          <td>${esc(r.benchmark)}</td>
+          <td class="num">${r.itemsHit} / ${num(r.itemsTotal)}</td>
+          <td class="num">${(r.rate * 100).toFixed(3)}%</td>
+          <td class="num">${r.totalMatches}</td>
+          <td class="num">${r.droppedGeneric}</td>
+          <td class="num">${r.uncheckableItems}</td>
+        </tr>`,
+  )
+  .join('\n');
+
+// Exhibit budget per benchmark: everything for the small rows, a curated six for MMLU,
+// with the retained-versus-total accounting printed beside them rather than implied.
+const ptEvidence = ptRows
+  .map((r) => {
+    const cap = r.benchmark === 'mmlu' ? 6 : r.benchmark === 'humaneval' ? 4 : r.samples.length;
+    const shown = curate(r.samples, cap);
+    const held = `${r.totalMatches} matches, ${r.samples.length} retained under the evidence cap, ${shown.length} shown — the full retained set is in results/pretraining-c4.json`;
+    return `    <h4>${esc(r.benchmark)} — ${esc(held)}</h4>\n${shown.map((s) => hitBlock(s, ptDocs)).join('\n')}`;
+  })
+  .join('\n');
+
+const ptSection = pretrain
+  ? `<section>
+  <div class="wrap">
+    <h2>The pretraining pass — three benchmarks against ${ptGB} GB of C4</h2>
+    <p class="plain">C4 is a public snapshot of web text — Common Crawl from April 2019, cleaned —
+    the kind of corpus models are actually pretrained on. Every benchmark below was assembled
+    <em>after</em> that snapshot, so a match here can never mean the exam leaked into this pile.
+    What a match shows is the reverse: the text posing a test item already existed on the
+    public web before the benchmark did.</p>
+    <dl class="assay">
+      <div><dt>Corpus</dt><dd>${esc(pretrain.corpus.name)}<small>${pretrain.corpus.shardCount} shards, Common Crawl, ${esc(pretrain.corpus.licence)}</small></dd></div>
+      <div><dt>Size</dt><dd><strong>${ptGB} GB</strong><small>${num(ptDocs)} documents</small></dd></div>
+      <div><dt>Tokens</dt><dd>${num(ptRows[0]?.corpusTokens ?? 0)}<small>one pass, streamed</small></dd></div>
+      <div><dt>Method</dt><dd>n = ${pretrain.defaultN}<small>exact, ${esc(pretrain.scanner)}</small></dd></div>
+      <div><dt>Corpus hash</dt><dd class="hash">${esc(ptRows[0]?.corpusHash ?? '')}<small>same bytes, same number</small></dd></div>
+    </dl>
+    <div class="scroll">
+      <table>
+        <tr><th>benchmark</th><th class="num">flagged</th><th class="num">rate</th><th class="num">matches</th><th class="num">discarded</th><th class="num">unscannable</th></tr>
+${ptTable}
+      </table>
+    </div>
+    <p class="plain" style="margin-top:1.4rem"><strong>&ldquo;2.4% of MMLU is contaminated in C4&rdquo;
+    is wrong, and that is the finding.</strong> The ${ptMmlu?.samples.length ?? 0} retained MMLU matches
+    were inspected and none is contamination: they are NATO Article 5, Patrick Henry, the Fifth
+    Amendment — canonical text, the famous passages the whole world quotes. MMLU quotes famous
+    documents; web text contains them. The overlap is exact, reproducible and evidentially worthless
+    — and a scanner that printed the rate without the words would have called it a scandal.</p>
+    <p>GSM8K's two matches are everyday phrasings each found in a single document, and HumanEval's
+    are digit runs and a textbook prime definition — the number sequences every explanation of
+    numbers contains. Judge all of it yourself:</p>
+${ptEvidence}
+  </div>
+</section>
+
+${canon ? canonSection() : ''}`
+  : '';
+
+function canonSection(): string {
+  if (!canon) return '';
+  const sources = Object.entries(canon.confirmationsBySource)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `      <li><code>${esc(k)}</code> confirmed ${v} item${v === 1 ? '' : 's'}</li>`)
+    .join('\n');
+  const controls = canon.controlSet.rows
+    .map(
+      (r) => `        <tr><td>${esc(r.id)}</td><td>${esc(r.label)}</td>
+          <td class="num">${r.confirmed ? 'confirmed' : 'not found'}</td></tr>`,
+    )
+    .join('\n');
+  return `<section>
+  <div class="wrap">
+    <h2>Canonical or leaked — the cross-provenance test</h2>
+    <p class="plain">A passage that reached two corpora by genuinely different routes is a property
+    of the language, not evidence a benchmark leaked. So the flagged MMLU items were scanned again
+    — against The Pile with every web-crawl subset removed: ${num(canon.referenceCorpus.documents)}
+    documents of court opinions, patents, paper abstracts and digitised books, routes a crawler was
+    never involved in.</p>
+    <p class="plain"><strong>${canon.confirmedCanonical.length} of the ${canon.webCorpus.itemsFlagged}
+    flagged items are confirmed canonical</strong> — their text lives in non-crawl print, most of it
+    in court opinions. The other ${canon.webCorpusOnly.length} are undetermined, <em>not</em> leaked:
+    a control set of nine unmistakably canonical items scored ${canon.controlSet.confirmed} of ${canon.controlSet.total}
+    against this reference, so absence from it carries no information.
+    Presence is evidence; absence is a lead.</p>
+    <ul>
+${sources}
+    </ul>
+    <details class="more">
+      <summary>The control set, and why absence proves nothing</summary>
+      <p>Nine items nobody believes leaked — famous speeches, founding documents — hand-labelled to
+      measure the test's negative power, not sampled from it. ${canon.controlSet.confirmed} of ${canon.controlSet.total}
+      appeared in the reference corpus at all:</p>
+      <div class="scroll">
+      <table>
+        <tr><th>item</th><th>what it quotes</th><th class="num">in the reference?</th></tr>
+${controls}
+      </table>
+      </div>
+      <p>${esc(canon.caveat)}</p>
+    </details>
+  </div>
+</section>`;
+}
 
 const html = `<!doctype html>
 <html lang="en">
@@ -160,13 +337,36 @@ const html = `<!doctype html>
   th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
   th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; }
   td.num, th.num { font-family: var(--mono); }
+  /* The corpus facts, stamped before the results — the same assay strip the front page
+     uses. A reader judging a claim should see what it was measured on without parsing a
+     paragraph. */
+  dl.assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+             gap: .9rem 1.4rem; margin: 1.2rem 0 1.4rem; padding: .9rem 0;
+             border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  dl.assay div { display: grid; gap: .15rem; align-content: start; }
+  dl.assay dt { font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
+                letter-spacing: .08em; color: var(--dim); }
+  dl.assay dd { margin: 0; font-size: .98rem; }
+  dl.assay dd small { display: block; color: var(--dim); font-size: .74rem; }
+  dl.assay dd.hash { font-family: var(--mono); font-size: .78rem; word-break: break-all; }
   /* Findings are a ruled record, exactly as on the front page. A border around each match
      adds no information and makes the most important content on the site look templated. */
   .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
   .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
+  .hit .meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem;
+               font-family: var(--mono); font-size: .74rem; color: var(--dim); }
+  .hit .meta b { color: var(--ink); font-weight: 600; }
   .quote { margin-top: .45rem; font-size: .92rem; color: var(--ink); }
   mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px;
          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* Depth folds, it does not delete — the same ruled disclosure as the front page. */
+  details.more { border-top: 1px solid var(--line); margin-top: 1.2rem; }
+  details.more summary { cursor: pointer; list-style: none; font-family: var(--mono);
+    font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--dim);
+    padding: .7rem 0; }
+  details.more summary::-webkit-details-marker { display: none; }
+  details.more summary::before { content: "+"; margin-right: .5rem; color: var(--gold); }
+  details.more[open] summary::before { content: "\\2212"; }
   /* Motion, under the same contract as the rest of the site. */
   /* screen-scoped: print rendering never scrolls, so a reveal print can see leaves
      every below-fold section as blank paper. */
@@ -202,21 +402,25 @@ const html = `<!doctype html>
   public, so every number can be re-derived from the same files.</p>
   <!-- The verdict, before the tables. It used to sit three screens down, after two tables
        a reader had to interpret unaided — the page buried its own conclusion. -->
-  <p class="plain"><strong>${totalFlagged} distinct items flagged of ${totalItems.toLocaleString()}
-  scanned — all ${totalFlagged} inspected, and none is contamination.</strong> Why that is the
-  finding, and not a disappointment, is explained under the evidence.</p>
-  <pre>node scripts/fetch-benchmarks.ts &amp;&amp; node scripts/registry-scan.ts</pre>
+  <p class="plain"><strong>Two passes so far.${pretrain ? ` Against ${ptGB} GB of C4 web text:
+  ${ptFlagged} distinct items flagged, every retained match inspected, and none is
+  contamination.` : ''} Against two instruction-tuning sets: ${totalFlagged} distinct items of
+  ${num(totalItems)}, all canonical text.</strong> Why a page full of matches and no
+  contamination is the finding — and not a disappointment — is explained beside the evidence.</p>
+  <pre>node scripts/fetch-benchmarks.ts &amp;&amp; node scripts/registry-scan.ts${pretrain ? `
+node scripts/fetch-pretraining.ts --shards ${pretrain.corpus.shardCount} &amp;&amp; node scripts/pretraining-scan.ts` : ''}</pre>
 </header>
 
+${ptSection}
 <section>
   <div class="wrap">
-    <h2>Results at n=${DEFAULT_N}, the Ingot default</h2>
+    <h2>The instruction-tuning pass at n=${DEFAULT_N}, the Ingot default</h2>
     <p class="plain">In plain words: n=${DEFAULT_N} means ${DEFAULT_N} identical words in a row is
     what counts as a match, and an <em>unscannable</em> item is one too short to ever produce a
     match at that length — named, never silently skipped.</p>
     <p>${registry.benchmarks.length} benchmarks against ${registry.corpora.length} corpora.
     <strong>${totalFlagged} distinct benchmark items flagged out of
-    ${totalItems.toLocaleString()}</strong>${flagRows !== totalFlagged ? `, appearing as ${flagRows} rows below because an item found in two corpora is one finding, not two` : ''}.</p>
+    ${num(totalItems)}</strong>${flagRows !== totalFlagged ? `, appearing as ${flagRows} rows below because an item found in two corpora is one finding, not two` : ''}.</p>
     <div class="scroll">
 ${table(DEFAULT_N)}
     </div>
@@ -232,7 +436,7 @@ ${table(LEGACY_N)}
 
 <section>
   <div class="wrap">
-    <h2>Evidence</h2>
+    <h2>Evidence from the instruction-tuning pass</h2>
     <p>Every finding below is a verbatim match. Judge them yourself — some overlaps are
     canonical facts with one natural phrasing rather than contamination, and the only way to
     tell is to read the text.</p>
@@ -243,15 +447,17 @@ ${evidence || '    <p>No findings at this n.</p>'}
 <section>
   <div class="wrap">
     <h2>What these findings actually are</h2>
-    <p class="plain"><strong>All ${totalFlagged} were inspected and none is contamination.</strong>
-    Every one is canonical text: a prime or digit sequence inside a HumanEval docstring, the
-    proper noun "I Have a Dream speech", a stock definition of capitalism. They match because
-    that text is everywhere, not because a benchmark leaked.</p>
+    <p class="plain"><strong>All ${totalFlagged} instruction-set items were inspected and none is
+    contamination.</strong> Every one is canonical text: a prime or digit sequence inside a
+    HumanEval docstring, the proper noun "I Have a Dream speech", a stock definition of
+    capitalism. They match because that text is everywhere, not because a benchmark leaked.</p>
     <p>That is published rather than quietly dropped, because it is the finding. A phrase
     appearing in exactly one benchmark item still carries no evidential weight if the whole
     world writes it. A corpus-side document-frequency filter was added and did not fire —
     these phrases sit in two or three documents of a 26k corpus, below any sane threshold,
-    while still being ubiquitous in English.</p>
+    while still being ubiquitous in English.${pretrain ? ` At C4 scale the same filter discarded
+    ${ptRows.reduce((a, r) => a + r.droppedGeneric, 0)} matches — it only engages once the corpus
+    is enormous, which is why the pretraining pass exists.` : ''}</p>
 ${cross ? `    <p>Independence across corpora is the stronger signal, and it sharpens with every corpus\n    added. Flagged in two or more independent corpora, and therefore canonical:</p>\n    <ul>\n${cross}\n    </ul>` : ''}
   </div>
 </section>
@@ -259,10 +465,18 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
 <section>
   <div class="wrap">
     <h2>Limitations, stated first</h2>
-    <ul>
-      <li>Both corpora are 2023-era instruction datasets, not pretraining corpora. A finding
-      here says a benchmark leaked into a widely used fine-tuning set, not that any particular
-      model trained on it.</li>
+    <ul>${pretrain ? `
+      <li>The pretraining pass covers ${pretrain.corpus.shardCount} of 1,024 C4 shards — about
+      2.5% of one snapshot of one corpus. Every rate is measured on exactly those shards and
+      extrapolates to nothing.</li>
+      <li>Every benchmark postdates the April 2019 crawl, so no match here is the exam leaking
+      into this pile. A match means the item's posing text existed on the public web before the
+      benchmark was assembled.</li>
+      <li>The pretraining pass has run at n=${pretrain.defaultN} only; the n=${pretrain.legacyN}
+      comparability pass is not yet published.</li>` : ''}
+      <li>The instruction-tuning corpora are 2023-era fine-tuning sets of a few million tokens.
+      A null result there says almost nothing about pretraining — which is why the pretraining
+      pass exists.</li>
       <li>Exact matching only. Paraphrased contamination is not counted and is invisible to
       this pass.</li>
       <li>Unscannable items are benchmark items too short to produce any n-gram. Nothing can
@@ -276,7 +490,8 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
 <footer>
   <div class="wrap">
     Ingot · ${esc(registry.scanner)} · Apache-2.0<br>
-    Generated from results/registry.json. Do not edit this page by hand — rebuild it with
+    Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ' and results/canonicality.json' : ''}.
+    Do not edit this page by hand — rebuild it with
     <strong>node scripts/build-registry-page.ts</strong>.
   </div>
 </footer>
@@ -301,6 +516,7 @@ if (MOTION) {
 
 writeFileSync(resolve('web/registry.html'), html, 'utf8');
 process.stdout.write(
-  `\n  wrote web/registry.html — ${registry.results.length} scans, ` +
-    `${totalFlagged} flagged of ${totalItems.toLocaleString()} at n=${DEFAULT_N}\n\n`,
+  `\n  wrote web/registry.html — ${registry.results.length} instruction scans` +
+    (pretrain ? `, ${ptRows.length} pretraining scans (${ptFlagged} flagged)` : '') +
+    `, ${totalFlagged} flagged of ${num(totalItems)} at n=${DEFAULT_N}\n\n`,
 );

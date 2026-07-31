@@ -121,6 +121,12 @@ jobs:
             exit 1
           fi
 
+      # The prose check gates web/registry.html too, and that page is a build artifact —
+      # gitignored, so a checkout does not contain it. Generated here from the committed
+      # results files, exactly as the deploy build generates it before running the same gate.
+      - name: Build the registry page
+        run: node scripts/build-registry-page.ts
+
       # The step above proves the results files still reproduce. This one proves the PROSE
       # still matches those files. They are different failures: a re-run that moves a number
       # leaves every document quoting the old one, and nothing caught that until now. The
