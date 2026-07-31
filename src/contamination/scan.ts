@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { createReadStream, statSync } from 'node:fs';
 import { basename } from 'node:path';
-import { createInterface } from 'node:readline';
 import type { Readable } from 'node:stream';
 import { createGunzip } from 'node:zlib';
 import { CorpusStreamError } from '../errors.ts';
@@ -61,11 +60,29 @@ function openLines(path: string, onBytes: (n: number) => void): AsyncIterable<st
     input = raw.pipe(gunzip);
   }
 
-  input.on('data', (chunk: Buffer | string) => {
-    onBytes(typeof chunk === 'string' ? Buffer.byteLength(chunk) : chunk.length);
-  });
-
-  return createInterface({ input, crlfDelay: Number.POSITIVE_INFINITY });
+  // A line ends at '\n' and nowhere else — the same rule the browser path applies, because
+  // the two surfaces must agree on what a line is. This used to be readline, which also
+  // breaks on U+2028/U+2029. Those are legal UNESCAPED inside a JSON string, so a document
+  // containing one was three unparseable fragments here and one clean document in the
+  // browser: same bytes, two different reports, on the pair of surfaces whose agreement
+  // this product promises. Found by scanning our own derived corpus, not by a test.
+  // setEncoding keeps multibyte sequences whole across chunk boundaries; the trailing \r
+  // of CRLF corpora is removed by the caller's trim, exactly as before.
+  input.setEncoding('utf8');
+  return (async function* () {
+    let carry = '';
+    for await (const chunk of input as AsyncIterable<string>) {
+      onBytes(Buffer.byteLength(chunk));
+      carry += chunk;
+      let nl = carry.indexOf('\n');
+      while (nl !== -1) {
+        yield carry.slice(0, nl);
+        carry = carry.slice(nl + 1);
+        nl = carry.indexOf('\n');
+      }
+    }
+    if (carry.length > 0) yield carry;
+  })();
 }
 
 export async function scanCorpus(

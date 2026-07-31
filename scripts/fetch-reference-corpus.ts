@@ -128,7 +128,12 @@ for (const src of sources) {
     // text was found. "confirmed in Gutenberg and FreeLaw" is the evidence; "confirmed in
     // the reference corpus" is not.
     const id = `${slug(set)}-${kept[set]}`;
-    if (!gzip.write(JSON.stringify({ id, text, source: set }) + '\n')) {
+    // Escaped for the same reason fetch-sft.ts escapes them: legal-but-raw U+2028/U+2029
+    // turn one document into several unparseable lines under line-splitting readers.
+    const out = JSON.stringify({ id, text, source: set })
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+    if (!gzip.write(out + '\n')) {
       await new Promise((r) => gzip.once('drain', r));
     }
   }

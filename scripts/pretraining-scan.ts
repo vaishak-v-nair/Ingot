@@ -64,7 +64,9 @@ if (missing.length > 0) {
 }
 
 const compressedBytes = shards.reduce((a, s) => a + s.bytes, 0);
-const corpusName = `c4-en-${shards.length}shards`;
+// The manifest names the corpus; this script no longer assumes it is C4. (For C4 the
+// manifest already says c4-en-26shards, so nothing previously published changes name.)
+const corpusName = manifest.corpus;
 
 type PairResult = {
   benchmark: string;
@@ -83,6 +85,11 @@ type PairResult = {
   throughputMBs: number;
   /** Matches the corpus-frequency filter discarded as ordinary language. */
   droppedGeneric: number;
+  /** Physical lines read, and lines the parser rejected. A skip count of zero is a claim
+   * worth publishing; a nonzero one is a disclosure the scan is not allowed to omit —
+   * six shattered SlimOrca documents hid in exactly this number before it was recorded. */
+  linesRead: number;
+  linesSkipped: number;
   contaminatedItemIds: string[];
   samples: ContaminationHit[];
 };
@@ -182,6 +189,8 @@ for (const b of BENCHMARKS) {
       elapsedMs: report.elapsedMs,
       throughputMBs: throughput,
       droppedGeneric: exact.droppedGeneric ?? 0,
+      linesRead: report.load?.totalLines ?? 0,
+      linesSkipped: report.load?.skipped ?? 0,
       contaminatedItemIds: report.contaminatedItemIds,
 
       // Every retained hit, not a slice of them. At this scale the evidence IS the

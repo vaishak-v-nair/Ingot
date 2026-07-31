@@ -245,3 +245,38 @@ test('a clean scan leaves droppedSamples absent rather than empty', async () => 
   const exact = report.tiers.find((t) => t.tier === 'exact')!;
   assert.equal(exact.droppedSamples, undefined);
 });
+
+/**
+ * U+2028 is legal, unescaped, inside a JSON string — and Node's readline treats it as a
+ * line break. Until the fix this test pins, the CLI shattered such a document into
+ * unparseable fragments while the browser read it whole: same bytes, two different
+ * reports, from the pair of surfaces whose agreement the product promises. Found by
+ * scanning our own derived SlimOrca corpus, not by a fixture.
+ */
+test('a document containing U+2028 is one document with one identity on both surfaces', async () => {
+  const items: BenchmarkItem[] = Array.from({ length: 10 }, (_, i) => ({
+    id: `u${i}`,
+    text: words(40, 82000 + i),
+  }));
+  const index = NgramIndex.build('u2028', items, { n: 10 });
+  const rows = [
+    // JSON.stringify leaves U+2028 raw, which is exactly the trap.
+    JSON.stringify({ id: 'sep', text: `before\u2028after ${items[0].text}` }),
+    JSON.stringify({ id: 'plain', text: words(30, 82100) }),
+  ];
+  const body = rows.join('\n') + '\n';
+  assert.ok(body.includes('\u2028'), 'the fixture really carries a raw separator');
+
+  const browser = await scanFile(index, new File([body], 'sep.jsonl'));
+  const scratch = mkdtempSync(join(tmpdir(), 'ingot-sep-'));
+  const p = join(scratch, 'sep.jsonl');
+  writeFileSync(p, body, 'utf8');
+  const cli = await scanCorpus(index, p);
+
+  assert.equal(browser.corpusDocs, 2);
+  assert.equal(cli.corpusDocs, 2, 'the separator is content, not a line break');
+  assert.equal(cli.load?.skipped, 0);
+  assert.equal(cli.corpusHash, browser.corpusHash, 'same bytes, same identity');
+  const hits = cli.tiers.find((t) => t.tier === 'exact')!;
+  assert.ok(hits.totalHits >= 1, 'the leak behind the separator is still found');
+});
