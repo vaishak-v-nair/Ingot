@@ -1,0 +1,236 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+  <style>
+  /* Brand fonts staged by the orchestrator in assets/fonts/ (SIL OFL, self-hosted). */
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 600;
+    src: url("assets/fonts/archivo-latin-600.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    /* 05-zero — "Zero bytes". dataviz-countup inverted: the hero stat owns the frame
+       at scale but never counts, never scales. Stillness is the proof.
+       NOTE on fonts: no font files ship with this project (assets/fonts/ and
+       capture/assets/fonts/ are absent, fonts-manifest is empty), so per the
+       no-file-no-font rule the Archivo voice falls to generic sans-serif and the
+       JetBrains Mono voice to generic monospace — no named family, no @font-face.
+       IDs are prefixed "05-zero-" (contract); since CSS id selectors cannot start
+       with a digit, rules use [id="..."] attribute selectors instead. */
+
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+
+    [id="05-zero-bg"],
+    [id="05-zero-stage"] {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* full-bleed graphite ground on its own clip layer — never on #root */
+    [id="05-zero-bg"] {
+      background: #0c0e0f;
+    }
+
+    [id="05-zero-stage"] {
+      container-type: size;
+      color: #e8eaec;
+    }
+
+    /* Scene 1 — the setup question, alone upper-third. Archivo-voice display:
+       sentence case, weight 400, negative tracking (headline tier, modest scale) */
+    [id="05-zero-question"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 9cqh;
+      text-align: center;
+      font-family: "Archivo", sans-serif;
+      font-weight: 400;
+      font-size: 4.6cqw;
+      line-height: 1.06;
+      letter-spacing: -0.018em;
+      color: #e8eaec;
+    }
+
+    /* Scene 2 — the giant 0. Signal green #4ADE80: the film's first green pixel,
+       this frame's single voltage moment (no other green anywhere).
+       Digit height ~45% of frame; content is injected by the discrete-text
+       sequence driver, so the box is reserved from t=0 — zero layout shift. */
+    [id="05-zero-figure"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 17cqh;
+      text-align: center;
+      font-family: "Archivo", sans-serif;
+      font-weight: 400;
+      font-size: 60cqh;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: #4ade80;
+    }
+
+    /* the mono unit of the number-lockup — always mono, never the display face */
+    [id="05-zero-unit"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 67.5cqh;
+      text-align: center;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 500;
+      font-size: 2.08cqw;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: rgba(232, 234, 236, 0.8);
+    }
+
+    /* Scene 3 — the verification line, per-word staggered reveal. Mono chrome,
+       dim ink. Sits at 75.5cqh; bottom edge ~843px, above the 896px caption
+       keep-out cutoff. */
+    [id="05-zero-f12"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 75.5cqh;
+      text-align: center;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 400;
+      font-size: 1.45cqw;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: rgba(232, 234, 236, 0.55);
+    }
+    [id="05-zero-f12"] span {
+      display: inline-block;
+      margin: 0 0.16em;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="05-zero"
+    data-start="0"
+    data-duration="5.129"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div
+      id="05-zero-bg"
+      class="clip"
+      data-start="0"
+      data-duration="5.129"
+      data-track-index="0"
+    ></div>
+
+    <div
+      id="05-zero-stage"
+      class="clip"
+      data-start="0"
+      data-duration="5.129"
+      data-track-index="1"
+    >
+      <div id="05-zero-question">What leaves your machine?</div>
+      <!-- Intentional layering: the giant zero's text box overlaps the lines beneath it
+           on the dark ground; the glyph never touches them (verified on the contact
+           sheet). data-layout-allow-overlap marks the design decision for the checker. -->
+      <div id="05-zero-figure" data-layout-allow-overlap></div>
+      <div id="05-zero-unit" data-layout-allow-overlap>bytes uploaded</div>
+      <div id="05-zero-f12" data-layout-allow-overlap><span>press</span><span>F12</span><span>—</span><span>the</span><span>network</span><span>panel</span><span>stays</span><span>empty</span></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      var D = 4.629; // frame duration — locked upstream
+      var CUT = 1.4; // Scene 2: the hard cut ("Zero bytes")
+      var REVEAL = 2.9; // Scene 3: "your browser enforces it"
+
+      var question = document.getElementById("05-zero-question");
+      var figure = document.getElementById("05-zero-figure");
+      var unit = document.getElementById("05-zero-unit");
+      var words = Array.prototype.slice.call(
+        document.getElementById("05-zero-f12").querySelectorAll("span")
+      );
+
+      /* Scene 1 (0.0–1.4s) — the question fades up, alone on the graphite */
+      tl.fromTo(
+        question,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
+        0.05
+      );
+
+      /* Scene 2 (1.4s) — discrete-text-sequence, single step: the "0" is not
+         animated in; it is simply, suddenly there. Sparse {t, text} states,
+         reverse-searched each frame by a linear driver — instant jump, no smear.
+         The same driver spans the full duration, so the timeline length is D. */
+      var SEQUENCE = [
+        { t: 0.0, text: "" },
+        { t: CUT, text: "0" },
+      ];
+      function textAt(t) {
+        for (var i = SEQUENCE.length - 1; i >= 0; i--) {
+          if (t >= SEQUENCE[i].t) return SEQUENCE[i].text;
+        }
+        return "";
+      }
+      var driver = { t: 0 };
+      var lastText = null;
+      tl.to(
+        driver,
+        {
+          t: D,
+          duration: D,
+          ease: "none",
+          onUpdate: function () {
+            var s = textAt(driver.t);
+            if (s !== lastText) {
+              /* DOM write only on state transitions — no per-frame thrash */
+              figure.textContent = s;
+              lastText = s;
+            }
+          },
+        },
+        0
+      );
+
+      /* same tick as the cut: the unit lands with the 0 (near-instant, one frame)
+         and the question recedes instantly — hard-cut discipline, no crossfade */
+      tl.fromTo(unit, { opacity: 0 }, { opacity: 1, duration: 0.02, ease: "none" }, CUT);
+      tl.set(question, { opacity: 0.3 }, CUT);
+
+      /* Scene 3 (2.9s) — dynamic-content-sequencing: per-word start times are
+         computed once from content length + per-item config (BASE + chars ×
+         PER_CHAR), never hardcoded per word. Quick flat fades, no positional
+         motion — the zero itself never moves. Last word lands ~3.81s; from there
+         to 4.629s absolutely nothing animates: the film's stillest hold. */
+      var BASE = 0.06;
+      var PER_CHAR = 0.012;
+      var cursor = REVEAL;
+      var TIMELINE = words.map(function (el) {
+        var start = cursor;
+        cursor += BASE + el.textContent.length * PER_CHAR;
+        return { el: el, start: start };
+      });
+      TIMELINE.forEach(function (w) {
+        tl.fromTo(
+          w.el,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.14, ease: "none" },
+          w.start
+        );
+      });
+
+      window.__timelines["05-zero"] = tl;
+    })();
+  </script>
+</template>

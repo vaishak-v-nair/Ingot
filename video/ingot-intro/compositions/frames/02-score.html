@@ -1,0 +1,198 @@
+<template>
+  <div id="root" data-composition-id="02-score" data-start="0" data-duration="4.105" data-width="1920" data-height="1080">
+  <style>
+  /* Brand fonts staged by the orchestrator in assets/fonts/ (SIL OFL, self-hosted). */
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 600;
+    src: url("assets/fonts/archivo-latin-600.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    /* 02-score — the score you can't check. Three pain lines land alone on the
+       graphite, each dimming into the stack: evidence of sameness. */
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+    #root .clip {
+      position: absolute;
+    }
+    /* full-bleed graphite ground — painted on a clip, never on #root */
+    [id="02-score-bg"] {
+      inset: 0;
+      background: #0c0e0f;
+    }
+    [id="02-score-stage"] {
+      inset: 0;
+    }
+    /* display register — packet: weight 600, ~40% width ("a score.") */
+    [id="02-score-line-1"],
+    [id="02-score-line-2"] {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: 39.9cqh; /* line box centered on the y≈525 stack anchor */
+      font-family: "Archivo", sans-serif; /* no font files ship with this project — generic only */
+      font-weight: 600;
+      font-size: 9.4cqw;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      text-align: center;
+      color: #e8eaec;
+      visibility: hidden; /* discrete driver owns visibility at thresholds */
+    }
+    /* mono register — the point of scene 3: a claim reduced to fine print */
+    [id="02-score-line-3"] {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      top: 45.1cqh;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 500;
+      font-size: 3.4cqw;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      text-align: center;
+      color: #e8eaec;
+      visibility: hidden;
+    }
+  </style>
+
+    <div
+      id="02-score-bg"
+      class="clip"
+      data-start="0"
+      data-duration="4.105"
+      data-track-index="0"
+    ></div>
+
+    <div
+      id="02-score-stage"
+      class="clip"
+      data-start="0"
+      data-duration="4.105"
+      data-track-index="1"
+    >
+      <div id="02-score-line-1">a score.</div>
+      <div id="02-score-line-2">a percentage.</div>
+      <div id="02-score-line-3">trust us.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      var DUR = 3.605;
+      var lines = [
+        document.getElementById("02-score-line-1"),
+        document.getElementById("02-score-line-2"),
+        document.getElementById("02-score-line-3"),
+      ];
+
+      /* discrete-text-sequence at line granularity: whole-line states replace
+         at time thresholds — instant hard-cut flashes, no fade between states.
+         Reverse-search finds the latest state whose t has passed. */
+      var SEQUENCE = [
+        { t: 0.0, on: [false, false, false] }, // bare graphite beat out of the crossfade
+        { t: 0.45, on: [true, false, false] }, // "a score." — VO: "every answer was a score"
+        { t: 1.4, on: [true, true, false] }, // "a percentage." — VO: "A percentage."
+        { t: 2.4, on: [true, true, true] }, // "trust us." — VO: "Trust us."
+      ];
+      function stateAt(time) {
+        for (var i = SEQUENCE.length - 1; i >= 0; i--) {
+          if (time >= SEQUENCE[i].t) return SEQUENCE[i];
+        }
+        return SEQUENCE[0];
+      }
+      var driver = { t: 0 };
+      tl.to(
+        driver,
+        {
+          t: DUR,
+          duration: DUR,
+          ease: "none",
+          onUpdate: function () {
+            var s = stateAt(driver.t);
+            for (var i = 0; i < 3; i++) {
+              lines[i].style.visibility = s.on[i] ? "visible" : "hidden";
+            }
+          },
+        },
+        0,
+      );
+
+      /* Scene 1 (0.45s) — "a score." flash-lands dead-center: instant on,
+         impact settle. Solo — nothing else on canvas. */
+      tl.fromTo(
+        lines[0],
+        { scale: 1.06 },
+        { scale: 1, duration: 0.5, ease: "expo.out", immediateRender: false },
+        0.45,
+      );
+
+      /* Scene 2 (1.4s) — waterfall seam at line granularity (cut-catalog):
+         the prior line dims to 40% and rides one line-height up on a long-tail
+         settle while "a percentage." hard-cuts in already mid-flight, same
+         direction, decelerating into center — one upward wave across the cut. */
+      tl.fromTo(
+        lines[0],
+        { y: 0 },
+        { y: -175, duration: 0.9, ease: "expo.out", immediateRender: false },
+        1.4,
+      );
+      tl.fromTo(
+        lines[0],
+        { opacity: 1 },
+        { opacity: 0.4, duration: 0.6, ease: "power2.out", immediateRender: false },
+        1.4,
+      );
+      tl.fromTo(
+        lines[1],
+        { y: 88 },
+        { y: 0, duration: 0.9, ease: "expo.out", immediateRender: false },
+        1.4,
+      );
+
+      /* Scene 3 (2.4s) — second seam: the stack cascades up again, both prior
+         lines dim to 25%; "trust us." lands center in mono. Then holds dim and
+         still into the crossfade — no exit (non-final frame). */
+      tl.fromTo(
+        lines[0],
+        { y: -175 },
+        { y: -350, duration: 0.9, ease: "expo.out", immediateRender: false },
+        2.4,
+      );
+      tl.fromTo(
+        lines[0],
+        { opacity: 0.4 },
+        { opacity: 0.25, duration: 0.6, ease: "power2.out", immediateRender: false },
+        2.4,
+      );
+      tl.fromTo(
+        lines[1],
+        { y: 0 },
+        { y: -175, duration: 0.9, ease: "expo.out", immediateRender: false },
+        2.4,
+      );
+      tl.fromTo(
+        lines[1],
+        { opacity: 1 },
+        { opacity: 0.25, duration: 0.6, ease: "power2.out", immediateRender: false },
+        2.4,
+      );
+      tl.fromTo(
+        lines[2],
+        { y: 88 },
+        { y: 0, duration: 0.9, ease: "expo.out", immediateRender: false },
+        2.4,
+      );
+
+      window.__timelines["02-score"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,276 @@
+[a] What is this?
+[a] Registry
+[h1] What's inside AI training data?
+[p] Ingot shows you which exact words — yours, or a benchmark's — are
+  inside the data an AI learned from. The words themselves, not a score.
+[span] nothing is uploaded · press F12 and watch the network stay empty
+[p] Write online?
+[a] Ask for a free check of your own words
+[p] — send a link to your public writing, get back a report with the matching text and a receipt.
+[label] Check against
+[option] GSM8K (1,319 items)
+[option] HumanEval (164 items)
+[option] MMLU (14,042 items)
+[span] 164 items · n=10 · 0.1 MB in 0.3s · hashes only, no benchmark text
+[p] The exam to look for. GSM8K — maths ·
+  HumanEval — code · MMLU — general knowledge.
+[strong] Drop training data here
+[p] JSONL — one
+[code] {"text": …}
+[p] record per line. Plain or gzipped — any size,
+    it streams.
+[button] Watch it work — no file needed
+[label] Choose a file
+[button] or scan the sample corpus directly
+[div] What is this?
+[h3] One mountain of text, two questions
+[p] An AI learns from a mountain of text scraped from the web — its
+[em] training data
+[p] . Two questions follow. Did
+[em] your
+[p] words end up in the
+    mountain? And were the exam questions the AI is graded on — its
+[em] benchmarks
+[p] —
+    in there too, so the score measures memory rather than ability (that is
+[em] contamination
+[p] )? Ingot answers both the same way: it finds the exact
+    overlapping words and shows them to you.
+[b] Pick the exam.
+[li] GSM8K — maths · HumanEval — code · MMLU — general knowledge.
+[b] Drop the study material.
+[li] Read here, in this tab — nothing is uploaded anywhere.
+[b] Read the overlaps.
+[li] Every match shown with the words around it. Some overlap is
+      innocent — that is why you see the words, not a score.
+[p] No file to hand?
+[strong] Watch it work
+[p] runs a
+    real scan for you, step by step — or press play below.
+[figcaption] 57 seconds, voiced and captioned. Nothing plays or downloads until you
+      press play.
+[p] Six words this page keeps using:
+[th] term
+[th] plain meaning
+[td] benchmark
+[td] a standard exam for AI models
+[td] training data · corpus
+[td] the pile of text a model studied
+[td] token
+[td] roughly one word
+[td] n = 10
+[td] ten identical words in a row is what counts as a match
+[td] contamination
+[td] exam questions found inside the study pile
+[td] canonical
+[td] famous text the whole world quotes — it matches, but it is not leakage
+[div] Why the answer is trustworthy
+[h3] Your corpus never leaves the machine
+[p] Not a policy — an architecture. There is no upload path: your file is read,
+    hashed and scanned inside this tab. Open the network panel and watch it stay empty.
+[span] bytes of your corpus sent anywhere. There is no server to send them to.
+[b] same code
+[span] as the command line runs, so a scan here and a scan in CI give the same numbers for the same bytes. A test asserts it.
+[b] hashes only
+[span] in the published benchmark indexes — one-way hashes and item ids, never benchmark text.
+[b] enforced
+[span] the page ships
+[code] connect-src 'self'
+[span] — the browser itself refuses to send data anywhere else. Check the response headers. Or pick the exam, go offline, and scan.
+[p] Never dropping a confidential corpus in a browser? Same
+    scanner, same numbers, on your terminal:
+[code] npx ingot-scan contaminate --index gsm8k --corpus your-corpus.jsonl
+[div] Method
+[h3] Index the benchmark, stream the corpus once
+[p] Ingot memorises the exam — every ten-word run it contains — then reads your
+    file once, checking each ten-word run that streams past. One pass, no matter how many
+    questions. lm-evaluation-harness indexes the corpus instead, and reports nine days on
+    the Pile.
+[pre] 7.0 MB/sec single-threaded, end to end  →  20 GB in about 48 minutes
+
+  21.4 GB of gzipped C4 shards on disk · GSM8K at n=10 · 51 minutes wall clock
+  decompression, JSON.parse, hashing and match bookkeeping all included
+  reproduce with: node scripts/pretraining-scan.ts
+[summary] Why this number replaced a faster one
+[p] This said
+[em] 37.1 MB/sec, 20 GB in 9.0 minutes
+[p] until we scanned a real
+      corpus. That figure is the scan kernel — tokenize, roll, look up — over text already read and
+      already parsed, and quoting it as a scanning rate dropped most of the actual work. The kernel
+      number is still the right one for judging optimisation; it was the wrong one to put here.
+[h3] The field's 13-gram default is wrong
+[p] How many identical words in a row should count as a match? Everyone uses 13,
+    because GPT-3 did in 2020 — and we could find no re-derivation since. So we ran 8 through 13
+    over a 1,000-item benchmark with 300 planted copies:
+[th] verbatim
+[th] edited copies
+[th] false positives
+[th] unscannable
+[td] 100%
+[td] 90.9%
+[td] 5 / 1000
+[td] 2 / 1000
+[td] 100%
+[td] 85.9%
+[td] 3 / 1000
+[td] 2 / 1000
+[strong] 100%
+[strong] 81.5%
+[strong] 2 / 1000
+[strong] 3 / 1000
+[td] 100%
+[td] 79.7%
+[td] 1 / 1000
+[td] 31 / 1000
+[td] 100%
+[td] 75.0%
+[td] 57 / 1000
+[td] 100%
+[td] 69.6%
+[td] 68 / 1000
+[strong] n=13 leaves 6.8% of the benchmark
+    unscannable
+[p] — items shorter than 13 tokens can never match at all. At n=10 that is
+    0.3%, edited copies are caught at 81.5% against 69.6%, and the cost is two false positives per
+    thousand that you can read and dismiss in a second.
+[summary] The standard error, a retraction, and the caveats
+[p] The 81.5% against 69.6% gap is real at 300 planted items, where the standard
+      error is about 2.3 points. An earlier version of this table claimed 100% against 3.5% — an
+      artifact of a test fixture that deleted words on a fixed lattice, which decided in advance
+      which values of n could survive. It is written up in
+[code] docs/measurements.md
+[p] ,
+      because a tool that audits other people's numbers cannot quietly restate its own.
+[p] Caveats: one corpus pair, both 2023-era, and edited copies simulated by random
+      word dropping rather than a model rewriting text. Real paraphrase will be harder.
+[div] The registry
+[h3] Three benchmarks against 21 GB of C4
+[p] We ran the scanner ourselves: three public exams against C4, a public snapshot
+    of web text. Every shard's URL and SHA-256 is published, so every number reproduces.
+[dt] Corpus
+[dd] c4-en
+[small] 26 shards, Common Crawl
+[dt] Size
+[strong] 21.33 GB
+[small] 9,264,249 documents
+[dt] Tokens
+[dd] 3,418,685,530
+[small] one pass, streamed
+[dt] Method
+[dd] n = 10
+[small] exact, ingot-0.1.0
+[th] benchmark
+[th] flagged
+[th] rate
+[th] matches
+[th] discarded
+[th] unscannable
+[td] gsm8k
+[td] 2 / 1319
+[td] 0.152%
+[td] humaneval
+[td] 6 / 164
+[td] 3.659%
+[td] 115
+[td] mmlu
+[td] 342 / 14042
+[td] 2.436%
+[td] 865
+[td] 642
+[strong] "2.4% of MMLU is contaminated in C4" is wrong,
+    and that is the finding.
+[p] We inspected 200 retained matches and found no contamination —
+    we found NATO Article 5, Patrick Henry, the Fifth Amendment: canonical text, the famous passages
+    the whole world quotes. MMLU quotes famous documents; web text contains them. The overlap is
+    exact, reproducible and evidentially worthless.
+[b] Found
+[span] mmlu-5951
+[span] c4-en · doc5541
+[span] n=10 · exact
+[div] …NATO’s founding treaty states in Article 5 that NATO members “
+[mark] agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and
+[div] that “if such an armed attack occurs, each of them, in exercise…
+[p] A false positive you can
+[em] see
+[p] is a judgment you make in one second; as a
+    rate, it is one you cannot evaluate at all. The full write-up, including the two published
+    numbers this project had to retract, is in
+[a] three
+    ways contamination scanning silently fails
+[summary] How we ruled contamination out — two tests
+[p] The standard defence does not save you. Document-frequency filtering discarded
+      757 matches at this scale and
+[p] at 356,317 documents — same filter, same
+      threshold, so it only engages once the corpus is enormous. Even then the survivors are canonical,
+      because a famous passage's
+[em] exact
+[p] ten-gram is rare: Patrick Henry's most quoted sentence
+      appears in one document out of nine million, as
+[code] give me liberty or give me death!?- Patrick Henry
+[p] Tested properly against a corpus of different provenance — The Pile with every
+      web-crawl subset removed, 251,488 documents of court opinions, patents, abstracts and digitised
+      books —
+[strong] 67 of the 342 are confirmed canonical
+[p] , 46 of them by court opinions. The
+      other 275 are undetermined, not leaked: a control of nine unmistakably canonical items scored
+[strong] 1 of 9
+[p] against that reference, so absence from it carries no information.
+      Presence is evidence; absence is a lead.
+[div] Discipline
+[h3] What Ingot refuses to do
+[p] Each of these was a defect first, caught by reading the output instead of
+    trusting it. All eleven are written up in
+[code] docs/measurements.md
+[b] No silent clean result.
+[li] Every report names the items nothing could ever match.
+[b] No verdict without the text.
+[li] Ingot reports what overlaps; whether that is leakage
+      is your call.
+[b] No paraphrase in the headline.
+[li] Weaker evidence sits in its own labelled section,
+      outside the count.
+[b] No unmeasured claims.
+[li] The false-positive rate prints beside the detection rate,
+      from the same run.
+[h4] Registry · C4
+[dt] corpus
+[dd] c4-en, 26 shards
+[dt] size
+[dd] 21.33 GB
+[dt] documents
+[dd] 9,264,249
+[dt] tokens
+[dd] 3,418,685,530
+[dt] scanner
+[dd] ingot-0.1.0
+[dt] corpus hash
+[dd] c046ce3c890918b4d68094c438c05321
+[h4] Flagged
+[dt] mmlu
+[dd] 342 / 14042
+[dt] humaneval
+[dd] 6 / 164
+[dt] gsm8k
+[dd] 2 / 1319
+[p] Of those 342 MMLU items,
+[p] are confirmed canonical against a corpus of
+  different provenance and 275 are undetermined — not leaked. A control of nine unmistakably
+  canonical items scored
+[b] 1 of 9
+[p] against that same reference, so absence from it carries no
+  information. Presence is evidence; absence is a lead.
+[div] · Apache-2.0 ·
+    zero runtime dependencies, Node 24 runs the TypeScript directly
+[div] Numbers on this page come from
+[strong] results/
+[div] and reproduce with
+[strong] node scripts/contamination-validate.ts
+[strong] node scripts/pretraining-scan.ts
+[strong] node scripts/canonicality-check.ts
+[div] Corpora: C4 en (ODC-BY), The Pile uncopyrighted with web-crawl subsets removed,
+    databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0, calibration only).
+[div] 1 of 5
+[p] Pick the exam. Three public benchmarks live in this menu — the demo uses HumanEval, 164 programming tasks.
+[button] Next
+[button] Skip
+[span] esc exits

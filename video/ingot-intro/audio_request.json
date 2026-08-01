@@ -1,0 +1,38 @@
+{
+  "provider": "kokoro",
+  "speed": 1,
+  "lines": [
+    {
+      "id": "01",
+      "text": "What's inside AI training data? Your words? A benchmark's exam questions?"
+    },
+    {
+      "id": "02",
+      "text": "Until now, every answer was a score. A percentage. Trust us."
+    },
+    {
+      "id": "03",
+      "text": "Ingot answers differently. It shows you the words."
+    },
+    {
+      "id": "04",
+      "text": "Drop a training corpus. The scan runs — and every overlap is shown word for word. Like this exam question, found inside twenty-one gigabytes of web text."
+    },
+    {
+      "id": "05",
+      "text": "And what leaves your machine? Zero bytes. Not a policy — your browser enforces it."
+    },
+    {
+      "id": "06",
+      "text": "Nine million documents scanned. Every published number gated in C I — and every report ends with a receipt anyone can re-run."
+    },
+    {
+      "id": "07",
+      "text": "Ask it yourself — in your browser, or one command. ingot dash six dot vercel dot app."
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  },
+  "voice": "bf_emma"
+}

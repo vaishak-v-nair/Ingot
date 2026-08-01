@@ -1,0 +1,16 @@
+[
+  {
+    "index": 0,
+    "url": "https://ingot-six.vercel.app/media/ingot-guide.webm",
+    "filename": "ingot-guide.webm",
+    "width": 1014,
+    "height": 570,
+    "sourceWidth": 0,
+    "sourceHeight": 0,
+    "heading": "One mountain of text, two questions",
+    "caption": "57 seconds, voiced and captioned. Nothing plays or downloads until you\n      press play.",
+    "ariaLabel": "",
+    "preview": "assets/videos/previews/video-0-preview.png",
+    "localPath": "assets/videos/ingot-guide.webm"
+  }
+]

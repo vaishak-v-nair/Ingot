@@ -1,0 +1,303 @@
+<template>
+  <style>
+  /* Brand fonts staged by the orchestrator in assets/fonts/ (SIL OFL, self-hosted). */
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 600;
+    src: url("assets/fonts/archivo-latin-600.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    /* 06-receipt — the receipt. Dark-native code-editorial: graphite ground,
+       ink voice, green = verified states only, amber = findings only.
+       No shipped font files exist in this project (assets/fonts/ and
+       capture/assets/fonts/ are empty), so only the generic monospace family
+       is named — the receipt is mono-voiced by design. */
+
+    #root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      container-type: size;
+      font-family: monospace;
+      color: #e8eaec;
+    }
+
+    .clip {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* full-bleed ground lives on a clip layer, never on #root */
+    .f06-bg {
+      background: #0c0e0f;
+    }
+
+    /* camera wrapper — GSAP drifts scale; CSS sets origin only (no CSS transform) */
+    .f06-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3cqh 0 20cqh; /* biases the block up, clear of the 17% caption band */
+      transform-origin: 50% 45%;
+    }
+
+    .f06-kicker {
+      font-size: 1.46cqw;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(232, 234, 236, 0.85);
+      margin-bottom: 1.7cqw;
+    }
+    .f06-spike {
+      color: #9BA1A6; /* steel: green is testimony, spent only on verified states */
+    }
+
+    .f06-wrap {
+      position: relative;
+      width: 42cqw;
+    }
+
+    /* the 2px tear edge the panel tears in from */
+    .f06-tear {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(232, 234, 236, 0.38);
+      z-index: 2;
+      transform-origin: center center;
+    }
+
+    .f06-panel {
+      background: #121415;
+      border: 1px solid rgba(232, 234, 236, 0.14);
+      border-radius: 0;
+      padding: 2.4cqw 2.4cqw 2.1cqw;
+    }
+
+    .f06-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 1.05cqw 0;
+    }
+
+    .f06-label {
+      font-size: 1.55cqw;
+      letter-spacing: 0.04em;
+      color: rgba(232, 234, 236, 0.72);
+    }
+
+    .f06-fig {
+      font-size: 2.3cqw;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums; /* mandatory — digits keep equal width */
+      color: #e8eaec;
+    }
+
+    /* the hero count-up figure — final size is static; GSAP animates scale only */
+    .f06-fig-docs {
+      display: inline-block;
+      font-size: 2.9cqw;
+      min-width: 9ch; /* "9,264,249" = 9 mono glyphs — no layout shift while counting */
+      text-align: right;
+      transform-origin: right center; /* right-aligned: right edge stays pinned */
+    }
+
+    .f06-amber {
+      color: #f59e0b; /* findings moment only — the flagged count */
+    }
+    .f06-green {
+      color: #4ade80; /* colour is testimony: green = verified state (76 / 76) */
+    }
+
+    .f06-rulebar {
+      height: 1px;
+      background: rgba(232, 234, 236, 0.14);
+      transform-origin: left center;
+    }
+
+    .f06-close {
+      margin-top: 2.1cqw;
+      text-align: center;
+      font-size: 1.5cqw;
+      letter-spacing: 0.03em;
+      color: rgba(232, 234, 236, 0.7);
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="06-receipt"
+    data-width="1920"
+    data-height="1080"
+    data-duration="8.18"
+  >
+    <div class="clip f06-bg" data-start="0" data-duration="8.18" data-track-index="0"></div>
+
+    <div class="clip" data-start="0" data-duration="8.18" data-track-index="1">
+      <div class="f06-stage">
+        <div class="f06-kicker"><span class="f06-spike">&#10033;</span>&nbsp;the receipt</div>
+
+        <div class="f06-wrap">
+          <div class="f06-tear"></div>
+          <div class="f06-panel">
+            <div class="f06-row f06-row-1">
+              <span class="f06-label">documents</span>
+              <span class="f06-fig f06-fig-docs" id="f06-counter">0</span>
+            </div>
+            <div class="f06-rulebar f06-rule-1"></div>
+
+            <div class="f06-row f06-row-2">
+              <span class="f06-label">corpus</span>
+              <span class="f06-fig">21.33 GB</span>
+            </div>
+            <div class="f06-rulebar f06-rule-2"></div>
+
+            <div class="f06-row f06-row-3">
+              <span class="f06-label">mmlu flagged</span>
+              <span class="f06-fig"><span class="f06-amber">342</span> / 14,042</span>
+            </div>
+            <div class="f06-rulebar f06-rule-3"></div>
+
+            <div class="f06-row f06-row-4">
+              <span class="f06-label">tests</span>
+              <span class="f06-fig f06-green">76 / 76</span>
+            </div>
+            <div class="f06-rulebar f06-rule-4"></div>
+
+            <div class="f06-close">every number carries its receipt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- macro camera: one slow linear drift under the whole shot ---- */
+      tl.fromTo(".f06-stage", { scale: 1 }, { scale: 1.022, duration: 7.68, ease: "none" }, 0);
+
+      /* ---- Scene 1 (0.0–2.2s): tear-in + first line item ---- */
+      tl.fromTo(
+        ".f06-kicker",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+        0.08
+      );
+
+      /* the 2px top rule draws first… */
+      tl.fromTo(
+        ".f06-tear",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.4, ease: "power3.out" },
+        0.12
+      );
+
+      /* …then the ruled panel tears downward from it */
+      tl.fromTo(
+        ".f06-panel",
+        { clipPath: "inset(0% 0% 100% 0% round 8px)" },
+        { clipPath: "inset(0% 0% 0% 0% round 8px)", duration: 0.75, ease: "power3.out" },
+        0.28
+      );
+
+      /* per-word staggered reveal at line granularity: label, then figure */
+      tl.fromTo(
+        ".f06-row-1 .f06-label",
+        { x: -16, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        0.55
+      );
+
+      /* value-scaled counter — the only count-up in the film.
+         Two synced tweens, same position, same ease: value + transform scale. */
+      var f06CounterEl = document.getElementById("f06-counter");
+      var f06Fmt = function (n) {
+        return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      };
+      var f06Count = { v: 0 };
+      var F06_COUNT_AT = 0.62;
+      var F06_COUNT_DUR = 0.9; /* settles in under a second, per spec */
+
+      tl.fromTo(
+        f06Count,
+        { v: 0 },
+        {
+          v: 9264249,
+          duration: F06_COUNT_DUR,
+          ease: "power3.out",
+          onUpdate: function () {
+            /* O(1): text only — never style writes, never fontSize */
+            f06CounterEl.textContent = f06Fmt(Math.round(f06Count.v));
+          },
+        },
+        F06_COUNT_AT
+      );
+      tl.fromTo(
+        f06CounterEl,
+        { scale: 0.55, opacity: 0 },
+        { scale: 1, opacity: 1, duration: F06_COUNT_DUR, ease: "power3.out" },
+        F06_COUNT_AT
+      );
+
+      /* first hairline rule lands once the count settles */
+      tl.fromTo(
+        ".f06-rule-1",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power2.out" },
+        1.45
+      );
+
+      /* ---- Scene 2 (2.2–5.0s): staggered cascade, one line item per beat ----
+         Starts computed once from a base beat + spacing (content-driven
+         sequencing), never per-frame. */
+      var F06_CASCADE_AT = 2.3;
+      var F06_BEAT = 0.9; /* one row per VO breath */
+      var f06Rows = [2, 3, 4];
+      var i, at, row;
+      for (i = 0; i < f06Rows.length; i++) {
+        at = F06_CASCADE_AT + i * F06_BEAT;
+        row = ".f06-row-" + f06Rows[i];
+        tl.fromTo(
+          row + " .f06-label",
+          { x: -16, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+          at
+        );
+        tl.fromTo(
+          row + " .f06-fig",
+          { x: 18, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+          at + 0.12
+        );
+        tl.fromTo(
+          ".f06-rule-" + f06Rows[i],
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          at + 0.28
+        );
+      }
+
+      /* ---- Scene 3 (5.0–7.68s): closing line beneath the rules, then hold ---- */
+      tl.fromTo(
+        ".f06-close",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
+        5.25
+      );
+      /* panel holds still into the crossfade — no exit (non-final frame) */
+
+      window.__timelines["06-receipt"] = tl;
+    })();
+  </script>
+</template>

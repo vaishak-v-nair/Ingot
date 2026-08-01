@@ -1,0 +1,337 @@
+<template>
+  <!--
+    07-cta — "Ask it yourself" install-command end card.
+    Blueprint: prompt-type-submit-generate (Adapt) — the ask IS the typed command;
+    the card holds on the caret. Final frame: resolves fully, no exit.
+    SEEK-SAFE: caret blink is exactly three finite stepped opacity sets, then held ON.
+    Fonts: this capture shipped no font files (fonts-manifest is empty), so per the
+    frame-worker contract no unshipped family is named — generic stacks carry the
+    Archivo / JetBrains Mono register (weight 400, sentence case, negative tracking).
+  -->
+  <style>
+  /* Brand fonts staged by the orchestrator in assets/fonts/ (SIL OFL, self-hosted). */
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 600;
+    src: url("assets/fonts/archivo-latin-600.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+    }
+
+    /* ── ground (full-bleed clip, never on #root) ─────────────────────── */
+    .cta07-bg {
+      position: absolute;
+      inset: 0;
+      background: #0c0e0f; /* cream role → graphite ground (cleanroom inversion) */
+    }
+
+    /* ── stage / camera ───────────────────────────────────────────────── */
+    .cta07-stage {
+      position: absolute;
+      inset: 0;
+    }
+    .cta07-cam {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 42%;
+    }
+
+    /* ── headline — Scene 1 focal, then demotes ───────────────────────── */
+    .cta07-headline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 12cqh;
+      margin: 0;
+      text-align: center;
+      font-family: "Archivo", sans-serif; /* Archivo register — no shipped file to name */
+      font-weight: 400;
+      font-size: 9.9cqw;
+      line-height: 0.98;
+      letter-spacing: -0.028em;
+      color: #e8eaec; /* ink — the voice, paper-white */
+      transform-origin: 50% 0%;
+    }
+    .cta07-w {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    /* ── terminal pill — Scene 2 focal (navy, hairline, radius 0, mono) ─ */
+    .cta07-pill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 40.7cqh;
+      margin-inline: auto;
+      width: max-content;
+      display: flex;
+      align-items: baseline;
+      padding: 1.75cqw 2.7cqw;
+      background: #17181b; /* navy-soft panel graphite */
+      border: 1px solid rgba(232, 234, 236, 0.14); /* hairline on navy */
+      border-radius: 0; /* packet override: radius 0 */
+      font-family: "JetBrains Mono", monospace;
+      font-size: 2.7cqw;
+      font-weight: 400;
+      color: #e8eaec;
+    }
+    .cta07-prompt {
+      color: rgba(232, 234, 236, 0.45);
+      margin-right: 0.7ch;
+    }
+    .cta07-cmdwrap {
+      display: inline-block;
+      min-width: 26ch; /* full command width — pill never resizes mid-type */
+      white-space: pre;
+      text-align: left;
+    }
+    .cta07-text {
+      white-space: pre;
+    }
+    .cta07-caret {
+      display: inline-block;
+      width: 0.32em;
+      height: 0.92em;
+      margin-left: 0.06em;
+      vertical-align: -0.14em; /* anchor block to baseline */
+      background: rgba(232, 234, 236, 0.5); /* segment-driven in onUpdate */
+    }
+
+    /* ── URL lockup — Scene 3 ─────────────────────────────────────────── */
+    .cta07-url {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 60.2cqh;
+      text-align: center;
+    }
+    .cta07-url-lockup {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+    .cta07-url-text {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 2cqw;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: #e8eaec;
+    }
+    .cta07-underline {
+      display: block;
+      height: 4px;
+      margin: 9px auto 0;
+      overflow: visible;
+    }
+    .cta07-underline path {
+      fill: none;
+      stroke: #4ade80; /* the film's second and last green */
+      stroke-width: 1;
+    }
+
+    /* ── corner crosshairs — closing chrome, static since entrance ────── */
+    .cta07-cross {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      will-change: opacity;
+    }
+    .cta07-cross::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: rgba(232, 234, 236, 0.35);
+    }
+    .cta07-cross::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: rgba(232, 234, 236, 0.35);
+    }
+    .cta07-cross-tl { left: 64px; top: 64px; }
+    .cta07-cross-tr { right: 64px; top: 64px; }
+    .cta07-cross-bl { left: 64px; top: 806px; } /* bottom edge 832 < 897 keep-out */
+    .cta07-cross-br { right: 64px; top: 806px; }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="07-cta"
+    data-start="0"
+    data-duration="5.163"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div class="clip cta07-bg" data-start="0" data-duration="5.163" data-track-index="0"></div>
+
+    <div class="clip cta07-stage" data-start="0" data-duration="5.163" data-track-index="1">
+      <div class="cta07-cam" id="cta07-cam">
+        <h1 class="cta07-headline" id="cta07-headline">
+          <span class="cta07-w">Ask</span> <span class="cta07-w">it</span> <span class="cta07-w">yourself</span>
+        </h1>
+
+        <div class="cta07-pill" id="cta07-pill">
+          <span class="cta07-prompt">$</span>
+          <span class="cta07-cmdwrap"><span class="cta07-text" id="cta07-text"></span><span class="cta07-caret" id="cta07-caret"></span></span>
+        </div>
+
+        <div class="cta07-url">
+          <div class="cta07-url-lockup" id="cta07-url-lockup">
+            <div class="cta07-url-text" id="cta07-url-text">ingot-six.vercel.app</div>
+            <svg class="cta07-underline" id="cta07-underline-svg" xmlns="http://www.w3.org/2000/svg">
+              <path id="cta07-uline" d="M 0 2 L 440 2" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cta07-chrome" class="clip cta07-chrome" data-start="0" data-duration="5.163" data-track-index="2"
+      style="position: absolute; inset: 0; pointer-events: none">
+      <div class="cta07-cross cta07-cross-tl"></div>
+      <div class="cta07-cross cta07-cross-tr"></div>
+      <div class="cta07-cross cta07-cross-bl"></div>
+      <div class="cta07-cross cta07-cross-br"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      var DUR = 5.163;
+
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* ── macro camera — slow push-in under the whole shot ───────────── */
+      tl.fromTo("#cta07-cam", { scale: 1 }, { scale: 1.016, duration: DUR, ease: "none" }, 0);
+
+      /* ── Scene 1 (0.0–1.3s) — per-word staggered reveal ─────────────────
+         dynamic-content-sequencing mechanics: per-word start times are
+         reduced from content length + per-item config, never hardcoded. */
+      var WORDS = ["Ask", "it", "yourself"];
+      var W_LEAD = 0.1, W_BASE = 0.12, W_SEC_PER_CHAR = 0.035;
+      var cum = W_LEAD;
+      var WORD_TIMELINE = WORDS.map(function (w) {
+        var start = cum;
+        cum += W_BASE + w.length * W_SEC_PER_CHAR;
+        return { word: w, start: start };
+      });
+      var wordEls = document.querySelectorAll("#cta07-headline .cta07-w");
+      WORD_TIMELINE.forEach(function (entry, i) {
+        tl.fromTo(
+          wordEls[i],
+          { opacity: 0, y: 36 },
+          { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+          entry.start
+        );
+      });
+
+      /* corner crosshairs enter once, then stay static — closing chrome */
+      tl.fromTo(".cta07-cross", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 0.35);
+
+      /* headline demotes — focus hands off to the pill */
+      tl.to("#cta07-headline", { scale: 0.6, opacity: 0.7, duration: 0.5, ease: "power2.inOut" }, 1.1);
+
+      /* ── Scene 2 (1.3–3.4s) — terminal pill, long-tail settle ───────── */
+      tl.fromTo(
+        "#cta07-pill",
+        { y: 46, scale: 0.95, opacity: 0 },
+        { y: 0, scale: 1, opacity: 1, duration: 1.0, ease: "expo.out" },
+        1.35
+      );
+
+      /* typing — discrete-text-sequence SEQUENCE, machine-even cadence
+         (no typos: instruments don't mistype) + context-sensitive-cursor
+         segment colors written in the same onUpdate. */
+      var CMD = "npx ingot-scan contaminate";
+      var TYPE_START = 1.95, CHAR_DT = 0.05;
+      var INK = "#E8EAEC",
+        DIM = "rgba(232, 234, 236, 0.5)",
+        TEAL = "#E8EAEC"; /* fixed syntax decoration — green stays reserved for the URL */
+      function segColor(charIdx) {
+        if (charIdx < 4) return DIM; /* "npx " — chrome */
+        if (charIdx < 15) return INK; /* "ingot-scan " — brand */
+        return TEAL; /* "contaminate" — the verb */
+      }
+      var SEQUENCE = [{ t: 0, text: "", color: DIM }];
+      for (var i = 1; i <= CMD.length; i++) {
+        SEQUENCE.push({ t: TYPE_START + i * CHAR_DT, text: CMD.slice(0, i), color: segColor(i - 1) });
+      }
+      /* command complete — caret rests to idle ink for the closing hold */
+      SEQUENCE.push({ t: 3.4, text: CMD, color: INK });
+
+      function entryAt(time) {
+        for (var j = SEQUENCE.length - 1; j >= 0; j--) {
+          if (time >= SEQUENCE[j].t) return SEQUENCE[j];
+        }
+        return SEQUENCE[0];
+      }
+
+      var textEl = document.getElementById("cta07-text");
+      var caretEl = document.getElementById("cta07-caret");
+      var driver = { t: 0 };
+      var lastText = null;
+      tl.to(
+        driver,
+        {
+          t: DUR,
+          duration: DUR,
+          ease: "none",
+          onUpdate: function () {
+            var e = entryAt(driver.t);
+            if (e.text !== lastText) {
+              textEl.textContent = e.text;
+              lastText = e.text;
+            }
+            caretEl.style.background = e.color;
+          },
+        },
+        0
+      );
+
+      /* ── Scene 3 (3.4–5.2s) — URL settles, green underline self-draws ─ */
+      tl.fromTo(
+        "#cta07-url-lockup",
+        { y: 26, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+        3.45
+      );
+
+      /* svg-path-draw — measured length, never guessed */
+      var urlTextEl = document.getElementById("cta07-url-text");
+      var ulSvg = document.getElementById("cta07-underline-svg");
+      var ulPath = document.getElementById("cta07-uline");
+      var uw = urlTextEl.offsetWidth || 440;
+      ulSvg.setAttribute("viewBox", "0 0 " + uw + " 4");
+      ulSvg.style.width = uw + "px";
+      ulPath.setAttribute("d", "M 0 2 L " + uw + " 2");
+      var ulen = ulPath.getTotalLength();
+      ulPath.style.strokeDasharray = String(ulen);
+      ulPath.style.strokeDashoffset = String(ulen);
+      tl.to(ulPath, { strokeDashoffset: 0, duration: 0.55, ease: "power2.out" }, 3.72);
+
+      /* caret: exactly THREE finite stepped blinks, then held ON — no loop */
+      tl.set(caretEl, { opacity: 0 }, 3.55);
+      tl.set(caretEl, { opacity: 1 }, 3.8);
+      tl.set(caretEl, { opacity: 0 }, 4.05);
+      tl.set(caretEl, { opacity: 1 }, 4.3);
+      tl.set(caretEl, { opacity: 0 }, 4.55);
+      tl.set(caretEl, { opacity: 1 }, 4.8);
+      /* holds ON through the end. Full stop. */
+
+      window.__timelines["07-cta"] = tl;
+    })();
+  </script>
+</template>

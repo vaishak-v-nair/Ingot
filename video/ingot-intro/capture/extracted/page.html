@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en" class="js">
+<head>
+<style>
+  /* Self-hosted, latin subset only. Same-origin on purpose: a webfont fetched from a CDN
+     would put a third-party request in the network panel, and the privacy claim on this
+     page is that the panel stays empty. All SIL OFL; see NOTICE.
+     font-display:swap so text is readable before the font lands. */
+  @font-face {
+    font-family: "Archivo"; font-style: normal; font-weight: 600;
+    font-display: swap; src: url("fonts/archivo-latin-600.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Public Sans"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/public-sans-latin-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Public Sans"; font-style: normal; font-weight: 500;
+    font-display: swap; src: url("fonts/public-sans-latin-500.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  /* Cleanroom Instrument (DESIGN.md 2026-08-01). Dark graphite is the identity; light is
+     a designed inverse, not a filter. Token names are v1's so the whole sheet re-skins in
+     one block: --gold is now the steel instrument accent (achromatic — colour is
+     testimony and decoration gets none), --hot is signal amber for findings that need
+     reading, --ember is the refusal red, --ok is the only green anywhere. */
+  :root {
+    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31; --card: #121415;
+    --gold: #9BA1A6; --hot: #F59E0B; --ember: #F87171; --ok: #4ADE80; --bad: #F87171;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: "Public Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    /* Display face. A neo-grotesque with character, set tight: the page is an instrument
+       and its headings are etched, not typeset for a magazine. */
+    --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
+            --gold: #43474B; --hot: #B45309; --ember: #B91C1C; --ok: #15803D; --bad: #B91C1C; }
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  /* Every dimension on this page is in rem, so the root font size is the scale of the
+     whole composition. Fixed at 16px, the layout stops growing at ~1500px and wide
+     screens get dead margins on both sides — measured at 1904px: 336px of nothing left,
+     356px right, with the composition using 63% of the viewport. Scaling the root the
+     way print scales a page keeps the proportions identical while the margins stay
+     honest. Text measures are in ch and rem, so line lengths never leave their range. */
+  @media (min-width: 94rem) {
+    html { font-size: clamp(16px, calc(16px + (100vw - 1504px) / 96), 19.5px); }
+  }
+  /* No washes, no glows: an instrument's ground is flat. The crucible treatment died
+     with the forensic-editorial system (archived in docs/). */
+  body { margin: 0; background: var(--paper); color: var(--ink);
+         font: 17px/1.55 var(--sans); overflow-x: hidden; position: relative; }
+  a { color: inherit; }
+  /* One shell in two states. Below the rail breakpoint .page and .wrap are the same 54rem
+     column the page has always been. Above it the shell widens by exactly the width of the
+     margin — the text column stays 54.5rem, so the reading measure never changes and nav,
+     column and footer keep a single left edge at both sizes. */
+  .wrap, .page { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
+  /* Sections still carry the .wrap they had before the rail existed. Inside the column the
+     column is the shell, so that inner shell must not indent a second time. */
+  .col .wrap { max-width: none; padding: 0; }
+
+  /* Solid strip, hairline rule: paper is opaque and so is the nav. The blur died with
+     the old system — glass is a marketing material. */
+  nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
+        background: var(--paper); }
+  /* flex-wrap matters: seven items in a nowrap flex row have a min-content width of
+     ~430px, and on a 375px phone that forces the whole page to lay out at 434px and zoom
+     out 16%. Measured, not theoretical. The links wrap to a second line instead. */
+  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
+              padding-top: .75rem; padding-bottom: .75rem; }
+  nav a { padding: .25rem 0; }
+  .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
+           text-transform: uppercase; color: var(--gold); margin-right: auto; }
+  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
+          position: relative; transition: color .15s; }
+  nav a:hover { color: var(--ink); }
+  /* The gold rule draws in under a link rather than toggling on: an underline arriving is
+     alive, an underline switching is a state change. */
+  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
+                 height: 1px; background: var(--gold); transition: right .18s ease; }
+  nav a:hover::after { right: 0; }
+
+  header { padding: 3.6rem 0 0; }
+  /* Etched, not molten: Archivo 600, tight tracking, plain ink. Two lines maximum. */
+  h1 { font-family: var(--display); font-weight: 600;
+       font-size: clamp(2.1rem, 5.2vw, 3.4rem); line-height: 1.02; margin: 0 0 .6rem; letter-spacing: -.03em; }
+  h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.01em; }
+  /* The sentence that says what this is. Full ink and a size above body copy, because it
+     is the definition rather than supporting text: set in --dim at body size it reads as a
+     caption under the headline and the eye skips it, which defeats the point of adding it. */
+  .says-what { font-size: clamp(1.12rem, 2.4vw, 1.34rem); line-height: 1.45; max-width: 47ch;
+               margin: 0 0 .9rem; color: var(--ink); }
+  .lede { color: var(--dim); max-width: 54ch; margin: 0 0 .95rem; font-size: 1.05rem; }
+  /* A readout, not a pill: machined corners like everything else on the bench. */
+  .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .76rem;
+             border: 1px solid var(--line); padding: .42rem .8rem; background: var(--card); }
+  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
+
+  /* ---------- the tool ---------- */
+  .tool { padding-bottom: 3.5rem; }
+  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: 1.75rem 0 1rem; }
+  .muted { color: var(--dim); font-size: .86rem; }
+  select { font: inherit; font-size: .92rem; padding: .45rem .6rem; border-radius: 0; border: 1px solid var(--line);
+           background: var(--card); color: var(--ink); }
+  /* The press bed: a solid-ruled instrument panel, not a dashed placeholder. */
+  .drop { border: 1px solid var(--line); padding: 3rem 1.5rem;
+          text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
+  .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--hot) 8%, var(--card)); }
+  .drop:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+  .drop p { margin: .4rem 0; color: var(--dim); font-size: .9rem; }
+  .drop strong { font-size: 1.05rem; color: var(--ink); }
+  input[type=file] { display: none; }
+  .btns { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+  .btn { border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+         border-radius: 0; padding: .55rem 1.1rem; cursor: pointer; font: inherit; font-size: .92rem;
+         transition: border-color .15s, background .15s, color .15s, transform .12s ease; }
+  .btn:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn.primary:hover { background: var(--gold); border-color: var(--gold); color: var(--paper); }
+
+  /* A measurement thread. Amber is the colour of a figure still changing (the rail uses
+     the same rule), so the running scan is amber until it settles. */
+  progress { width: 100%; height: 3px; margin-top: 1rem; appearance: none;
+             border: 0; background: var(--line); }
+  progress::-webkit-progress-bar { background: var(--line); }
+  progress::-webkit-progress-value { background: var(--hot); }
+  progress::-moz-progress-bar { background: var(--hot); }
+  #status { font-family: var(--mono); font-size: .8rem; color: var(--dim); min-height: 1.4em; margin-top: .5rem; }
+
+  /* The verdict is a ruled stamp, not a card: the record opens with 4px of ink the way
+     the assay does, and the number sits on the rule. The last boxes died here. */
+  .verdict { border: 0; border-radius: 0; background: none; border-top: 4px solid var(--ink);
+             border-bottom: 1px solid var(--line); padding: 1.3rem 0 1.35rem; margin: 1.5rem 0; }
+  /* Refusals are designed, not dumped: an ember rule, the cause in plain words, one
+     action. For a tool whose brand is disciplined refusal, these are the most on-brand
+     screens it owns. */
+  .refusal { border-top: 4px solid var(--ember); border-bottom: 1px solid var(--line);
+             padding: 1.2rem 0 1.3rem; margin: 1.25rem 0; }
+  .refusal b { display: block; font-size: 1.05rem; margin-bottom: .4rem; }
+  .refusal p { margin: 0; color: var(--dim); max-width: 56ch; }
+  .refusal .linklike { margin-top: .7rem; }
+  .linklike { background: none; border: 0; padding: 0; font: inherit; font-size: .88rem;
+              color: var(--gold); text-decoration: underline; text-underline-offset: 3px;
+              cursor: pointer; }
+  .samplelink { margin: .65rem 0 0; font-size: .85rem; color: var(--dim); }
+  /* The focus contract: the gold rule, drawn around whatever the keyboard is on. */
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .big { font-family: var(--mono); font-size: 2.6rem; line-height: 1; font-weight: 600; }
+  /* Verdicts never use red: green is verified-clean, amber is findings that need reading.
+     Red belongs to refusals — the machine declining to answer, not the answer. */
+  .big.clean { color: var(--ok); } .big.dirty { color: var(--hot); }
+  .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin: 2rem 0 .6rem; font-weight: 600; }
+  /* Findings are a ruled record, not a stack of cards. A border around each match adds no
+     information and makes the most important content on the site look like a template. */
+  .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
+  .hit code { font-family: var(--mono); font-size: .72rem; color: var(--dim); letter-spacing: .04em; }
+  .quote { margin-top: .45rem; font-size: .92rem; }
+
+  /* The first match is the specimen. The product's whole claim is that it shows you the
+     words, and until now the words were 15px inside a bordered box while the percentage
+     above them was 42px. That is the claim stated in copy and contradicted by the layout.
+     The lead match is set at display scale; every match after it stays compact, because a
+     record of forty matches at this size is not a record, it is a scroll. */
+  .hit--lead { border-bottom: 2px solid var(--ink); padding: 0 0 1.6rem; margin-bottom: .2rem; }
+  .hit--lead .meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+                     font-family: var(--mono); font-size: .68rem; letter-spacing: .16em;
+                     text-transform: uppercase; color: var(--dim); margin-bottom: 1.1rem; }
+  .hit--lead .meta b { color: var(--gold); font-weight: 400; }
+  .hit--lead .quote { font-family: var(--mono); font-size: clamp(1.15rem, 2.9vw, 1.85rem);
+                      line-height: 1.5; letter-spacing: -.03em; color: var(--dim);
+                      max-width: 34ch; margin: 0; }
+  .hit--lead .quote mark { color: var(--ink); }
+
+  /* box-decoration-break keeps the highlight intact when a match wraps. Without it the
+     span is drawn once across the whole run and the second line gets a stray tail. */
+  mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit;
+         padding: .05rem .15rem; border-radius: 0;
+         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* The assay strip. Four ruled cells, no box: the rules do the dividing, the way columns
+     are divided in a printed record rather than fenced into cards. Rule above is 2px ink so
+     the strip reads as a stamped header and not another table. */
+  .assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+           border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+           margin: 0 0 1.6rem; gap: 0; }
+  .assay > div { padding: 1.05rem 1.2rem 1rem 0; }
+  .assay > div + div { border-left: 1px solid var(--line); padding-left: 1.2rem; }
+  .assay dt { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
+              text-transform: uppercase; color: var(--gold); margin-bottom: .5rem; }
+  .assay dd { margin: 0; font-family: var(--mono); font-size: 1.02rem; letter-spacing: -.02em; }
+  .assay dd small { display: block; font-family: var(--sans); font-size: .78rem;
+                    color: var(--dim); letter-spacing: 0; margin-top: .3rem; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; }
+  td.num, th.num { font-family: var(--mono); }
+
+  /* ---------- evidence sections ---------- */
+  section { padding: 4.8rem 0; border-top: 1px solid var(--line); }
+  /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
+     for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
+     being drawn and then tightened on top of it. */
+  section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
+  .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+            color: var(--gold); display: flex; align-items: center; gap: .7rem; }
+  .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
+  .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
+  /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
+     row is the single most recognisable generated-page layout there is, and these three
+     were the page's clearest example of it. The rules do the dividing; the boxes were only
+     ever decoration around content that already had structure. */
+  .cards { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+           border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .card { padding: 1.15rem 1.3rem 1.15rem 0; }
+  .card + .card { border-left: 1px solid var(--line); padding-left: 1.3rem; }
+  .card b { display: block; font-family: var(--mono); font-size: 1.6rem; letter-spacing: -.03em; line-height: 1.1; }
+  .card span { display: block; margin-top: .55rem; font-size: .85rem; color: var(--dim); line-height: 1.5; }
+  /* The refusals as a numbered record. Four uniform bordered boxes were the one generic
+     moment left on the page; DESIGN.md had them flagged as an open item since the type
+     landed. The ember now lives in the numeral, so the eye finds each entry without a
+     border doing that work, and the counter makes the list read as a standard rather than
+     as four floating assertions. */
+  ul.plain { list-style: none; padding: 0; margin: 0; counter-reset: refusal;
+             border-top: 2px solid var(--ink); }
+  ul.plain li { counter-increment: refusal; position: relative;
+                padding: 1.1rem 0 1.1rem 2.9rem; border-bottom: 1px solid var(--line);
+                font-size: .92rem; color: var(--dim); }
+  ul.plain li::before { content: counter(refusal, decimal-leading-zero);
+                        position: absolute; left: 0; top: 1.18rem;
+                        font-family: var(--mono); font-size: .78rem; color: var(--ember); }
+  ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
+  pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
+        border-radius: 0; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
+  /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
+     ink rule opens it, a hairline closes it, and the caption reads like a plate caption. */
+  .guide-film { margin: 2.2rem 0; border-top: 2px solid var(--ink);
+                border-bottom: 1px solid var(--line); padding: 1.2rem 0 1rem; }
+  .guide-film video { display: block; width: 100%; height: auto; background: var(--paper); }
+  .guide-film figcaption { margin-top: .8rem; font-family: var(--mono); font-size: .74rem;
+                           letter-spacing: .04em; color: var(--dim); }
+  /* Deep prose folds behind a ruled disclosure: the expert layer is preceded, never deleted.
+     A hairline and a mono summary — not a widget box. */
+  details.more { margin: 1.5rem 0 0; border-top: 1px solid var(--line); }
+  details.more summary { cursor: pointer; list-style: none; display: flex; align-items: center;
+                         gap: .6rem; font-family: var(--mono); font-size: .72rem;
+                         letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+                         padding: .85rem 0; }
+  details.more summary::-webkit-details-marker { display: none; }
+  details.more summary::before { content: "+"; font-size: .95rem; line-height: 1; flex: none; }
+  details.more[open] summary::before { content: "\2212"; }
+  details.more > .sub:last-child, details.more > .scroll:last-child { margin-bottom: .4rem; }
+  tr.win td { background: color-mix(in srgb, var(--hot) 9%, transparent); }
+  /* Data rows warm faintly under the pointer. Rows that mix th and td are labels rather
+     than records, and stay still. */
+  table tr:not(:has(th)):hover td { background: color-mix(in srgb, var(--hot) 5%, transparent); }
+  tr.win:hover td { background: color-mix(in srgb, var(--hot) 13%, transparent); }
+  /* ---------- the receipt rail ---------- */
+  /* Marginalia, not a second column. It carries the artifacts a scan actually produces —
+     the corpus hash, the counts, the caveat — beside the argument that cites them, and it
+     fills in live while the scanner runs, which is the one stretch of this page that was
+     otherwise inert. A margin needs room to exist, so the rail appears only when the
+     viewport can hold the full text measure plus 18rem beside it. Below that there is no
+     margin and so no rail, and nothing is lost: every figure in it also appears in the body
+     of the page, which is what makes it safe to drop rather than reflow. */
+  .rail { display: none; }
+  @media (min-width: 78.5rem) {
+    .wrap, .page { max-width: 76rem; }
+    .page { display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
+            gap: 0 3.5rem; align-items: start; }
+    .rail { display: block; position: sticky; top: 4.5rem;
+            border-left: 1px solid var(--line); padding: .3rem 0 2rem 1.5rem;
+            max-height: calc(100vh - 6.5rem); overflow-y: auto; }
+  }
+  .rail h4 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
+             text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 0 0 .9rem; }
+  /* A ledger: label left, figure right, so the numbers form a column the eye can run down
+     without reading the labels again. */
+  .rail dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .4rem .9rem;
+             margin: 0 0 1.7rem; font-family: var(--mono); font-size: .715rem; line-height: 1.45; }
+  .rail dt { color: var(--dim); }
+  .rail dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+  /* A 32-character hash will not fit a ledger column at any size still worth reading, and
+     broken across two right-aligned lines it looks damaged rather than long. It gets a
+     full-width row of its own and reads left to right like the stamp it is. */
+  .rail dt.wide { grid-column: 1 / -1; margin-top: .3rem; }
+  .rail dd.hash { grid-column: 1 / -1; text-align: left; margin-top: -.15rem;
+                  font-size: .7rem; letter-spacing: -.012em; }
+  .rail .note { margin: 0; padding-top: 1rem; border-top: 1px solid var(--line);
+                font-size: .78rem; line-height: 1.55; color: var(--dim); }
+  .rail .note b { color: var(--ink); font-weight: 400; }
+  /* Mid-scan the rail holds the only moving numbers on the page. Ember marks the figures
+     that are still changing, so a reader can tell a running total from a settled one. */
+  .rail dl.ticking dd { color: var(--hot); }
+
+  /* ---------- motion ---------- */
+  /* Everything here narrates measurement: content settles beneath rules that never move,
+     the verdict counts to its value, the highlight sweeps the matched words the way a
+     stamp strikes. ease-out only — settling, never bouncing. The one loop is the status
+     dot, and it is a status light. All of it sits behind prefers-reduced-motion, and the
+     hidden pre-reveal state is keyed on a .js class the script adds, so a script that
+     never runs costs the settling and not the content. */
+  /* screen-scoped: print rendering never scrolls, so an IntersectionObserver reveal
+     that print can see leaves every below-fold section as blank paper. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .js section > .wrap, .js footer > .wrap {
+      opacity: 0; transform: translateY(14px);
+      transition: opacity .65s ease-out, transform .65s ease-out; }
+    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
+    /* The kicker's gold rule draws in a beat after its section lands. */
+    .js section > .wrap .kicker::before { width: 0; transition: width .6s ease .25s; }
+    .js section > .wrap.in .kicker::before { width: 1.9rem; }
+
+    #out > * { animation: rise .45s ease-out backwards; }
+    /* The words appear, then the stamp strikes: the highlight is drawn as a background
+       image so its width can sweep on, and it ends at the exact state the static rule
+       gives reduced-motion readers from the start. */
+    #out mark { background: none;
+      background-image: linear-gradient(color-mix(in srgb, var(--hot) 35%, transparent),
+                                        color-mix(in srgb, var(--hot) 35%, transparent));
+      background-repeat: no-repeat; background-size: 100% 100%;
+      animation: sweep .55s ease-out .5s backwards; }
+    .dot { animation: breathe 2.6s ease-in-out infinite; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  @keyframes sweep { from { background-size: 0 100%; } }
+  @keyframes breathe { 50% { opacity: .4; } }
+
+  /* ---------- the guided demo ---------- */
+  /* Not a video. A recording would rot the moment the page changed, weigh megabytes
+     against a zero-network budget, and show a scan instead of doing one. This runs the
+     real scanner on the real sample and walks the reader through what appears: a gold
+     ring moves between the controls with a caption that says what each one is. The ring
+     is absolute in the document, so it scrolls with the page; the dimming is its own
+     box-shadow, so there is no overlay intercepting clicks. */
+  .tour-ring { position: absolute; z-index: 50; pointer-events: none;
+               border: 2px solid var(--gold); border-radius: 0;
+               box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--paper) 62%, transparent); }
+  /* A ruled annotation, not a popover: paper ground, ink rule, no radius, no shadow —
+     the page's own dialect. The ring and the dimming carry the focus. */
+  .tour-card { position: absolute; z-index: 51; width: min(24rem, calc(100vw - 2rem));
+               background: var(--paper); border: 0; border-radius: 0;
+               border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+               padding: .9rem 1.15rem 1rem; }
+  .tour-card .esc { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em;
+                    color: var(--dim); margin-left: auto; align-self: center; }
+  .tour-card .step { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em;
+                     text-transform: uppercase; color: var(--gold); margin-bottom: .45rem; }
+  .tour-card p { margin: 0 0 .8rem; font-size: .93rem; line-height: 1.5; }
+  .tour-card .btns { justify-content: flex-start; margin: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tour-ring, .tour-card { transition: top .45s ease, left .45s ease,
+                             width .45s ease, height .45s ease; }
+  }
+
+  footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim);
+           font-family: var(--mono); font-size: .78rem; }
+</style>
+
+</head>
+<body>
+
+
+<nav style="">
+  <div class="wrap">
+    <span class="brand">Ingot</span>
+    <a href="#plain">What is this?</a>
+    <a href="#trust">Privacy</a>
+    <a href="#method">Method</a>
+    <a href="registry.html">Registry</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
+  </div>
+</nav>
+
+<div class="page">
+<main class="col">
+
+<header class="wrap">
+  <h1>What's inside AI training data?</h1>
+  <!-- The h1 asks the question everyone shares; this line makes it personal and concrete
+       before the page says how anything works. Reframed 2026-08-01 (design doc): the
+       reader's own words are the front door, the benchmark question is the wing. -->
+  <p class="says-what">Ingot shows you which exact words — yours, or a benchmark's — are
+  inside the data an AI learned from. The words themselves, not a score.</p>
+  <p><span class="promise"><span class="dot"></span>nothing is uploaded · press F12 and watch the network stay empty</span></p>
+  <!-- The intake channel from the design doc: writers ask, the founder runs the check.
+       A mailto is deliberately the whole mechanism — no form, no backend, no promises. -->
+  <p class="samplelink" style="margin-top:.7rem">Write online? <a href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Ask for a free check of your own words</a> — send a link to your public writing, get back a report with the matching text and a receipt.</p>
+</header>
+
+<div class="wrap tool">
+  <div class="row">
+    <label for="bench" class="muted">Check against</label>
+    <select id="bench"><option value="gsm8k">GSM8K (1,319 items)</option><option value="humaneval">HumanEval (164 items)</option><option value="mmlu">MMLU (14,042 items)</option></select>
+    <span class="muted" id="benchmeta">164 items · n=10 · 0.1 MB in 0.3s · hashes only, no benchmark text</span>
+  </div>
+  <!-- The menu is meaningless to anyone who has not met these names. One line decodes it:
+       these are the exams, and this is what each one examines. -->
+  <p class="muted" style="margin:-.35rem 0 1rem">The exam to look for. GSM8K — maths ·
+  HumanEval — code · MMLU — general knowledge.</p>
+
+  <div class="drop" id="drop">
+    <strong>Drop training data here</strong>
+    <p>JSONL — one <code>{"text": …}</code> record per line. Plain or gzipped — any size,
+    it streams.</p>
+    <div class="btns">
+      <button class="btn primary" id="tour" type="button">Watch it work — no file needed</button>
+      <label class="btn" for="file">Choose a file</label>
+    </div>
+    <p class="samplelink"><button class="linklike" id="try" type="button">or scan the sample corpus directly</button></p>
+    <input type="file" id="file" accept=".jsonl,.json,.gz">
+  </div>
+
+  <progress id="bar" max="100" value="0" hidden=""></progress>
+  <button class="linklike" id="cancel" type="button" hidden="">cancel the scan</button>
+  <div id="status"></div>
+  <div id="out"></div>
+</div>
+
+<!-- The plain-words register. Everything below this section was written for a reader who
+     already knows what a benchmark is; this section is for everyone else, sitting directly
+     beneath the tool it decodes. The expert layer is never dumbed down — it is preceded. -->
+<section id="plain">
+  <div class="wrap in">
+    <div class="kicker">What is this?</div>
+    <h3>One mountain of text, two questions</h3>
+    <p class="sub">An AI learns from a mountain of text scraped from the web — its
+    <em>training data</em>. Two questions follow. Did <em>your</em> words end up in the
+    mountain? And were the exam questions the AI is graded on — its <em>benchmarks</em> —
+    in there too, so the score measures memory rather than ability (that is
+    <em>contamination</em>)? Ingot answers both the same way: it finds the exact
+    overlapping words and shows them to you.</p>
+    <ul class="plain">
+      <li><b>Pick the exam.</b> GSM8K — maths · HumanEval — code · MMLU — general knowledge.</li>
+      <li><b>Drop the study material.</b> Read here, in this tab — nothing is uploaded anywhere.</li>
+      <li><b>Read the overlaps.</b> Every match shown with the words around it. Some overlap is
+      innocent — that is why you see the words, not a score.</li>
+    </ul>
+    <p class="sub" style="margin-top:1.4rem">No file to hand? <strong>Watch it work</strong> runs a
+    real scan for you, step by step — or press play below.</p>
+    <!-- The guidance video. Click-to-play from a poster, so it costs zero bytes until
+         asked — the network panel stays empty on load, which is this page's claim. It
+         complements the tour rather than replacing it: the tour runs the real scanner,
+         this is for people who want to watch before touching anything. Self-hosted,
+         same-origin; the CSP's default-src 'self' already covers it. -->
+    <figure class="guide-film">
+      <video controls="" preload="none" playsinline="" poster="media/guide-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-guide.webm" type="video/webm">
+        <source src="media/ingot-guide.mp4" type="video/mp4">
+      </video>
+      <figcaption>57 seconds, voiced and captioned. Nothing plays or downloads until you
+      press play.</figcaption>
+    </figure>
+    <!-- Open, not folded. The folds hold expert depth; this table is the decoder ring for
+         the exact reader who would never guess a gold line hides definitions. -->
+    <p class="sub" style="margin:1.6rem 0 .6rem">Six words this page keeps using:</p>
+    <div class="scroll">
+      <table>
+        <tbody><tr><th>term</th><th>plain meaning</th></tr>
+        <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
+        <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
+        <tr><td class="num">token</td><td>roughly one word</td></tr>
+        <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
+        <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
+        <tr><td class="num">canonical</td><td>famous text the whole world quotes — it matches, but it is not leakage</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<section id="trust">
+  <div class="wrap in">
+    <div class="kicker">Why the answer is trustworthy</div>
+    <h3>Your corpus never leaves the machine</h3>
+    <p class="sub">Not a policy — an architecture. There is no upload path: your file is read,
+    hashed and scanned inside this tab. Open the network panel and watch it stay empty.</p>
+    <div class="cards">
+      <div class="card"><b>0</b><span>bytes of your corpus sent anywhere. There is no server to send them to.</span></div>
+      <div class="card"><b>same code</b><span>as the command line runs, so a scan here and a scan in CI give the same numbers for the same bytes. A test asserts it.</span></div>
+      <div class="card"><b>hashes only</b><span>in the published benchmark indexes — one-way hashes and item ids, never benchmark text.</span></div>
+      <div class="card"><b>enforced</b><span>the page ships <code>connect-src 'self'</code> — the browser itself refuses to send data anywhere else. Check the response headers. Or pick the exam, go offline, and scan.</span></div>
+    </div>
+    <p class="sub" style="margin:1.1rem 0 0">Never dropping a confidential corpus in a browser? Same
+    scanner, same numbers, on your terminal:
+    <code>npx ingot-scan contaminate --index gsm8k --corpus your-corpus.jsonl</code></p>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap in">
+    <div class="kicker">Method</div>
+    <h3>Index the benchmark, stream the corpus once</h3>
+    <p class="sub">Ingot memorises the exam — every ten-word run it contains — then reads your
+    file once, checking each ten-word run that streams past. One pass, no matter how many
+    questions. lm-evaluation-harness indexes the corpus instead, and reports nine days on
+    the Pile.</p>
+    <pre>  7.0 MB/sec single-threaded, end to end  →  20 GB in about 48 minutes
+
+  21.4 GB of gzipped C4 shards on disk · GSM8K at n=10 · 51 minutes wall clock
+  decompression, JSON.parse, hashing and match bookkeeping all included
+  reproduce with: node scripts/pretraining-scan.ts</pre>
+    <details class="more">
+      <summary>Why this number replaced a faster one</summary>
+      <p class="sub">This said <em>37.1 MB/sec, 20 GB in 9.0 minutes</em> until we scanned a real
+      corpus. That figure is the scan kernel — tokenize, roll, look up — over text already read and
+      already parsed, and quoting it as a scanning rate dropped most of the actual work. The kernel
+      number is still the right one for judging optimisation; it was the wrong one to put here.</p>
+    </details>
+
+    <h3 style="margin-top:2.5rem">The field's 13-gram default is wrong</h3>
+    <p class="sub">How many identical words in a row should count as a match? Everyone uses 13,
+    because GPT-3 did in 2020 — and we could find no re-derivation since. So we ran 8 through 13
+    over a 1,000-item benchmark with 300 planted copies:</p>
+    <div class="scroll">
+      <table>
+        <tbody><tr><th class="num">n</th><th class="num">verbatim</th><th class="num">edited copies</th><th class="num">false positives</th><th class="num">unscannable</th></tr>
+        <tr><td class="num">8</td><td class="num">100%</td><td class="num">90.9%</td><td class="num">5 / 1000</td><td class="num">2 / 1000</td></tr>
+        <tr><td class="num">9</td><td class="num">100%</td><td class="num">85.9%</td><td class="num">3 / 1000</td><td class="num">2 / 1000</td></tr>
+        <tr class="win"><td class="num"><strong>10</strong></td><td class="num"><strong>100%</strong></td><td class="num"><strong>81.5%</strong></td><td class="num"><strong>2 / 1000</strong></td><td class="num"><strong>3 / 1000</strong></td></tr>
+        <tr><td class="num">11</td><td class="num">100%</td><td class="num">79.7%</td><td class="num">1 / 1000</td><td class="num">31 / 1000</td></tr>
+        <tr><td class="num">12</td><td class="num">100%</td><td class="num">75.0%</td><td class="num">0</td><td class="num">57 / 1000</td></tr>
+        <tr><td class="num">13</td><td class="num">100%</td><td class="num">69.6%</td><td class="num">0</td><td class="num">68 / 1000</td></tr>
+      </tbody></table>
+    </div>
+    <p class="sub" style="margin-top:1.2rem"><strong>n=13 leaves 6.8% of the benchmark
+    unscannable</strong> — items shorter than 13 tokens can never match at all. At n=10 that is
+    0.3%, edited copies are caught at 81.5% against 69.6%, and the cost is two false positives per
+    thousand that you can read and dismiss in a second.</p>
+    <details class="more">
+      <summary>The standard error, a retraction, and the caveats</summary>
+      <p class="sub">The 81.5% against 69.6% gap is real at 300 planted items, where the standard
+      error is about 2.3 points. An earlier version of this table claimed 100% against 3.5% — an
+      artifact of a test fixture that deleted words on a fixed lattice, which decided in advance
+      which values of n could survive. It is written up in <code>docs/measurements.md</code>,
+      because a tool that audits other people's numbers cannot quietly restate its own.</p>
+      <p class="sub">Caveats: one corpus pair, both 2023-era, and edited copies simulated by random
+      word dropping rather than a model rewriting text. Real paraphrase will be harder.</p>
+    </details>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="wrap in">
+    <div class="kicker">The registry</div>
+    <h3>Three benchmarks against 21 GB of C4</h3>
+    <p class="sub">We ran the scanner ourselves: three public exams against C4, a public snapshot
+    of web text. Every shard's URL and SHA-256 is published, so every number reproduces.</p>
+    <!-- The provenance of a result, stated before the result. An ingot is a bar of metal
+         stamped with its measured purity, and this is the stamp: what was scanned, how much
+         of it, by which version, at which n. Prose buried these numbers mid-sentence; a
+         reader checking whether a claim is trustworthy should not have to parse a paragraph
+         to find out what it was measured on. -->
+    <dl class="assay">
+      <div><dt>Corpus</dt><dd>c4-en<small>26 shards, Common Crawl</small></dd></div>
+      <div><dt>Size</dt><dd><strong>21.33 GB</strong><small>9,264,249 documents</small></dd></div>
+      <div><dt>Tokens</dt><dd>3,418,685,530<small>one pass, streamed</small></dd></div>
+      <div><dt>Method</dt><dd>n = 10<small>exact, ingot-0.1.0</small></dd></div>
+    </dl>
+    <div class="scroll">
+      <table>
+        <tbody><tr><th>benchmark</th><th class="num">flagged</th><th class="num">rate</th><th class="num">matches</th><th class="num">discarded</th><th class="num">unscannable</th></tr>
+        <tr><td>gsm8k</td><td class="num">2 / 1319</td><td class="num">0.152%</td><td class="num">2</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>humaneval</td><td class="num">6 / 164</td><td class="num">3.659%</td><td class="num">15</td><td class="num">115</td><td class="num">0</td></tr>
+        <tr><td>mmlu</td><td class="num">342 / 14042</td><td class="num">2.436%</td><td class="num">865</td><td class="num">642</td><td class="num">28</td></tr>
+      </tbody></table>
+    </div>
+    <p class="sub" style="margin-top:1.4rem"><strong>"2.4% of MMLU is contaminated in C4" is wrong,
+    and that is the finding.</strong> We inspected 200 retained matches and found no contamination —
+    we found NATO Article 5, Patrick Henry, the Fifth Amendment: canonical text, the famous passages
+    the whole world quotes. MMLU quotes famous documents; web text contains them. The overlap is
+    exact, reproducible and evidentially worthless.</p>
+    <!-- One real match from results/pretraining-c4.json, baked in and asserted by
+         check-published-numbers.ts. The words are the product; here are the words,
+         visible without running anything. -->
+    <div class="hit hit--lead" style="margin:1.8rem 0 1.4rem">
+      <div class="meta">
+        <span><b>Found</b> mmlu-5951</span>
+        <span>c4-en · doc5541</span>
+        <span>n=10 · exact</span>
+      </div>
+      <div class="quote">…NATO’s founding treaty states in Article 5 that NATO members “<mark>agree that an armed attack against one or more of them in Europe or North America shall be considered an attack against them all” and</mark> that “if such an armed attack occurs, each of them, in exercise…</div>
+    </div>
+    <p class="sub">A false positive you can <em>see</em> is a judgment you make in one second; as a
+    rate, it is one you cannot evaluate at all. The full write-up, including the two published
+    numbers this project had to retract, is in
+    <a href="https://github.com/vaishak-v-nair/Ingot/blob/main/docs/silent-failures.md">three
+    ways contamination scanning silently fails</a>.</p>
+    <details class="more">
+      <summary>How we ruled contamination out — two tests</summary>
+      <p class="sub">The standard defence does not save you. Document-frequency filtering discarded
+      757 matches at this scale and <strong>0</strong> at 356,317 documents — same filter, same
+      threshold, so it only engages once the corpus is enormous. Even then the survivors are canonical,
+      because a famous passage's <em>exact</em> ten-gram is rare: Patrick Henry's most quoted sentence
+      appears in one document out of nine million, as
+      <code>give me liberty or give me death!?- Patrick Henry</code>.</p>
+      <p class="sub">Tested properly against a corpus of different provenance — The Pile with every
+      web-crawl subset removed, 251,488 documents of court opinions, patents, abstracts and digitised
+      books — <strong>67 of the 342 are confirmed canonical</strong>, 46 of them by court opinions. The
+      other 275 are undetermined, not leaked: a control of nine unmistakably canonical items scored
+      <strong>1 of 9</strong> against that reference, so absence from it carries no information.
+      Presence is evidence; absence is a lead.</p>
+    </details>
+  </div>
+</section>
+
+<section>
+  <div class="wrap in">
+    <div class="kicker">Discipline</div>
+    <h3>What Ingot refuses to do</h3>
+    <p class="sub">Each of these was a defect first, caught by reading the output instead of
+    trusting it. All eleven are written up in <code>docs/measurements.md</code>.</p>
+    <ul class="plain">
+      <li><b>No silent clean result.</b> Every report names the items nothing could ever match.</li>
+      <li><b>No verdict without the text.</b> Ingot reports what overlaps; whether that is leakage
+      is your call.</li>
+      <li><b>No paraphrase in the headline.</b> Weaker evidence sits in its own labelled section,
+      outside the count.</li>
+      <li><b>No unmeasured claims.</b> The false-positive rate prints beside the detection rate,
+      from the same run.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<!-- The receipt, in the margin. Before a scan it holds the published C4 run, so the numbers
+     the argument cites stay in view while you read the argument. During a scan it ticks. After
+     one it holds your own receipt, which is the only version of this page that is about your
+     corpus rather than ours. Everything here is duplicated in the body of the page on purpose:
+     the rail is an annotation, and an annotation that carries the only copy of a fact is not
+     an annotation, it is a load-bearing column that happens to vanish on a laptop. -->
+<aside class="rail" id="rail" aria-label="Receipt" style="">
+  <div id="rail-live"></div>
+  <h4>Registry · C4</h4>
+  <dl>
+    <dt>corpus</dt><dd>c4-en, 26 shards</dd>
+    <dt>size</dt><dd>21.33 GB</dd>
+    <dt>documents</dt><dd>9,264,249</dd>
+    <dt>tokens</dt><dd>3,418,685,530</dd>
+    <dt>n</dt><dd>10</dd>
+    <dt>scanner</dt><dd>ingot-0.1.0</dd>
+    <dt class="wide">corpus hash</dt><dd class="hash">c046ce3c890918b4d68094c438c05321</dd>
+  </dl>
+  <h4>Flagged</h4>
+  <dl>
+    <dt>mmlu</dt><dd>342 / 14042</dd>
+    <dt>humaneval</dt><dd>6 / 164</dd>
+    <dt>gsm8k</dt><dd>2 / 1319</dd>
+  </dl>
+  <p class="note">Of those 342 MMLU items, <b>67</b> are confirmed canonical against a corpus of
+  different provenance and 275 are undetermined — not leaked. A control of nine unmistakably
+  canonical items scored <b>1 of 9</b> against that same reference, so absence from it carries no
+  information. Presence is evidence; absence is a lead.</p>
+</aside>
+</div>
+
+<footer>
+  <div class="wrap in">
+    Ingot · <a href="https://github.com/vaishak-v-nair/Ingot">source</a> · Apache-2.0 ·
+    zero runtime dependencies, Node 24 runs the TypeScript directly<br>
+    Numbers on this page come from <strong>results/</strong> and reproduce with
+    <strong>node scripts/contamination-validate.ts</strong>,
+    <strong>node scripts/pretraining-scan.ts</strong> and
+    <strong>node scripts/canonicality-check.ts</strong>.<br>
+    Corpora: C4 en (ODC-BY), The Pile uncopyrighted with web-crawl subsets removed,
+    databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0, calibration only).
+  </div>
+</footer>
+
+<script type="module">
+import { loadIndexFromBytes, renderContaminationReport, reportFileName } from './ingot.js';
+
+const INDEXES = [
+  { id: 'gsm8k', label: 'GSM8K (1,319 items)' },
+  { id: 'humaneval', label: 'HumanEval (164 items)' },
+  { id: 'mmlu', label: 'MMLU (14,042 items)' },
+];
+
+/**
+ * Five ordinary documents that produce two real hits against HumanEval, both of them
+ * canonical text rather than leakage. Someone with no JSONL to hand still sees exactly
+ * what the tool does, and learns the most important thing about reading its output.
+ *
+ * Fetched rather than inlined so `test/sample-corpus.test.ts` asserts against the same
+ * bytes. A demo that quietly stopped matching would be a lie told by the front page.
+ */
+const SAMPLE_URL = './sample-corpus.jsonl';
+
+const $ = (id) => document.getElementById(id);
+
+/**
+ * Motion is additive. The reveal styles hide content only once this class lands, so a
+ * script that never runs — old browser, blocked JS — leaves a complete static page
+ * rather than a blank one. Rules stay put; the content settles in beneath them.
+ */
+const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+if (MOTION) {
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+}
+
+const benchSel = $('bench');
+for (const b of INDEXES) {
+  const o = document.createElement('option');
+  o.value = b.id; o.textContent = b.label;
+  benchSel.appendChild(o);
+}
+
+let indexBytes = null;
+let loading = null;
+
+async function loadIndex(id) {
+  indexBytes = null;
+  $('benchmeta').textContent = 'loading index…';
+  const started = performance.now();
+  const res = await fetch(`./indexes/${id}.idx.bin.gz`);
+  if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  // Decoded once for the meta line, then released. The scan runs in the worker from the
+  // raw bytes — retained so no second fetch is ever needed, which is what makes the
+  // pick-the-exam-then-go-offline story true — and a decoded MMLU index is tens of MB
+  // the main thread has no reason to keep.
+  const idx = await loadIndexFromBytes(bytes);
+  indexBytes = bytes;
+  const secs = ((performance.now() - started) / 1000).toFixed(1);
+  $('benchmeta').textContent =
+    `${idx.itemIds.length.toLocaleString()} items · n=${idx.n} · ` +
+    `${(bytes.length / 1e6).toFixed(1)} MB in ${secs}s · hashes only, no benchmark text`;
+}
+
+function selectIndex(id) {
+  // A failed load is our failure, not the reader's file — say so, in order, and offer
+  // the one action that helps. The run() guard keeps the drop zone honest meanwhile.
+  loading = loadIndex(id).catch(() => {
+    $('benchmeta').innerHTML =
+      `the benchmark list did not load — our side, not your file. ` +
+      `<button class="linklike" id="retry-index" type="button">retry</button>`;
+    $('retry-index').addEventListener('click', () => selectIndex(benchSel.value));
+  });
+  return loading;
+}
+
+selectIndex(benchSel.value);
+benchSel.addEventListener('change', () => selectIndex(benchSel.value));
+
+const drop = $('drop');
+for (const ev of ['dragenter', 'dragover']) {
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); });
+}
+for (const ev of ['dragleave', 'drop']) {
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); });
+}
+drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) run(e.dataTransfer.files[0]); });
+$('file').addEventListener('change', (e) => { if (e.target.files[0]) run(e.target.files[0]); });
+
+$('try').addEventListener('click', async () => {
+  if (benchSel.value !== 'humaneval') {
+    benchSel.value = 'humaneval';
+    selectIndex('humaneval');
+  }
+  try {
+    const res = await fetch(SAMPLE_URL);
+    if (!res.ok) throw new Error(`sample corpus not found (${res.status})`);
+    const body = await res.blob();
+    run(new File([body], 'sample-corpus.jsonl', { type: 'application/x-ndjson' }), true);
+  } catch (err) {
+    $('out').innerHTML = `<div class="refusal"><b>The sample did not load.</b>
+      <p>Our side, not yours — the demo corpus could not be fetched
+      (${esc(String(err.message || err))}). Reload the page, or drop a file of your own.</p></div>`;
+  }
+});
+
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+/**
+ * The guided demo. Five steps, each a gold ring around a real control with a caption
+ * saying what it is; step three runs the actual sample scan and waits for the results.
+ * A video of this page would rot the moment the page changed and weigh megabytes against
+ * a zero-network budget — the tour is always current because it runs the real thing.
+ */
+const TOUR = [
+  { el: '#bench',
+    text: 'Pick the exam. Three public benchmarks live in this menu — the demo uses HumanEval, 164 programming tasks.',
+    pre: () => { if (benchSel.value !== 'humaneval') { benchSel.value = 'humaneval'; selectIndex('humaneval'); } } },
+  { el: '#drop',
+    text: 'Your training data drops here — any size, read entirely in this tab. Today the built-in sample stands in for it.' },
+  { el: '#status',
+    text: 'Scanning now, on your CPU. Open the network panel: nothing leaves this machine.',
+    pre: () => $('try').click(),
+    waitFor: () => document.querySelector('#out .hit--lead') },
+  { el: '#out .hit--lead',
+    text: 'The evidence. The matched words, large, with their context — both sample matches are famous text, not cheating, and you can tell because you can read them.' },
+  { el: '#dl-html',
+    text: 'Take it with you. The report is built here and opens with no network at all. That is the whole tool — now try your own file.' },
+];
+
+let tourAt = -1, tourRing = null, tourCard = null;
+let tourPrevFocus = null;
+let tourAutoAt = 0;
+
+function tourWriteFlag() { try { localStorage.setItem('ingot-tour-done', '1'); } catch { /* fine */ } }
+
+function tourStop(reason) {
+  if (tourAt < 0) return;
+  tourAt = -1;
+  tourRing?.remove(); tourCard?.remove();
+  tourRing = tourCard = null;
+  removeEventListener('keydown', tourKey);
+  removeEventListener('resize', tourPlace);
+  // A reflex scroll inside the first two seconds of an auto-start is noise, not a
+  // dismissal — the flag stays unwritten, so the next visit gets one more chance.
+  // Anything explicit (Esc, Skip, Done) or any later scroll is intent, and sticks.
+  const reflex = reason === 'scroll' && tourAutoAt > 0 && performance.now() - tourAutoAt < 2000;
+  if (!reflex) tourWriteFlag();
+  tourAutoAt = 0;
+  tourPrevFocus?.focus?.();
+  tourPrevFocus = null;
+}
+function tourKey(e) { if (e.key === 'Escape') tourStop('explicit'); }
+
+function tourPlace() {
+  if (tourAt < 0) return;
+  const el = document.querySelector(TOUR[tourAt].el);
+  if (!el) return tourStop();
+  const r = el.getBoundingClientRect();
+  const top = r.top + scrollY, left = r.left + scrollX;
+  Object.assign(tourRing.style, {
+    top: `${top - 8}px`, left: `${left - 8}px`,
+    width: `${r.width + 16}px`, height: `${r.height + 16}px`,
+  });
+  const cardLeft = Math.max(12, Math.min(left, innerWidth - tourCard.offsetWidth - 12));
+  Object.assign(tourCard.style, { top: `${top + r.height + 18}px`, left: `${cardLeft}px` });
+}
+
+async function tourStep(i) {
+  if (i >= TOUR.length) return tourStop();
+  tourAt = i;
+  const step = TOUR[i];
+  step.pre?.();
+  // A step that runs the scanner shows its caption while the scan runs, then advances by
+  // itself when the results exist — its work, not a click, is what completes it.
+  if (step.waitFor) {
+    tourCard.querySelector('.next').textContent = 'scanning…';
+    tourCard.querySelector('.next').disabled = true;
+  }
+  const el = document.querySelector(step.el);
+  if (!el) return tourStop();
+  tourCard.querySelector('.step').textContent = `${i + 1} of ${TOUR.length}`;
+  tourCard.querySelector('p').textContent = step.text;
+  el.scrollIntoView({ block: 'center', behavior: MOTION ? 'smooth' : 'auto' });
+  tourPlace();
+  if (step.waitFor) {
+    // Time-boxed: if the sample scan fails, the tour ends with the error visible in the
+    // results area instead of hanging forever on a disabled button.
+    const deadline = performance.now() + 20000;
+    while (tourAt === i && !step.waitFor() && performance.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    if (tourAt !== i) return;
+    if (!step.waitFor()) return tourStop('error');
+    await new Promise((r) => setTimeout(r, 900));
+    if (tourAt === i) tourStep(i + 1);
+  } else {
+    const next = tourCard.querySelector('.next');
+    next.disabled = false;
+    next.textContent = i === TOUR.length - 1 ? 'Done' : 'Next';
+  }
+}
+
+function tourStart() {
+  if (tourAt >= 0) return;
+  tourRing = document.createElement('div');
+  tourRing.className = 'tour-ring';
+  tourCard = document.createElement('div');
+  tourCard.className = 'tour-card';
+  tourCard.setAttribute('role', 'dialog');
+  tourCard.setAttribute('aria-label', 'Guided demo');
+  tourCard.innerHTML = `<div class="step"></div><p></p>
+    <div class="btns"><button class="btn primary next" type="button">Next</button>
+    <button class="btn skip" type="button">Skip</button><span class="esc">esc exits</span></div>`;
+  document.body.append(tourRing, tourCard);
+  tourCard.querySelector('.next').addEventListener('click', () => tourStep(tourAt + 1));
+  tourCard.querySelector('.skip').addEventListener('click', () => tourStop('explicit'));
+  addEventListener('keydown', tourKey);
+  addEventListener('resize', tourPlace);
+  // Taking the wheel back ends the tour. Programmatic scrollIntoView never fires wheel or
+  // touchmove, so these only trip on a real hand — the user scrolling away IS a dismissal,
+  // and a tour that fights the scrollbar is a hostage situation.
+  addEventListener('wheel', () => tourStop('scroll'), { passive: true, once: true });
+  addEventListener('touchmove', () => tourStop('scroll'), { passive: true, once: true });
+  // Focus moves into the dialog so a keyboard can operate it, and returns on close.
+  tourPrevFocus = document.activeElement;
+  tourStep(0);
+  tourCard.querySelector('.next').focus();
+}
+
+$('tour').addEventListener('click', tourStart);
+
+/**
+ * First visit: the demo introduces itself once the page has settled. The never-again
+ * flag is written on intent — Esc, Skip, Done, or any scroll after the first two
+ * seconds — but a reflex scroll inside those two seconds leaves it unwritten, so an
+ * accidental dismissal costs one more auto-start, never a hijacking. Krug's rule:
+ * sizzle in the user's way drains goodwill, so declining stays free and explicit
+ * dismissal stays permanent. A visitor who wants it back has the button.
+ */
+try {
+  if (!localStorage.getItem('ingot-tour-done')) {
+    setTimeout(() => {
+      if (tourAt < 0 && !document.querySelector('#out .hit')) {
+        tourAutoAt = performance.now();
+        tourStart();
+      }
+    }, 1600);
+  }
+} catch { /* storage disabled: never auto-run rather than run every visit */ }
+
+/**
+ * The rail's live block. It sits above the published C4 receipt rather than replacing it,
+ * because the reader's numbers only mean something next to the ones the argument cites.
+ *
+ * `uploaded 0 bytes` is in both states deliberately. The privacy claim is easiest to doubt
+ * at exactly the moment the file is being read, which is the moment this line is ticking
+ * beside a byte counter that is visibly climbing.
+ */
+const railLive = $('rail-live');
+
+function railScanning(file, docs, tokens, bytes) {
+  railLive.innerHTML = `
+    <h4>Scanning</h4>
+    <dl class="ticking">
+      <dt>file</dt><dd>${esc(file.name)}</dd>
+      <dt>read</dt><dd>${(bytes / 1e6).toFixed(0)} / ${(file.size / 1e6).toFixed(0)} MB</dd>
+      <dt>documents</dt><dd>${docs.toLocaleString()}</dd>
+      <dt>tokens</dt><dd>${tokens.toLocaleString()}</dd>
+      <dt>uploaded</dt><dd>0 bytes</dd>
+    </dl>`;
+}
+
+function railResult(report, file) {
+  const exact = report.tiers.find((t) => t.tier === 'exact');
+  const r = report.receipt;
+  railLive.innerHTML = `
+    <h4>Your scan</h4>
+    <dl>
+      <dt>file</dt><dd>${esc(file.name)}</dd>
+      <dt>benchmark</dt><dd>${esc(report.benchmark)}</dd>
+      <dt>documents</dt><dd>${report.corpusDocs.toLocaleString()}</dd>
+      <dt>tokens</dt><dd>${report.corpusTokens.toLocaleString()}</dd>
+      <dt>flagged</dt><dd>${exact.itemsHit} / ${exact.itemsTotal.toLocaleString()}</dd>
+      <dt>matches</dt><dd>${exact.totalHits}</dd>
+      <dt>n</dt><dd>${report.n}</dd>
+      <dt>scanner</dt><dd>${esc(r.scannerVersion)}</dd>
+      <dt class="wide">corpus hash</dt><dd class="hash">${esc(r.corpusHash)}</dd>
+      <dt>uploaded</dt><dd>0 bytes</dd>
+    </dl>`;
+}
+
+let scanning = false;
+let scanWorker = null;
+let scanStartedAt = 0;
+let cancelReject = null;
+let wasCancelled = false;
+
+const beforeUnloadGuard = (e) => { e.preventDefault(); e.returnValue = ''; };
+
+function fmtRemaining(bytesRead, total) {
+  const elapsed = (performance.now() - scanStartedAt) / 1000;
+  if (elapsed < 3 || bytesRead === 0) return '';
+  const secs = (total - bytesRead) / (bytesRead / elapsed);
+  if (!Number.isFinite(secs) || secs < 1) return '';
+  const m = Math.floor(secs / 60), s = Math.round(secs % 60);
+  return ` · about ${m > 0 ? `${m}m` : `${s}s`} left`;
+}
+
+function scanEnded() {
+  scanning = false;
+  benchSel.disabled = false;
+  $('bar').hidden = true;
+  $('cancel').hidden = true;
+  removeEventListener('beforeunload', beforeUnloadGuard);
+}
+
+$('cancel').addEventListener('click', () => {
+  if (!scanning) return;
+  wasCancelled = true;
+  scanWorker?.terminate();
+  scanWorker = null;
+  cancelReject?.(new Error('cancelled'));
+  scanEnded();
+  $('status').textContent = 'scan cancelled — nothing was uploaded, nothing was kept';
+  railLive.innerHTML = '';
+});
+
+function refusal(title, body) {
+  return `<div class="refusal"><b>${title}</b><p>${body}</p></div>`;
+}
+
+async function run(file, isSample = false) {
+  if (scanning) {
+    $('status').textContent = 'a scan is already running — cancel it first';
+    return;
+  }
+  // Set before any await: a guard that yields before it guards is not a guard — two
+  // files dropped during index load would otherwise both pass the check above and
+  // interleave their writes to the bar, the status line, and the rail. Cancel is
+  // visible from this same instant, so a stalled index download is never a dead end,
+  // and the benchmark select locks so it cannot null the index out from under us.
+  scanning = true;
+  wasCancelled = false;
+  benchSel.disabled = true;
+  $('cancel').hidden = false;
+
+  $('out').innerHTML = '';
+  $('bar').hidden = false;
+  $('bar').value = 0;
+  $('status').textContent = `reading ${file.name} (${(file.size / 1e6).toFixed(1)} MB)…`;
+  railScanning(file, 0, 0, 0);
+
+  try {
+    await loading;
+    if (!scanning) return; // cancelled while the index was loading
+    if (!indexBytes) {
+      throw new Error('the benchmark index has not loaded — retry it above, then drop the file again');
+    }
+
+    scanStartedAt = performance.now();
+    addEventListener('beforeunload', beforeUnloadGuard);
+
+    const onProgress = (docs, tokens, bytes) => {
+      $('bar').value = Math.min(100, (bytes / file.size) * 100);
+      $('status').textContent =
+        `${docs.toLocaleString()} documents · ${tokens.toLocaleString()} tokens · ` +
+        `${(bytes / 1e6).toFixed(0)} MB${fmtRemaining(bytes, file.size)}`;
+      railScanning(file, docs, tokens, bytes);
+    };
+
+    // The scan runs in a worker so the tab stays responsive for the whole 48 minutes;
+    // cancel is terminate(), which cannot leak. There is no main-thread fallback: any
+    // browser that runs this module script has Worker — module scripts do not run from
+    // file:// at all — so a fallback would be unreachable code kept alive by a fiction.
+    const report = await new Promise((resolve, reject) => {
+      cancelReject = reject;
+      // Terminated explicitly on every exit — done, error, cancel. Browsers do not
+      // reliably collect abandoned workers, and each holds a decoded index.
+      const w = new Worker('./scan.worker.js', { type: 'module' });
+      scanWorker = w;
+      w.onmessage = (e) => {
+        const m = e.data;
+        if (m.type === 'progress') onProgress(m.docs, m.tokens, m.bytesRead);
+        else if (m.type === 'done') { w.terminate(); scanWorker = null; resolve(m.report); }
+        else if (m.type === 'error') { w.terminate(); scanWorker = null; reject(new Error(m.message)); }
+      };
+      w.onerror = (e) => { w.terminate(); scanWorker = null; reject(new Error(e.message || 'the scan worker failed')); };
+      const copy = indexBytes.slice().buffer;
+      // The receipt's contract is the exact reproducible invocation, so the page sends
+      // the real one — it is the only party that knows the benchmark id.
+      w.postMessage({
+        indexBytes: copy,
+        file,
+        command: `npx ingot-scan contaminate --index ${benchSel.value} --corpus ${file.name}`,
+      }, [copy]);
+    });
+
+    cancelReject = null;
+    scanEnded();
+    render(report, file, isSample);
+  } catch (err) {
+    cancelReject = null;
+    scanWorker?.terminate();
+    scanWorker = null;
+    scanEnded();
+    if (wasCancelled) { wasCancelled = false; return; }
+    $('status').textContent = '';
+    // A half-ticked counter left in the margin would read as a scan still in progress.
+    railLive.innerHTML = '';
+    $('out').innerHTML = refusal('The scan did not run.', esc(String(err.message || err)));
+  }
+}
+
+const hitRow = (h) => `
+        <div class="hit">
+          <code>${esc(h.benchmarkItemId)} &rarr; ${esc(h.corpusDocId)}${h.corpusDocFrequency ? ` &middot; in ${h.corpusDocFrequency} doc${h.corpusDocFrequency === 1 ? '' : 's'}` : ''}</code>
+          <div class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</div>
+        </div>`;
+
+function render(report, file, isSample) {
+  const exact = report.tiers.find((t) => t.tier === 'exact');
+  const hitCount = exact.itemsHit;
+  const clean = hitCount === 0;
+  const load = report.load ?? { totalLines: 0, skipped: 0 };
+
+  // Zero readable documents is a refusal, never a verdict. A green 0 over an unread
+  // file would be the exact silent failure docs/silent-failures.md is about.
+  if (report.corpusDocs === 0) {
+    $('status').textContent = '';
+    railLive.innerHTML = '';
+    $('out').innerHTML = load.totalLines === 0
+      ? refusal('This file is empty.', 'There were no lines to read — nothing was scanned.')
+      : refusal('This file was not scanned.',
+        `None of its ${load.totalLines.toLocaleString()} line${load.totalLines === 1 ? '' : 's'} could be
+        read as a JSONL record — one <code>{"text": …}</code> object per line. Nothing was checked, so
+        this is not a clean result. Fix the format, or scan other formats on the command line:
+        <code>npx ingot-scan contaminate --index ${esc(report.benchmark)} --corpus ${esc(file.name)}</code>`);
+    return;
+  }
+
+  $('status').textContent =
+    `${report.corpusDocs.toLocaleString()} documents · ${report.corpusTokens.toLocaleString()} tokens · ` +
+    `${(report.elapsedMs / 1000).toFixed(1)}s · nothing left this machine`;
+
+  railResult(report, file);
+
+  const uncheckable = report.uncheckableItemIds.length;
+
+  let html = '';
+
+  if (isSample) {
+    html += `<div class="verdict" style="border-color:var(--gold)">
+      <strong>This is the sample corpus.</strong>
+      <p class="muted" style="margin:.5rem 0 0">Five ordinary documents, none of them copied from
+      HumanEval. It still produces matches — and reading them is the point.</p>
+    </div>`;
+  }
+
+  html += `
+    <div class="verdict">
+      <div class="big ${clean ? 'clean' : 'dirty'}">${hitCount}</div>
+      <div class="label">${clean ? 'benchmark items found in your data' : `of ${exact.itemsTotal.toLocaleString()} benchmark items appear in your data`}</div>
+      <p style="margin:.9rem 0 0">${
+        clean
+          ? 'No verbatim overlap found. That is a real result, not an absence of one: every item that could be checked was checked.'
+          : 'Read the matches below before concluding anything. Some overlaps are canonical facts with one natural phrasing rather than leakage.'
+      }</p>
+    </div>
+
+    <h2>What was checked</h2>
+    <div class="scroll"><table>
+      <tr><th>benchmark</th><td class="num">${esc(report.benchmark)}, ${exact.itemsTotal.toLocaleString()} items at n=${report.n}</td></tr>
+      <tr><th>your file</th><td class="num">${esc(file.name)} · ${report.corpusDocs.toLocaleString()} docs</td></tr>
+      <tr><th>matches kept</th><td class="num">${exact.totalHits}</td></tr>
+      <tr><th>dropped as ordinary language</th><td class="num">${exact.droppedGeneric ?? 0}</td></tr>
+      <tr><th>could not be checked</th><td class="num">${uncheckable} item${uncheckable === 1 ? '' : 's'} shorter than ${report.n} tokens</td></tr>
+      ${load.skipped > 0 ? `<tr><th>lines skipped</th><td class="num">${load.skipped.toLocaleString()} of ${load.totalLines.toLocaleString()} — unreadable as records, reported rather than silently dropped</td></tr>` : ''}
+    </table></div>`;
+
+  if (exact.hits.length > 0) {
+    html += `<h2>Evidence — judge it yourself</h2>`;
+    // The first match is rendered as the specimen, at display scale, because the passage is
+    // the product. The rest follow as a compact record: forty matches at display scale is
+    // not evidence, it is a scroll.
+    exact.hits.slice(0, 25).forEach((h, i) => {
+      if (i === 0) {
+        html += `
+        <div class="hit hit--lead">
+          <div class="meta">
+            <span><b>Found</b> ${esc(h.benchmarkItemId)}</span>
+            <span>${esc(h.corpusDocId)}</span>
+            <span>n=${report.n} · exact</span>
+          </div>
+          <div class="quote">…${esc(h.contextBefore)}<mark>${esc(h.matchedText)}</mark>${esc(h.contextAfter)}…</div>
+        </div>`;
+        return;
+      }
+      html += hitRow(h);
+    });
+    if (isSample) {
+      html += `<p class="muted">Both matches are canonical text — a prime sequence and the ten digits —
+        that appear in a HumanEval docstring because they appear everywhere. Neither is contamination,
+        and you can tell in a second because the tool showed you the words rather than a percentage.</p>`;
+    }
+    // Nothing is cut silently: the cap is labelled, the rest render on demand, and the
+    // JSON download always carries every match the report counted.
+    if (exact.hits.length > 25) {
+      html += `<p class="muted" id="more-row"><button class="linklike" id="more-hits" type="button">show
+        the other ${(exact.hits.length - 25).toLocaleString()} matches</button>${
+        exact.totalHits > exact.hits.length
+          ? ` — ${exact.totalHits.toLocaleString()} counted in total; the ${exact.hits.length} with
+          retained text are in the JSON download below`
+          : ''}</p><div id="more-out"></div>`;
+    } else if (exact.totalHits > exact.hits.length) {
+      html += `<p class="muted">${exact.totalHits.toLocaleString()} matches counted in total — the
+        ${exact.hits.length} with retained text are in the JSON download below.</p>`;
+    }
+  }
+
+  // The frequency filter's discards, readable. "Dropped as ordinary language" is itself
+  // a judgement, and a reader gets to check it rather than trust it.
+  if ((exact.droppedGeneric ?? 0) > 0 && exact.droppedSamples?.length) {
+    const capNote = exact.droppedSamples.length < exact.droppedGeneric
+      ? ` — the first ${exact.droppedSamples.length} of ${exact.droppedGeneric}; the rest are counted,
+      their text not retained`
+      : '';
+    html += `<details class="more"><summary>dropped as ordinary language — read them${capNote}</summary>
+      ${exact.droppedSamples.map(hitRow).join('')}
+    </details>`;
+  }
+
+  if (uncheckable > 0) {
+    html += `<h2>Not checked</h2><p class="muted">${uncheckable} benchmark item${uncheckable === 1 ? ' is' : 's are'}
+      shorter than ${report.n} tokens, so nothing could ever match ${uncheckable === 1 ? 'it' : 'them'}.
+      A clean result that stayed silent about that would be hiding the part of the benchmark nobody looked at.</p>`;
+  }
+
+  const r = report.receipt;
+  html += `
+    <h2>Take it with you</h2>
+    <p class="muted">A scan that only exists in this tab is not evidence. Both files are built
+    here, on your machine, from the result you are looking at — the HTML one is self-contained
+    and opens with no network at all.</p>
+    <div class="btns" style="justify-content:flex-start">
+      <button class="btn primary" id="dl-html" type="button">Download report (HTML)</button>
+      <button class="btn" id="dl-json" type="button">Download data (JSON)</button>
+    </div>
+
+    <h2>Receipt — reproduce this without asking us</h2>
+    <p class="muted">Everything needed to re-derive this exact result on your own machine. The
+    corpus hash is computed the same way on the command line, so the two reports name the
+    same bytes.</p>
+    <pre>scanner        ${esc(r.scannerVersion)}, index format ${r.indexFormatVersion}
+index          ${esc(r.benchmark)} · n=${r.n} · stride ${r.stride} · ${r.indexGrams.toLocaleString()} grams
+benchmark hash ${esc(r.benchmarkHash)}
+corpus         ${esc(r.corpus)} · ${r.corpusBytes.toLocaleString()} bytes · ${r.corpusDocs.toLocaleString()} docs
+corpus hash    ${esc(r.corpusHash)}
+generated      ${esc(r.generatedAt)}
+
+${esc(r.command)}</pre>
+    <p class="muted">The corpus hash covers the first 64 lines, every thousandth line after
+    that, and the exact line and byte counts — enough to notice a changed corpus, not enough
+    to stop someone who edits theirs deliberately. The command line additionally records a
+    full SHA-256, which does. That limit is written down rather than implied away.</p>`;
+
+  $('out').innerHTML = html;
+
+  if (MOTION) {
+    // The record cascades in reading order, capped so a long list of hits arrives as one
+    // block rather than a minute of theatre.
+    [...$('out').children].forEach((el, i) => { el.style.animationDelay = `${Math.min(i * 35, 300)}ms`; });
+    if (hitCount > 0) countUp($('out').querySelector('.big'), hitCount);
+  }
+
+  // Wired after the HTML lands, since innerHTML replaces the nodes each render.
+  const moreBtn = $('more-hits');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', () => {
+      // Chunked, so hundreds of matches render without freezing the page they land on.
+      moreBtn.disabled = true;
+      moreBtn.textContent = 'rendering…';
+      const rest = exact.hits.slice(25);
+      let at = 0;
+      const chunk = () => {
+        $('more-out').insertAdjacentHTML('beforeend', rest.slice(at, at + 40).map(hitRow).join(''));
+        at += 40;
+        if (at < rest.length) requestAnimationFrame(chunk);
+        else $('more-row').remove();
+      };
+      requestAnimationFrame(chunk);
+    });
+  }
+
+  $('dl-html').addEventListener('click', () =>
+    download(renderContaminationReport(report), reportFileName(report, 'html'), 'text/html'),
+  );
+  $('dl-json').addEventListener('click', () =>
+    download(JSON.stringify(report, null, 2), reportFileName(report, 'json'), 'application/json'),
+  );
+}
+
+/**
+ * The verdict converges on its value instead of appearing fully formed — ease-out cubic,
+ * 650 ms, ending on the exact figure. A measurement settling, not a slot machine.
+ */
+function countUp(el, to) {
+  const t0 = performance.now();
+  const step = (t) => {
+    const p = Math.min(1, (t - t0) / 650);
+    el.textContent = String(Math.round(to * (1 - (1 - p) ** 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/**
+ * Saves a file the browser built. Still no upload: the bytes go from this tab to the
+ * download folder without touching a network, which is the same promise the scan makes.
+ */
+function download(text, filename, type) {
+  const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Revoked on the next tick: revoking immediately can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+</script>
+
+
+<div class="tour-ring" style="top: 411.984px; left: 360.625px; width: 252.375px; height: 58.5312px;"></div><div class="tour-card" role="dialog" aria-label="Guided demo" style="top: 480.516px; left: 368.625px;"><div class="step">1 of 5</div><p>Pick the exam. Three public benchmarks live in this menu — the demo uses HumanEval, 164 programming tasks.</p>
+    <div class="btns"><button class="btn primary next" type="button">Next</button>
+    <button class="btn skip" type="button">Skip</button><span class="esc">esc exits</span></div></div>
+</body>
+</html>

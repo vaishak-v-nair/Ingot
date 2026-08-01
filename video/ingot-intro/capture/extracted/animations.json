@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "webAnimations": 1,
+    "cssDeclarations": 20,
+    "scrollTargets": 6,
+    "cdpAnimations": 38,
+    "canvases": 0
+  },
+  "namedAnimations": [
+    "breathe"
+  ],
+  "scrollTriggeredElements": 6,
+  "representativeAnimations": [
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "breathe",
+      "targetSelector": "span.dot",
+      "targetRect": {
+        "x": 259.96875,
+        "y": 291.9375,
+        "width": 9.75,
+        "height": 9.75,
+        "top": 291.9375,
+        "right": 269.71875,
+        "bottom": 301.6875,
+        "left": 259.96875
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "replace",
+          "opacity": "1",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.4",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "replace",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 2600,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    }
+  ]
+}

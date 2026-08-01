@@ -1,0 +1,203 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "Archivo",
+      "fontSize": "66.3px",
+      "fontWeight": "600",
+      "lineHeight": "67.626px",
+      "letterSpacing": "-1.989px",
+      "color": "#16181A",
+      "sampleText": "What's inside AI training data?"
+    },
+    {
+      "role": "heading",
+      "fontFamily": "Archivo",
+      "fontSize": "38.025px",
+      "fontWeight": "400",
+      "lineHeight": "58.9388px",
+      "letterSpacing": "normal",
+      "color": "#16181A",
+      "sampleText": "One mountain of text, two questions"
+    },
+    {
+      "role": "body",
+      "fontFamily": "Public Sans",
+      "fontSize": "26.13px",
+      "fontWeight": "400",
+      "lineHeight": "37.8885px",
+      "letterSpacing": "normal",
+      "color": "#16181A",
+      "sampleText": "Ingot shows you which exact words — yours, or a benchmark's "
+    },
+    {
+      "role": "label",
+      "fontFamily": "Public Sans",
+      "fontSize": "17.94px",
+      "fontWeight": "400",
+      "lineHeight": "27.807px",
+      "letterSpacing": "normal",
+      "color": "#16181A",
+      "sampleText": "Choose a file"
+    },
+    {
+      "role": "code",
+      "fontFamily": "monospace",
+      "fontSize": "17.55px",
+      "fontWeight": "400",
+      "lineHeight": "27.2025px",
+      "letterSpacing": "normal",
+      "color": "#5D6165",
+      "sampleText": "{\"text\": …}"
+    },
+    {
+      "role": "body-small",
+      "fontFamily": "Public Sans",
+      "fontSize": "15.21px",
+      "fontWeight": "400",
+      "lineHeight": "23.5755px",
+      "letterSpacing": "normal",
+      "color": "#5D6165",
+      "sampleText": "26 shards, Common Crawl"
+    },
+    {
+      "role": "heading-4",
+      "fontFamily": "JetBrains Mono",
+      "fontSize": "12.48px",
+      "fontWeight": "400",
+      "lineHeight": "19.344px",
+      "letterSpacing": "2.496px",
+      "color": "#43474B",
+      "sampleText": "Registry · C4"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      5,
+      8,
+      10,
+      11,
+      12,
+      14,
+      15,
+      18,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      27
+    ],
+    "baseUnit": 4
+  },
+  "radius": [],
+  "shadows": [],
+  "buttons": [
+    {
+      "label": "Watch it work — no file needed",
+      "background": "#16181A",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#F4F5F4",
+      "padding": "10.725px 21.45px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(22, 24, 26)",
+      "boxShadow": "none",
+      "fontSize": "17.94px",
+      "fontWeight": "400",
+      "height": "51.2344px"
+    },
+    {
+      "label": "or scan the sample corpus directly",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#43474B",
+      "padding": "0px",
+      "borderRadius": "0px",
+      "border": "0px none rgb(67, 71, 75)",
+      "boxShadow": "none",
+      "fontSize": "17.16px",
+      "fontWeight": "400",
+      "height": "26.5781px"
+    },
+    {
+      "label": "Skip",
+      "background": "#F4F5F4",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#16181A",
+      "padding": "10.725px 21.45px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(217, 219, 218)",
+      "boxShadow": "none",
+      "fontSize": "17.94px",
+      "fontWeight": "400",
+      "height": "51.2344px"
+    }
+  ],
+  "cards": [
+    {
+      "label": "card",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#16181A",
+      "padding": "0px",
+      "borderRadius": "0px",
+      "border": "",
+      "boxShadow": "none",
+      "fontSize": "17px",
+      "fontWeight": "400",
+      "height": "295.75px"
+    },
+    {
+      "label": "card",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#16181A",
+      "padding": "22.425px 25.35px 22.425px 0px",
+      "borderRadius": "0px",
+      "border": "0px none rgb(22, 24, 26)",
+      "boxShadow": "none",
+      "fontSize": "17px",
+      "fontWeight": "400",
+      "height": "292.75px"
+    },
+    {
+      "label": "card",
+      "background": "#F4F5F4",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#16181A",
+      "padding": "17.55px 22.425px 19.5px",
+      "borderRadius": "0px",
+      "border": "",
+      "boxShadow": "none",
+      "fontSize": "17px",
+      "fontWeight": "400",
+      "height": "217.203px"
+    }
+  ],
+  "nav": {
+    "label": "navigation",
+    "background": "#F4F5F4",
+    "backgroundImage": "",
+    "backdropFilter": "",
+    "color": "#16181A",
+    "padding": "0px",
+    "borderRadius": "0px",
+    "border": "",
+    "boxShadow": "none",
+    "fontSize": "17px",
+    "fontWeight": "400",
+    "height": "65.6875px"
+  },
+  "chips": [],
+  "statCells": [],
+  "tabs": [],
+  "backgrounds": [],
+  "glass": []
+}

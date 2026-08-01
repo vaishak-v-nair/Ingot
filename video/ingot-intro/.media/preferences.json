@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "preferences": {
+    "style_preset.product-launch-video": {
+      "value": "code-editorial",
+      "confirmed_in": [
+        "ingot-intro"
+      ],
+      "updated_at": "2026-08-01T12:02:51.816Z"
+    },
+    "voice": {
+      "value": "bf_emma",
+      "confirmed_in": [
+        "ingot-intro"
+      ],
+      "updated_at": "2026-08-01T12:02:51.901Z"
+    }
+  },
+  "sightings": {}
+}

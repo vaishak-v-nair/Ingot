@@ -1,0 +1,210 @@
+<template>
+  <!--
+    Frame 01 — The question (hook · kinetic-type-beats, sub-shape A: fixed-line token swap)
+    Scene 1 (0.0–2.0s)  headline assembles per-word on long-tail settles (dynamic-content-sequencing timing)
+    Scene 2 (2.0–3.4s)  mono slot lands beneath with first token "your words" (discrete-text-sequence)
+    Scene 3 (3.4–4.928s) slot HARD-CUT swaps to "a benchmark's exam questions" — the swap is the beat; holds still.
+    Dark-native code-editorial: graphite ground #0C0E0F, ink voice #E8EAEC, zero accent
+    (green = verified states only — nothing here is verified yet).
+    Fonts: no font files ship with this project — web-safe stacks only, no @font-face.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+  <style>
+  /* Brand fonts staged by the orchestrator in assets/fonts/ (SIL OFL, self-hosted). */
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 600;
+    src: url("assets/fonts/archivo-latin-600.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+    src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); }
+
+    /* frame root — styled via #root, never a class on the composition element */
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      container-type: size;
+      font-family: "Archivo", Arial, Helvetica, sans-serif;
+    }
+
+    /* full-bleed graphite ground — a dedicated clip layer, never painted on #root */
+    #f01-question-bg {
+      position: absolute;
+      inset: 0;
+      background: #0c0e0f;
+    }
+
+    /* stage — the centered type column, upper-third golden position */
+    #f01-question-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 21.5cqh;
+    }
+
+    /* headline lockup — sentence case, negative-tracked, ~55% frame width, 2 lines */
+    .f01-question-headline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      row-gap: 0.5cqh;
+      color: #e8eaec;
+      font-size: 6.9cqw;
+      font-weight: 600;
+      line-height: 1.06;
+      letter-spacing: -0.022em;
+    }
+    .f01-question-line {
+      display: flex;
+      justify-content: center;
+      gap: 0.26em;
+      white-space: nowrap;
+    }
+    .f01-question-word {
+      display: inline-block;
+    }
+
+    /* token-cycle slot — mono, ink, 3:1 under the headline; fixed box so the
+       hard-cut swap changes glyphs only, never layout (min-width ≥ widest state) */
+    #f01-question-slot {
+      margin-top: 6.6cqh;
+      min-width: 42cqw;
+      min-height: 3.2cqw;
+      text-align: center;
+    }
+    #f01-question-slot-text {
+      display: inline-block;
+      font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+      font-weight: 700;
+      font-size: 2.4cqw;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+      color: #e8eaec;
+      white-space: nowrap;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="01-question"
+    data-start="0"
+    data-duration="5.428"
+    data-fps="30"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div
+      id="f01-question-bg"
+      class="clip"
+      data-start="0"
+      data-duration="5.428"
+      data-track-index="0"
+    ></div>
+
+    <div
+      id="f01-question-stage"
+      class="clip"
+      data-start="0"
+      data-duration="5.428"
+      data-track-index="1"
+    >
+      <div class="f01-question-headline">
+        <div class="f01-question-line">
+          <span class="f01-question-word">What&rsquo;s</span>
+          <span class="f01-question-word">inside</span>
+        </div>
+        <div class="f01-question-line">
+          <span class="f01-question-word">AI</span>
+          <span class="f01-question-word">training</span>
+          <span class="f01-question-word">data?</span>
+        </div>
+      </div>
+
+      <div id="f01-question-slot">
+        <span id="f01-question-slot-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var DURATION = 4.928;
+
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- Scene 1 (0.0–2.0s) — per-word staggered reveal on long-tail settles.
+         Timing is computed from content length + per-word config
+         (dynamic-content-sequencing), never hardcoded per word. ---- */
+      var REVEAL_START = 0.12; // first word arrives well before the 0.5s hero floor
+      var WORD_GAP = 0.13; // base beat between word entrances
+      var SEC_PER_CHAR = 0.024; // longer words earn a longer gap before the next
+      var SETTLE = 1.05; // smooth long-tail settle per word
+
+      var words = gsap.utils.toArray(".f01-question-word");
+      var cursor = REVEAL_START;
+      words.forEach(function (el) {
+        tl.fromTo(
+          el,
+          { opacity: 0, y: 36, filter: "blur(8px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: SETTLE,
+            ease: "power3.out",
+          },
+          cursor
+        );
+        cursor += WORD_GAP + el.textContent.length * SEC_PER_CHAR;
+      });
+
+      /* ---- Scene 2 (2.0s) — the slot lands beneath the headline. ---- */
+      tl.fromTo(
+        "#f01-question-slot",
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
+        2.0
+      );
+
+      /* ---- Scenes 2→3 — in-place token cycle (discrete-text-sequence).
+         Sparse {t, text} states, reverse-searched each frame; the 3.4s swap is an
+         INSTANT hard cut — no transition on the text — then holds still to the end. ---- */
+      var SLOT_SEQ = [
+        { t: 0.0, text: "" },
+        { t: 2.0, text: "your words" },
+        { t: 3.4, text: "a benchmark’s exam questions" },
+      ];
+
+      function slotAt(time) {
+        for (var i = SLOT_SEQ.length - 1; i >= 0; i--) {
+          if (time >= SLOT_SEQ[i].t) return SLOT_SEQ[i].text;
+        }
+        return "";
+      }
+
+      var slotTextEl = document.getElementById("f01-question-slot-text");
+      var driver = { t: 0 };
+      var lastText = null;
+      tl.to(
+        driver,
+        {
+          t: DURATION,
+          duration: DURATION,
+          ease: "none",
+          onUpdate: function () {
+            var txt = slotAt(driver.t);
+            if (txt !== lastText) {
+              slotTextEl.textContent = txt;
+              lastText = txt;
+            }
+          },
+        },
+        0
+      );
+
+      window.__timelines["01-question"] = tl;
+    })();
+  </script>
+</template>
