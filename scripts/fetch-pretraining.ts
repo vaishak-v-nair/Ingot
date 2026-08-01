@@ -10,11 +10,14 @@
  *   c4/en   Common Crawl, cleaned, April 2019   ODC-BY   1024 shards
  *
  * C4 is chosen because it is the corpus behind T5 and is reused widely enough that a
- * finding matters; because it predates none of the benchmarks scanned against it, which
- * is what makes leakage possible rather than assumed; and because it ships as gzipped
- * JSONL with a `text` field, so Ingot scans the published bytes with no transformation
- * step between download and result. Nothing here rewrites the corpus, which means a
- * reader reproduces the scan by fetching the same URLs.
+ * finding matters, and because it ships as gzipped JSONL with a `text` field, so Ingot
+ * scans the published bytes with no transformation step between download and result.
+ * One thing it cannot contain is leakage: every benchmark scanned against it postdates
+ * the April 2019 crawl, so this pass measures the canonical-text baseline and proves the
+ * method at corpus scale — the registry page says the same. (An earlier version of this
+ * header claimed the opposite; the first registry corpus where leakage is chronologically
+ * possible is the 2023 distillation set, not C4.) Nothing here rewrites the corpus, which
+ * means a reader reproduces the scan by fetching the same URLs.
  *
  *   node scripts/fetch-pretraining.ts --shards 26 --out ../corpora/c4-en
  *

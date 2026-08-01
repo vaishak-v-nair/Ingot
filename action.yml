@@ -79,7 +79,9 @@ runs:
 
         # The whole report goes to the log on purpose. A gate that says "3 findings" and
         # nothing else forces everyone to go and look; the matching text is the finding.
-        npx --yes ingot-scan "${ARGS[@]}" | tee /tmp/ingot-out.txt
+        # The version is pinned: unpinned, every consumer silently ran whatever was newest
+        # on npm, whatever action ref they pinned. Bumped alongside each npm release.
+        npx --yes ingot-scan@0.1.1 "${ARGS[@]}" | tee /tmp/ingot-out.txt
 
         FOUND=$(node -e "
           const r = require('${{ github.workspace }}/${{ inputs.report }}');

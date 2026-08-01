@@ -20,9 +20,9 @@
  */
 import { createReadStream, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { createInterface } from 'node:readline';
 import { createGunzip } from 'node:zlib';
 import { SCANNER_VERSION } from '../src/types.ts';
+import { LEAK, LEAK_EXCESS, PARTIAL, PARTIAL_EXCESS, jsonlLines, longestRun, tokens, verdictFor } from './triage-rules.ts';
 
 function flag(name: string, fallback: string): string {
   const i = process.argv.indexOf(`--${name}`);
@@ -32,18 +32,8 @@ function flag(name: string, fallback: string): string {
 const resultsPath = resolve(flag('results', 'results/sft-slimorca.json'));
 const corpusDir = resolve(flag('corpus', '../corpora/slimorca'));
 
-/**
- * Coverage alone is a trap this script fell into on its first run. Every flagged item has
- * coverage of at least n/itemTokens BY CONSTRUCTION — that is what being flagged means —
- * so a 10-token gram is 53% of a 19-token item before any evidence of leakage exists.
- * Three short MMLU items were labelled "leaked" on exactly that floor artifact. The
- * verdicts therefore also require EXCESS: tokens matched beyond the n-gram that triggered
- * the flag, which is the part the flag did not already guarantee.
- */
-const LEAK = 0.5; // half the item or more, verbatim...
-const LEAK_EXCESS = 5; // ...and meaningfully past the flagging gram
-const PARTIAL = 0.25;
-const PARTIAL_EXCESS = 2;
+// The thresholds, the floor-artifact rationale behind them, and the tokenizer live in
+// triage-rules.ts, where the test suite can reach them.
 
 type Sample = { benchmarkItemId: string; corpusDocId: string };
 type ResultsFile = {
@@ -79,24 +69,6 @@ for (const r of file.results.filter((x) => x.n === file.defaultN)) {
   }
 }
 
-const tokens = (s: string): string[] => s.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
-
-/** Longest common contiguous token run, classic DP. Items are short; documents are pages. */
-function longestRun(a: string[], b: string[]): number {
-  let best = 0;
-  let prev = new Int32Array(b.length + 1);
-  let cur = new Int32Array(b.length + 1);
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : 0;
-      if (cur[j] > best) best = cur[j];
-    }
-    [prev, cur] = [cur, prev];
-    cur.fill(0);
-  }
-  return best;
-}
-
 process.stdout.write(`\n  LEAK TRIAGE — ${SCANNER_VERSION}\n\n`);
 process.stdout.write(`  ${docsNeeded.size} corpus documents to read, ${[...new Set([...docsNeeded.values()].flatMap((s) => [...s]))].length} flagged items\n\n`);
 
@@ -105,8 +77,7 @@ const docText = new Map<string, string>();
 for (const shard of manifest.shards) {
   const input = createReadStream(join(corpusDir, shard.name));
   const stream = shard.name.endsWith('.gz') ? input.pipe(createGunzip()) : input;
-  const rl = createInterface({ input: stream, crlfDelay: Number.POSITIVE_INFINITY });
-  for await (const line of rl) {
+  for await (const line of jsonlLines(stream)) {
     const t = line.trim();
     if (!t) continue;
     let row: { id?: string; text?: string };
@@ -169,12 +140,7 @@ for (const [key, { docs }] of [...byItem.entries()].sort()) {
     excess,
     bestDoc,
     docsExamined: docs.length,
-    verdict:
-      coverage >= LEAK && excess >= LEAK_EXCESS
-        ? 'leaked'
-        : coverage >= PARTIAL && excess >= PARTIAL_EXCESS
-          ? 'partial'
-          : 'phrase',
+    verdict: verdictFor(coverage, excess),
   });
 }
 

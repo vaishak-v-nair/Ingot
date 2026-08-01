@@ -32,6 +32,15 @@ build step and nothing installed at scan time.
   leakage in any count. Every one of the first six registry findings turned out to be
   canonical — prime sequences, the ten digits, "I Have a Dream". Only reading the words
   tells you which it is, which is why Ingot always shows them.
+- **Canonical is not the same as harmless.** A test item written from a public web page can
+  sit in a training corpus as ordinary web text: nobody leaked it, and a model trained on
+  that corpus still saw it. The canonicality label says where text came from, not that
+  seeing it was free.
+- **Questions are indexed; answers are not.** Published indexes exclude answer text, so a
+  corpus that reproduces every solution while paraphrasing its questions scans clean.
+- **"Verbatim" means after normalization.** Matching runs on lowercased tokens with
+  punctuation stripped. For prose the difference is cosmetic; for code it is not — a
+  HumanEval match is a run of identifiers and words, with operators and structure invisible.
 - **It does not stop a determined vendor.** Anyone can run Ingot on their own corpus, see
   what matched, and edit until nothing does. `docs/threat-model.md` says so plainly.
 - **The provenance scanner's detection floor is 50% contamination**, with a 13% false
@@ -93,7 +102,7 @@ yourself are used.
 From a clone, with no install step at all:
 
 ```bash
-node --test test/*.test.ts        # 44 tests, one per defect found so far
+node --test test/*.test.ts        # 76 tests; the defect log is docs/measurements.md
 
 node scripts/fetch-benchmarks.ts  # public benchmarks, normalised
 node scripts/build-web.ts         # browser bundle + publishable indexes

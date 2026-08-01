@@ -20,6 +20,10 @@ import { NPX_OPTS } from './npx.ts';
 
 const BENCHES = ['gsm8k', 'humaneval', 'mmlu'];
 
+// Pinned exactly: an unpinned esbuild means two checkouts can produce two different
+// bundles, which is the one drift a reproducibility tool cannot shrug at. Bump on purpose.
+const ESBUILD = 'esbuild@0.25.0';
+
 /** Indexes need the benchmark files; the bundle does not. CI builds the bundle alone. */
 const bundleOnly = process.argv.includes('--bundle-only');
 const alsoJson = process.argv.includes('--json');
@@ -27,7 +31,7 @@ const alsoJson = process.argv.includes('--json');
 process.stdout.write('\n  building browser bundle\n');
 execFileSync(
   'npx',
-  ['--yes', 'esbuild', 'src/contamination/browserScan.ts', '--bundle', '--format=esm',
+  ['--yes', ESBUILD, 'src/contamination/browserScan.ts', '--bundle', '--format=esm',
    '--outfile=web/ingot.js', '--platform=browser', '--target=es2022', '--minify'],
   { stdio: 'inherit', ...NPX_OPTS },
 );
@@ -37,7 +41,7 @@ execFileSync(
 // stays runnable offline once loaded.
 execFileSync(
   'npx',
-  ['--yes', 'esbuild', 'src/contamination/scanWorker.ts', '--bundle', '--format=esm',
+  ['--yes', ESBUILD, 'src/contamination/scanWorker.ts', '--bundle', '--format=esm',
    '--outfile=web/scan.worker.js', '--platform=browser', '--target=es2022', '--minify'],
   { stdio: 'inherit', ...NPX_OPTS },
 );

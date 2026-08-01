@@ -12,7 +12,7 @@
  *
  *   node scripts/check-published-numbers.ts
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 type Claim = { doc: string; label: string; expected: string };
@@ -148,6 +148,15 @@ const claims: Claim[] = [
   })),
   { doc: REGISTRY, label: 'registry: total discarded by filter', expected: `${droppedTotal} matches` },
 ];
+
+// The suite count is a published figure like any other, and it drifted: the README said
+// 44 while the suite had grown to 64, and no gate noticed because the count was
+// hand-typed. Derived here from the test files themselves — the number of top-level
+// test( calls is exactly what node --test runs.
+const testCount = readdirSync(resolve('test'))
+  .filter((f) => f.endsWith('.test.ts'))
+  .reduce((a, f) => a + (readFileSync(resolve('test', f), 'utf8').match(/^test\(/gm)?.length ?? 0), 0);
+claims.push({ doc: README, label: 'test suite size', expected: `${testCount} tests` });
 
 // The canonicality run is optional: the report ships whether or not that scan has been run,
 // so the file's absence is not a failure, but a mismatch is.

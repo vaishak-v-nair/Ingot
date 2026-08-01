@@ -1,0 +1,65 @@
+name: corpus-scan
+
+# Reruns a registry-scale pretraining scan on a hosted runner, one benchmark per job.
+#
+# Until this existed, every corpus-scale number on the site was produced on one person's
+# desktop — reproducible by anyone, in practice reproduced by no one. This makes the
+# reproduction a button: the same scripts, the same manifest-pinned shards, results
+# uploaded as artifacts for comparison against the committed results/ files.
+#
+# Deliberately artifact-only: it does not commit or publish anything. Published numbers
+# enter results/ by a human reading the artifact and committing it, so the provenance
+# story ("a person ran this and read it") stays true.
+#
+# Runner arithmetic: a standard runner offers ~14 GB of free disk and a 6-hour job cap.
+# The gzipped shards stream through the scanner without being unpacked to disk, so disk
+# holds only the download: 26 shards ≈ 21.4 GB does NOT fit the default runner — the
+# default of 8 shards (~6.6 GB, ≈2 passes × ~35 min per benchmark job) does. Full-corpus
+# runs need a larger runner or the desktop, which is exactly the note the artifact carries.
+
+on:
+  workflow_dispatch:
+    inputs:
+      shards:
+        description: 'How many C4 shards to fetch and scan (26 = full published corpus; needs a large runner)'
+        required: false
+        default: '8'
+      n:
+        description: 'Single n to scan (empty = both 10 and 13, like the published runs)'
+        required: false
+        default: ''
+
+jobs:
+  scan:
+    strategy:
+      fail-fast: false
+      matrix:
+        benchmark: [mmlu, gsm8k, humaneval]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Fetch benchmarks
+        run: node scripts/fetch-benchmarks.ts
+
+      - name: Fetch corpus shards
+        run: node scripts/fetch-pretraining.ts --shards ${{ inputs.shards }} --out corpora/c4-en
+
+      - name: Scan
+        run: |
+          set -euo pipefail
+          ARGS=(--corpus corpora/c4-en --benchmark ${{ matrix.benchmark }} --out ci-c4-${{ matrix.benchmark }})
+          if [ -n '${{ inputs.n }}' ]; then ARGS+=(--n '${{ inputs.n }}'); fi
+          node scripts/pretraining-scan.ts "${ARGS[@]}"
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-c4-${{ matrix.benchmark }}
+          path: results/ci-c4-${{ matrix.benchmark }}.json
+          retention-days: 90

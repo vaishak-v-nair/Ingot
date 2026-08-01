@@ -18,10 +18,10 @@
  */
 import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { createInterface } from 'node:readline';
 import { createGunzip } from 'node:zlib';
 import { SCANNER_VERSION } from '../src/types.ts';
 import { withRetry } from './retry.ts';
+import { jsonlLines, norm } from './triage-rules.ts';
 
 const TRAIN_URL =
   'https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/train.jsonl';
@@ -34,9 +34,6 @@ function flag(name: string, fallback: string): string {
 
 const resultsPath = resolve(flag('results', 'results/sft-slimorca.json'));
 const corpusDir = resolve(flag('corpus', '../corpora/slimorca'));
-
-/** Case- and whitespace-insensitive: formatting differs between FLAN framings, words do not. */
-const norm = (s: string): string => s.toLowerCase().replace(/\s+/g, ' ').trim();
 
 type ResultsFile = {
   defaultN: number;
@@ -103,8 +100,7 @@ const docNormed = new Map<string, string>();
 for (const shard of manifest.shards) {
   const input = createReadStream(join(corpusDir, shard.name));
   const stream = shard.name.endsWith('.gz') ? input.pipe(createGunzip()) : input;
-  const rl = createInterface({ input: stream, crlfDelay: Number.POSITIVE_INFINITY });
-  for await (const line of rl) {
+  for await (const line of jsonlLines(stream)) {
     const t = line.trim();
     if (!t) continue;
     let r: { id?: string; text?: string };

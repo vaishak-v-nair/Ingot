@@ -85,12 +85,20 @@ jobs:
         with:
           node-version: '24'
 
+      # The key rotates weekly. With a fixed key the cache never expired, so the weekly
+      # scheduled run — whose stated purpose is catching upstream drift — always restored
+      # last week's bytes and could not see upstream change. A fresh key each ISO week
+      # forces one re-fetch; pushes within the week still hit.
+      - name: Compute the cache week
+        id: week
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+
       - name: Cache reference corpora
         id: corpora
         uses: actions/cache@v4
         with:
           path: ingot-data
-          key: corpora-v1
+          key: corpora-${{ steps.week.outputs.week }}
 
       - name: Fetch reference corpora
         if: steps.corpora.outputs.cache-hit != 'true'

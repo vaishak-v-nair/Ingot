@@ -125,12 +125,24 @@ say which situation it is in.
   canonical text; see `results/registry.md`.
 - **No claim about paraphrased contamination.** It is not counted in the headline and is
   invisible to exact matching.
+- **No claim about answers.** Published indexes carry questions only, so a corpus that
+  reproduces every solution while paraphrasing its questions scans clean. Answer
+  contamination is real contamination; Ingot does not see it.
+- **"Verbatim" means after normalization.** Matches are runs of lowercased tokens with
+  punctuation stripped. For prose the difference is cosmetic. For code benchmarks it is
+  not: a HumanEval match is an identifier-and-word stream, with operators and structure
+  invisible, so treat code-benchmark counts as weaker evidence than prose counts.
+- **Canonical is not harmless.** The registry's canonicality label answers "where did this
+  text come from", not "was it free to train on". A test item sourced from a public web
+  page sits in web corpora as ordinary text; nobody leaked it, and a model trained there
+  still saw it.
 
 ## Supply chain
 
 Zero runtime dependencies. Node 24 executes the TypeScript directly, with no build step and
 nothing installed at scan time. `esbuild` is used once, at development time, to produce the
-browser bundle, via `npx`.
+browser bundle, via `npx` — pinned to an exact version in `scripts/build-web.ts`, so two
+checkouts build the same bundle.
 
 The attack surface of a scan is therefore Node itself and this repository. That is a
 deliberate choice: a tool whose job is to tell you what is in your data should not require

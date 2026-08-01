@@ -23,8 +23,9 @@ Independent verification of the AI training data supply chain.
       text around it, because a match you cannot read is not evidence.
 
   ingot scan <batch.jsonl> [options]
-      Was this batch written by a human or generated? Batch-level, against named
-      reference corpora.
+      EXPERIMENTAL. Was this batch written by a human or generated? Batch-level,
+      against named reference corpora. Its measured floor is 50% contamination at
+      a 13% false-positive rate — read docs/measurements.md before trusting it.
 
 contaminate options
   --index <name|path>    a bundled benchmark by name (humaneval, gsm8k), or a
@@ -38,7 +39,7 @@ contaminate options
   --out <path>           self-contained HTML report you can hand to a reviewer
   --json <path>          machine-readable report, including the receipt
 
-scan options
+scan options (experimental)
   --baselines <path>     reference distributions   (default data/baselines.json)
   --text-field <name>    field holding the response text
   --author-field <name>  field holding the annotator id
