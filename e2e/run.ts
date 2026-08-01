@@ -24,7 +24,9 @@ function check(name: string, ok: boolean, detail = ''): void {
 
 const { dir, planted } = await assembleSite();
 const server = await serveSite(dir);
-const url = `http://127.0.0.1:${server.port}/`;
+// ?noauto=1 suppresses the page's auto-running sample scan: the suite's scenarios own
+// every scan they assert about, so the instrument must open idle here (and only here).
+const url = `http://127.0.0.1:${server.port}/?noauto=1`;
 const browser = await Browser.launch();
 
 /** The S1/S6 corpus, built identically on each call so gz and plain hash the same. */

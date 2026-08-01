@@ -924,23 +924,20 @@ function tourStart() {
 $('tour').addEventListener('click', tourStart);
 
 /**
- * First visit: the demo introduces itself once the page has settled. The never-again
- * flag is written on intent — Esc, Skip, Done, or any scroll after the first two
- * seconds — but a reflex scroll inside those two seconds leaves it unwritten, so an
- * accidental dismissal costs one more auto-start, never a hijacking. Krug's rule:
- * sizzle in the user's way drains goodwill, so declining stays free and explicit
- * dismissal stays permanent. A visitor who wants it back has the button.
+ * Every visit: the instrument is already measuring when you arrive. A stranger does
+ * not read — they glance, ask "what is this doing for me", and leave. So the real
+ * scanner runs the real sample corpus unprompted: the first thing a visitor sees is
+ * matched words being FOUND, in front of them, before the headline finishes
+ * registering. This replaces the auto-tour, which asked for the visitor's attention;
+ * showing beats guiding (the tour keeps its button for whoever wants the walkthrough).
+ * Skipped under automation (navigator.webdriver) so the e2e suite still opens on an
+ * idle instrument, and skipped when the visitor has already started anything.
  */
-try {
-  if (!localStorage.getItem('ingot-tour-done')) {
-    setTimeout(() => {
-      if (tourAt < 0 && !document.querySelector('#out .hit')) {
-        tourAutoAt = performance.now();
-        tourStart();
-      }
-    }, 1600);
-  }
-} catch { /* storage disabled: never auto-run rather than run every visit */ }
+setTimeout(() => {
+  if (navigator.webdriver || new URLSearchParams(location.search).has('noauto')) return;
+  if (tourAt >= 0 || document.querySelector('#out .hit') || !$('bar').hidden) return;
+  $('try').click();
+}, 900);
 
 /**
  * The rail's live block. It sits above the published C4 receipt rather than replacing it,
