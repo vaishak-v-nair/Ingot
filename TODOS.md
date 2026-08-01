@@ -29,7 +29,12 @@ now understands the motivation. Each item came out of a review; none is a guess.
 - **Pros:** The full redo drops to under an hour on 8 cores; hosted corpus-scan runs get
   cheaper; one reader everywhere ends the readline-vs-browser bug family for good.
 - **Cons:** Corpus hashing must stay order-stable across workers — a parity test is part
-  of the work, not optional.
+  of the work, not optional. **Scoping finding (2026-08-01):** in-pass parallelism is a
+  deep redesign, not a patch — doc numbering, both corpus hashes, the frequency filter's
+  evidence-slot allocation and the provisional cap are all order-dependent, so bit-parity
+  with published results cannot be retrofitted cheaply. Process-level concurrency
+  (independent benchmark×n passes side by side, which the CLI already supports) delivers
+  most of the wall-clock win at zero parity risk, and is the interim tool of choice.
 - **Context:** Deliberately NOT built during the 2026-08-01 review-fix pass because the C4
   fixed-reader redo was running: later commands in that chain load scan.ts fresh, and
   editing it mid-run would mix scanner versions inside one published result.
