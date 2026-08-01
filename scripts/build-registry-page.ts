@@ -391,7 +391,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot registry — which benchmarks appear in which corpora</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239a6a00'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
 <meta name="description" content="A public record of which benchmarks appear inside which public training corpora, reproducible from the same files.">
 <style>
   /* Same two faces the rest of the site serves, from the same origin. This page is
@@ -400,24 +400,30 @@ const html = `<!doctype html>
      live in web/fonts/ and are same-origin, so the CSP and the no-external-request
      assertion both still hold. */
   @font-face {
-    font-family: "Instrument Serif"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/instrument-serif-400.woff2") format("woff2");
+    font-family: "Archivo"; font-style: normal; font-weight: 600;
+    font-display: swap; src: url("fonts/archivo-latin-600.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Public Sans"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/public-sans-latin-400.woff2") format("woff2");
   }
   @font-face {
     font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
     font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
   }
   *, *::before, *::after { box-sizing: border-box; }
+  /* Cleanroom Instrument tokens (DESIGN.md 2026-08-01): dark graphite identity, designed
+     light inverse. Same values as index.html so the generated page cannot drift. */
   :root {
-    --ink: #16150f; --paper: #fbfaf7; --dim: #6d6a5c; --line: #ddd9cc; --card: #fff;
-    --gold: #9a6a00; --hot: #ff9d1f; --ok: #2f6b34;
+    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31; --card: #121415;
+    --gold: #9BA1A6; --hot: #F59E0B; --ok: #4ADE80;
     --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --sans: "Public Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f; --card: #16150f;
-            --gold: #e0aa3e; --ok: #7fbf85; }
+  @media (prefers-color-scheme: light) {
+    :root { --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
+            --gold: #43474B; --hot: #B45309; --ok: #15803D; }
   }
   html { -webkit-text-size-adjust: 100%; }
   /* The same ultra-wide scale and shell rules as the rest of the site, so the nav sits at
@@ -433,7 +439,7 @@ const html = `<!doctype html>
     nav .wrap, footer .wrap { max-width: 76rem; }
   }
   nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
-        background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
+        background: var(--paper); }
   nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
               padding-top: .75rem; padding-bottom: .75rem; }
   .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-right: auto; }
@@ -445,16 +451,14 @@ const html = `<!doctype html>
   nav a:hover::after { right: 0; }
   nav a[aria-current] { color: var(--ink); }
   header { padding: 3rem 0 1rem; }
-  h1 { font-family: var(--display); font-weight: 400;
-       font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.06; margin: 0 0 .6rem; letter-spacing: -.015em; }
+  h1 { font-family: var(--display); font-weight: 600;
+       font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.03em; }
   .lede { color: var(--dim); max-width: 52ch; margin: 0 0 1rem; }
   /* The focus contract, same token as the front page. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   section { padding: 2.5rem 0; border-top: 1px solid var(--line); }
-  /* No negative tracking at this size. Instrument Serif is narrow already; the -.02em that
-     suited the old grotesque closes its counters up. Only h1 has room for -.015em. */
-  h2 { font-family: var(--display); font-weight: 400;
-       font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: 0; }
+  h2 { font-family: var(--display); font-weight: 600;
+       font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: -.01em; }
   h4 { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
        color: var(--dim); margin: 1.6rem 0 .6rem; font-weight: 600; }
   p { color: var(--dim); max-width: 60ch; }
@@ -484,7 +488,7 @@ const html = `<!doctype html>
                font-family: var(--mono); font-size: .74rem; color: var(--dim); }
   .hit .meta b { color: var(--ink); font-weight: 600; }
   .quote { margin-top: .45rem; font-size: .92rem; color: var(--ink); }
-  mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px;
+  mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 0;
          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   /* Depth folds, it does not delete — the same ruled disclosure as the front page. */
   details.more { border-top: 1px solid var(--line); margin-top: 1.2rem; }
@@ -504,7 +508,7 @@ const html = `<!doctype html>
     .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
   }
   pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
-        border-radius: 10px; padding: 1rem; overflow-x: auto; }
+        border-radius: 0; padding: 1rem; overflow-x: auto; }
   ul { color: var(--dim); }
   footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim); font-family: var(--mono); font-size: .78rem; }
 </style>

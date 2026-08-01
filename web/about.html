@@ -4,14 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot — why this exists</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239a6a00'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
 <meta name="description" content="Independent verification of the AI training data supply chain: what Ingot checks, what it refuses to claim, and where it goes next.">
 <style>
   /* Self-hosted, latin subset only. Same-origin so the network panel stays empty,
      which is the claim the sibling page makes. SIL OFL; see NOTICE. */
   @font-face {
-    font-family: "Instrument Serif"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/instrument-serif-400.woff2") format("woff2");
+    font-family: "Archivo"; font-style: normal; font-weight: 600;
+    font-display: swap; src: url("fonts/archivo-latin-600.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Public Sans"; font-style: normal; font-weight: 400;
+    font-display: swap; src: url("fonts/public-sans-latin-400.woff2") format("woff2");
   }
   @font-face {
     font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
@@ -20,27 +24,26 @@
 
   *, *::before, *::after { box-sizing: border-box; }
   :root {
-    /* These are the DESIGN.md tokens, byte for byte. They used to be six near-misses of
-       them -- a slightly different paper, a slightly different gold -- which is why this
-       page and index.html read as two products before you even noticed the fonts. Near
-       enough to look like a mistake, far enough to feel like one. */
-    --ink: #16150f;
-    --paper: #fbfaf7;
-    --dim: #6d6a5c;
-    --line: #ddd9cc;
-    --gold: #9a6a00;
-    --gold-hot: #ff9d1f;
-    --ember: #d2451e;
-    --good: #2f6b34;
-    --card: #fff;
+    /* These are the DESIGN.md tokens, byte for byte (Cleanroom Instrument, 2026-08-01):
+       dark graphite is the identity, light is a designed inverse. Same tokens as
+       index.html so the site reads as one composition. */
+    --ink: #E8EAEC;
+    --paper: #0C0E0F;
+    --dim: #82878C;
+    --line: #2A2E31;
+    --gold: #9BA1A6;
+    --gold-hot: #F59E0B;
+    --ember: #F87171;
+    --good: #4ADE80;
+    --card: #121415;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --sans: "Public Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
-      --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f;
-      --gold: #e0aa3e; --gold-hot: #ffcc5c; --ember: #ff7a4d; --good: #7fbf85; --card: #16150f;
+      --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA;
+      --gold: #43474B; --gold-hot: #B45309; --ember: #B91C1C; --good: #15803D; --card: #FFFFFF;
     }
   }
   html { -webkit-text-size-adjust: 100%; }
@@ -73,27 +76,18 @@
     position: relative; padding: 6.5rem 0 5rem; overflow: hidden;
     border-bottom: 1px solid var(--line);
   }
-  /* The crucible wash, same restraint as the front page: one radial of heat behind the
-     molten headline, no blur, no blobs. Blurred gradient blobs are the most recognisable
-     generated-page backdrop there is — the one page arguing credibility cannot wear it. */
-  .hero::before {
-    content: ""; position: absolute; inset: -30% 0 auto 0; height: 120%;
-    background: radial-gradient(58% 52% at 42% 16%,
-      color-mix(in srgb, var(--gold-hot) 10%, transparent), transparent 70%);
-    pointer-events: none;
-  }
+  /* No washes: an instrument's ground is flat (Cleanroom, 2026-08-01). The crucible
+     treatment is archived with the old system. */
   .eyebrow {
     font-family: var(--mono); font-size: .74rem; letter-spacing: .22em;
     text-transform: uppercase; color: var(--gold);
   }
   h1 {
-    font-size: clamp(2.6rem, 7.2vw, 5.2rem); line-height: .98; margin: 1rem 0 0;
-    font-family: var(--display); font-weight: 400; letter-spacing: -.015em; max-width: 30ch;
+    font-size: clamp(2.4rem, 6.4vw, 4.6rem); line-height: 1.0; margin: 1rem 0 0;
+    font-family: var(--display); font-weight: 600; letter-spacing: -.03em; max-width: 30ch;
   }
-  h1 .molten {
-    background: linear-gradient(96deg, var(--gold-hot), var(--ember) 62%, var(--gold));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  /* The molten treatment died with the old system; the span in the markup now reads in
+     plain ink, which is the point — this page argues, the type does not perform. */
   .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1rem 0 0; color: var(--dim); }
   /* The focus contract, same token as the front page. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
@@ -103,19 +97,17 @@
   .stamp {
     display: inline-flex; align-items: center; gap: .6rem; margin-top: 2.2rem;
     font-family: var(--mono); font-size: .8rem; padding: .55rem .9rem;
-    border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+    border: 1px solid var(--line); background: var(--card);
   }
   .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--good); }
 
   /* ---------- shared ---------- */
   section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
-  /* Section headings are the display serif, like every other section heading on the site.
-     They were the body sans at weight 640, because the typography pass reached this page's
-     h1 and stopped there. Weight 400 and no negative tracking: the face has no bold, and
-     asking for 600+ draws a synthetic one. */
+  /* Section headings in the display grotesque, real 600 weight (Archivo ships it —
+     no synthetic bold), tight but not closed. */
   h2 {
-    font-family: var(--display); font-weight: 400;
-    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: 0;
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: -.01em;
     margin: 0 0 .6rem; max-width: 32ch;
   }
   .kicker {
@@ -140,12 +132,12 @@
   .fact span { display: block; margin-top: .5rem; font-size: .9rem; color: var(--dim); }
 
   /* The emphatic statement is a stamped pull quote, not a warning box. Set in the display
-     serif between its own rules, because a sentence this load-bearing earns the face. */
+     face between its own rules, because a sentence this load-bearing earns the face. */
   .punch {
     margin-top: 2.5rem; padding: 1.5rem 0;
     border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
-    font-family: var(--display); font-weight: 400;
-    font-size: clamp(1.3rem, 2.9vw, 1.75rem); line-height: 1.35; letter-spacing: 0;
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(1.3rem, 2.9vw, 1.75rem); line-height: 1.35; letter-spacing: -.01em;
   }
 
   .step .n {
@@ -157,11 +149,11 @@
   /* ---------- chart ---------- */
   /* A border around a figure is functional, like the front page's pre blocks — but it
      shares their 10px radius, not a larger one of its own. */
-  .chart-card { border: 1px solid var(--line); border-radius: 10px; background: var(--card); padding: 1.6rem; }
+  .chart-card { border: 1px solid var(--line); background: var(--card); padding: 1.6rem; }
   .chart-scroll { overflow-x: auto; }
   svg { display: block; max-width: 100%; height: auto; }
   .legend { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.1rem; font-size: .84rem; color: var(--dim); font-family: var(--mono); }
-  .swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; vertical-align: -1px; margin-right: .4rem; }
+  .swatch { display: inline-block; width: .8rem; height: .8rem; vertical-align: -1px; margin-right: .4rem; }
 
   /* The colored-left-border card is on the blacklist by name. Same ruled record. */
   .honest { margin-top: 2rem; display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -189,7 +181,7 @@
   .act + .act { border-left: 1px solid var(--line); padding-left: 1.4rem; }
   .act .badge {
     font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
-    color: var(--paper); background: var(--ink); padding: .2rem .5rem; border-radius: 4px;
+    color: var(--paper); background: var(--ink); padding: .2rem .5rem;
   }
   .act.now .badge { background: var(--gold); color: #17150d; }
   .act h3 { margin: .9rem 0 .4rem; font-size: 1.1rem; }
@@ -199,7 +191,7 @@
   footer strong { color: var(--ink); }
 
   nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
-        background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); }
+        background: var(--paper); }
   nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
               padding-top: .75rem; padding-bottom: .75rem; }
   nav .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;

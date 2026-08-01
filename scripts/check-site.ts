@@ -36,7 +36,9 @@ const REQUIRED = [
   'web/indexes/mmlu.idx.bin.gz',
   'web/indexes/gsm8k.idx.bin.gz',
   'web/indexes/humaneval.idx.bin.gz',
-  'web/fonts/instrument-serif-400.woff2',
+  'web/fonts/archivo-latin-600.woff2',
+  'web/fonts/public-sans-latin-400.woff2',
+  'web/fonts/public-sans-latin-500.woff2',
   'web/fonts/jetbrains-mono-400.woff2',
 ];
 
