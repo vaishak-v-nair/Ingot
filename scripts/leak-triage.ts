@@ -24,10 +24,7 @@ import { createGunzip } from 'node:zlib';
 import { SCANNER_VERSION } from '../src/types.ts';
 import { LEAK, LEAK_EXCESS, PARTIAL, PARTIAL_EXCESS, jsonlLines, longestRun, tokens, verdictFor } from './triage-rules.ts';
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const resultsPath = resolve(flag('results', 'results/sft-slimorca.json'));
 const corpusDir = resolve(flag('corpus', '../corpora/slimorca'));

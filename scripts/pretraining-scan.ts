@@ -33,10 +33,7 @@ type Manifest = {
   shards: { name: string; url: string; bytes: number; sha256: string }[];
 };
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const corpusDir = resolve(flag('corpus', '../corpora/c4-en'));
 const shardLimit = Number(flag('shards', '0')) || 0;

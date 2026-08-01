@@ -393,6 +393,12 @@ const html = `<!doctype html>
 <title>Ingot registry — which benchmarks appear in which corpora</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
 <meta name="description" content="A public record of which benchmarks appear inside which public training corpora, reproducible from the same files.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Ingot registry — which benchmarks appear in which training corpora">
+<meta property="og:description" content="A public record of which benchmarks appear inside which public training corpora, reproducible from the same files.">
+<meta property="og:url" content="https://ingot-six.vercel.app/registry.html">
+<meta property="og:image" content="https://ingot-six.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   /* Same two faces the rest of the site serves, from the same origin. This page is
      generated, which is exactly why it was the page that never got them: nobody edits it,

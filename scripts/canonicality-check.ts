@@ -29,10 +29,7 @@ import { loadBatch } from '../src/loader.ts';
 import { SCANNER_VERSION } from '../src/types.ts';
 import type { BenchmarkItem, ContaminationHit } from '../src/contamination/types.ts';
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const refDir = resolve(flag('reference', '../corpora/pile-noncrawl'));
 const webResults = resolve(flag('web-results', 'results/pretraining-c4.json'));

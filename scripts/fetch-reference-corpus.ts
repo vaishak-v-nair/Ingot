@@ -28,7 +28,7 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync, w
 import { join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createInterface } from 'node:readline';
+import { jsonlLines } from './triage-rules.ts';
 import { createGzip, createZstdDecompress } from 'node:zlib';
 import { withRetry } from './retry.ts';
 
@@ -42,10 +42,7 @@ const PARTS = ['val.jsonl.zst', 'test.jsonl.zst'];
  */
 const WEB_DERIVED = new Set(['Pile-CC', 'OpenWebText2', 'HackerNews', 'Ubuntu IRC']);
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const outDir = resolve(flag('out', '../corpora/pile-noncrawl'));
 const cacheDir = join(outDir, 'download');
@@ -102,9 +99,7 @@ const started = Date.now();
 
 for (const src of sources) {
   const stream = createReadStream(src).pipe(createZstdDecompress());
-  const rl = createInterface({ input: stream, crlfDelay: Number.POSITIVE_INFINITY });
-
-  for await (const line of rl) {
+  for await (const line of jsonlLines(stream)) {
     const t = line.trim();
     if (!t) continue;
     let row: { text?: unknown; meta?: { pile_set_name?: unknown } };

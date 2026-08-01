@@ -40,6 +40,7 @@ const REQUIRED = [
   'web/fonts/public-sans-latin-400.woff2',
   'web/fonts/public-sans-latin-500.woff2',
   'web/fonts/jetbrains-mono-400.woff2',
+  'web/og.png',
 ];
 
 process.stdout.write('\n  checking the built site\n\n');

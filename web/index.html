@@ -8,6 +8,14 @@
      the CSP's img-src 'self' data: already allows it. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
 <meta name="description" content="See which exact words — yours, or a benchmark's — are inside AI training data. Scanned in your own browser tab; nothing is uploaded.">
+<!-- Link previews for the public launch. content= attributes are not subresources, so the
+     self-containment check is untouched; scrapers fetch og.png from this same origin. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ingot — what's inside AI training data?">
+<meta property="og:description" content="See which exact words — yours, or a benchmark's — are inside AI training data. Runs in your browser; nothing is uploaded.">
+<meta property="og:url" content="https://ingot-six.vercel.app/">
+<meta property="og:image" content="https://ingot-six.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   /* Self-hosted, latin subset only. Same-origin on purpose: a webfont fetched from a CDN
      would put a third-party request in the network panel, and the privacy claim on this

@@ -42,10 +42,7 @@ type Manifest = {
   shards: { name: string; url: string; bytes: number; sha256: string }[];
 };
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const shardCount = Number(flag('shards', '26'));
 // Defaults beside the repository, not inside it. A pretraining corpus is gigabytes of

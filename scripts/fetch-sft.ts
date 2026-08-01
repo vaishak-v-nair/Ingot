@@ -27,7 +27,7 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync, w
 import { join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createInterface } from 'node:readline';
+import { jsonlLines } from './triage-rules.ts';
 import { createGzip } from 'node:zlib';
 import { withRetry } from './retry.ts';
 
@@ -35,10 +35,7 @@ const SOURCE_URL =
   'https://huggingface.co/datasets/Open-Orca/SlimOrca/resolve/main/oo-labeled_correct.gpt4.sharegpt.jsonl';
 const SOURCE_NAME = 'oo-labeled_correct.gpt4.sharegpt.jsonl';
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const outDir = resolve(flag('out', '../corpora/slimorca'));
 const cacheDir = join(outDir, 'download');
@@ -97,8 +94,7 @@ let skipped = 0;
 let chars = 0;
 const started = Date.now();
 
-const rl = createInterface({ input: createReadStream(src), crlfDelay: Number.POSITIVE_INFINITY });
-for await (const line of rl) {
+for await (const line of jsonlLines(createReadStream(src))) {
   const t = line.trim();
   if (!t) continue;
   let row: { conversations?: Turn[] };

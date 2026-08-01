@@ -14,7 +14,7 @@
 import { createHash } from 'node:crypto';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import { createInterface } from 'node:readline';
+import { jsonlLines } from './triage-rules.ts';
 import { createGunzip } from 'node:zlib';
 import { CorpusHasher } from '../src/contamination/corpusHash.ts';
 import { hashTokens } from '../src/contamination/fastTokens.ts';
@@ -22,10 +22,7 @@ import { NgramIndex, forEachNgramHashed } from '../src/contamination/ngramIndex.
 import { DEFAULT_N } from '../src/contamination/types.ts';
 import { loadBatch } from '../src/loader.ts';
 
-function flag(name: string, fallback: string): string {
-  const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
-}
+import { flag } from './cli-flags.ts';
 
 const shard = resolve(flag('shard', '../corpora/c4-en/c4-train.00000-of-01024.json.gz'));
 const benchPath = resolve(flag('bench', 'data/bench/mmlu.jsonl'));
@@ -53,9 +50,7 @@ async function run(label: string, opts: Stage): Promise<{ s: number; bytes: numb
   gz.on('data', (c: Buffer) => {
     bytes += c.length;
   });
-  const rl = createInterface({ input: gz, crlfDelay: Number.POSITIVE_INFINITY });
-
-  for await (const line of rl) {
+  for await (const line of jsonlLines(gz)) {
     const trimmed = line.trim();
     if (trimmed.length === 0) continue;
     if (full && portable) {
