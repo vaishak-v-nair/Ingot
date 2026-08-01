@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ingot — is your benchmark inside your training data?</title>
+<title>Ingot — what's inside AI training data?</title>
 <!-- An ingot: a gold bar on nothing. Inline data: URI, so the icon costs no request and
      the CSP's img-src 'self' data: already allows it. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
-<meta name="description" content="Drop a training corpus and find out whether a benchmark leaked into it. Scanned in your own browser tab; nothing is uploaded.">
+<meta name="description" content="See which exact words — yours, or a benchmark's — are inside AI training data. Scanned in your own browser tab; nothing is uploaded.">
 <style>
   /* Self-hosted, latin subset only. Same-origin on purpose: a webfont fetched from a CDN
      would put a third-party request in the network panel, and the privacy claim on this
@@ -389,14 +389,16 @@
 <main class="col">
 
 <header class="wrap">
-  <h1>Is your benchmark inside your training data?</h1>
-  <!-- The h1 is a question, and a question only works on someone who already knows the
-       problem. This line is for everyone else: it says what the product is before the
-       page says how to use it. Without it a visitor who has not met the word
-       "contamination" reads a headline they cannot answer, then instructions for a tool
-       whose purpose nobody told them. -->
-  <p class="says-what">Ingot checks whether an AI was tested on questions it had already seen.</p>
+  <h1>What's inside AI training data?</h1>
+  <!-- The h1 asks the question everyone shares; this line makes it personal and concrete
+       before the page says how anything works. Reframed 2026-08-01 (design doc): the
+       reader's own words are the front door, the benchmark question is the wing. -->
+  <p class="says-what">Ingot shows you which exact words — yours, or a benchmark's — are
+  inside the data an AI learned from. The words themselves, not a score.</p>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; press F12 and watch the network stay empty</span></p>
+  <!-- The intake channel from the design doc: writers ask, the founder runs the check.
+       A mailto is deliberately the whole mechanism — no form, no backend, no promises. -->
+  <p class="samplelink" style="margin-top:.7rem">Write online? <a href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Ask for a free check of your own words</a> — send a link to your public writing, get back a report with the matching text and a receipt.</p>
 </header>
 
 <div class="wrap tool">
@@ -434,11 +436,13 @@
 <section id="plain">
   <div class="wrap">
     <div class="kicker">What is this?</div>
-    <h3>The exam, the study pile, and the leak</h3>
-    <p class="sub">An AI is graded by standard exams — <em>benchmarks</em>. It learns from a
-    mountain of text — its <em>training data</em>. If the exam questions are already in the
-    mountain, the score measures memory rather than ability. That is <em>contamination</em>.
-    Ingot finds it, and shows you the words.</p>
+    <h3>One mountain of text, two questions</h3>
+    <p class="sub">An AI learns from a mountain of text scraped from the web — its
+    <em>training data</em>. Two questions follow. Did <em>your</em> words end up in the
+    mountain? And were the exam questions the AI is graded on — its <em>benchmarks</em> —
+    in there too, so the score measures memory rather than ability (that is
+    <em>contamination</em>)? Ingot answers both the same way: it finds the exact
+    overlapping words and shows them to you.</p>
     <ul class="plain">
       <li><b>Pick the exam.</b> GSM8K — maths · HumanEval — code · MMLU — general knowledge.</li>
       <li><b>Drop the study material.</b> Read here, in this tab — nothing is uploaded anywhere.</li>

@@ -2,6 +2,22 @@
 
 Numbers quoted here trace to `results/`; defect write-ups live in `docs/measurements.md`.
 
+## 0.1.3 — August 2026
+
+The reframe release. No scan-behavior changes: results and receipts are identical to
+0.1.1 and 0.1.2.
+
+- The site and README lead with the question everyone shares — "What's inside AI
+  training data?" — with a personal check ("see which of your exact words are inside —
+  or get confirmation we couldn't find any") as the front door and the benchmark
+  contamination record as the institutional wing.
+- Full visual redesign: the Cleanroom Instrument system (dark graphite identity, designed
+  light inverse, Archivo/Public Sans/JetBrains Mono self-hosted, colour as testimony —
+  green only for verified-clean). The prior forensic-editorial system is archived in
+  docs/ with its complete decisions log.
+- Weekly CI corpora cache now actually rotates; esbuild and this Action's npx call are
+  version-pinned; triage verdict rules extracted to scripts/triage-rules.ts and tested.
+
 ## 0.1.2 — August 2026
 
 The whole-product review release. No scan-behavior changes: results and receipts are

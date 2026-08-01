@@ -1,6 +1,9 @@
 # Ingot
 
-**Is the benchmark you are quoting inside the data you trained on?**
+**What's inside AI training data?**
+
+See which exact words — yours, or a benchmark's — are inside the data an AI learned from.
+The words themselves, side by side with their surroundings, never a score.
 
 [Run it in your browser](https://ingot-six.vercel.app/) ·
 [**new here? how it works in five minutes**](docs/how-it-works.md) ·
