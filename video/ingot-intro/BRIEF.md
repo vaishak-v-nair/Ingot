@@ -21,10 +21,25 @@ Instrument design system. It should feel like a calibrated instrument powering u
 taking one measurement — not a SaaS promo. Motion settles, never bounces. Near-silence:
 narration only, no BGM (deliberate: an instrument does not play music).
 
+## Revisions after the first cut
+
+**2026-08-02, founder review.** Two standing corrections — they override the
+Customizations below, and they apply to every future Ingot visual:
+
+1. **No decorative mark.** The ✱ spike inherited from the style preset is retired
+   film-wide (it had reached three of seven frames — a mark repeated reads as clip-art).
+   `frame.md` now voids its own spike mandate.
+2. **Never show the hosting domain.** "Close on the URL" below is VOID: a
+   `*.vercel.app` on an end card advertises the host, not the product. The film closes
+   on `npx ingot-scan contaminate` and nothing else. Line 7 was re-synthesised without
+   the spoken URL; frame 07 retimed 5.163s → 4.8s; total 37.8s → 37.5s.
+
 ## Truth constraints (absolute — zero hallucination)
 
 - Only published, CI-gated figures may appear: 9,264,249 documents · 21.33 GB ·
-  342 / 14,042 MMLU items flagged · 0 bytes uploaded · 76 tests.
+  342 / 14,042 MMLU items flagged · 0 bytes uploaded. (The suite size quoted here as
+  "76 tests" at brief time is now 83 — figures move; always re-read `results/` and the
+  gates rather than this brief.)
 - The only quotable matched-text specimen is the published mmlu-5951 NATO Article 5 match
   (already on the site, gated).
 - NEVER use the Paul Graham findings (fenced behind legal review).
