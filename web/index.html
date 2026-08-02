@@ -76,7 +76,7 @@
      tables, receipts — thin theirs further. The -webkit rules are the Safari fallback;
      browsers that understand scrollbar-color ignore them. */
   html { scrollbar-color: var(--line) transparent; }
-  .rail, .scroll, pre { scrollbar-width: thin; }
+  .scroll, pre { scrollbar-width: thin; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { background: var(--line); }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -124,7 +124,9 @@
                  height: 1px; background: var(--gold); transition: right .18s ease; }
   nav a:hover::after { right: 0; }
 
-  header { padding: 2.7rem 0 0; }
+  /* 4rem: the founder read the hero as crowded against the nav — the question needs a
+     clear breath of graphite above it before anything else registers. */
+  header { padding: 4rem 0 0; }
   /* Etched, not molten: Archivo 600, tight tracking, plain ink. Two lines maximum. */
   h1 { font-family: var(--display); font-weight: 600;
        font-size: clamp(2.1rem, 5.2vw, 3.4rem); line-height: 1.02; margin: 0 0 .6rem; letter-spacing: -.03em; }
@@ -309,15 +311,17 @@
      otherwise inert. A margin needs room to exist, so the rail appears only when the
      viewport can hold the full text measure plus 18rem beside it. Below that there is no
      margin and so no rail, and nothing is lost: every figure in it also appears in the body
-     of the page, which is what makes it safe to drop rather than reflow. */
+     of the page, which is what makes it safe to drop rather than reflow.
+     NOT sticky and NEVER its own scroller (founder decision 2026-08-02): a pinned rail
+     taller than the viewport needs an inner scrollbar, which cut the hashes off and put a
+     second scrollbar inside the instrument. The rail now flows with the page — scroll the
+     page, see all of it. */
   .rail { display: none; }
   @media (min-width: 78.5rem) {
     .wrap, .page { max-width: 76rem; }
     .page { display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
             gap: 0 3.5rem; align-items: start; }
-    .rail { display: block; position: sticky; top: 4.5rem;
-            border-left: 1px solid var(--line); padding: .3rem 0 2rem 1.5rem;
-            max-height: calc(100vh - 6.5rem); overflow-y: auto; }
+    .rail { display: block; border-left: 1px solid var(--line); padding: .3rem 0 2rem 1.5rem; }
   }
   .rail h4 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
              text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 0 0 .9rem; }
@@ -491,7 +495,7 @@
              poster="media/intro-poster.jpg" width="1920" height="1080">
         <source src="media/ingot-intro.mp4" type="video/mp4">
       </video>
-      <figcaption>38 seconds, voiced. Nothing plays or downloads until you press play.</figcaption>
+      <figcaption>37 seconds, voiced. Nothing plays or downloads until you press play.</figcaption>
     </figure>
     <!-- Folded on the founder's tune pass 2026-08-02: open, the table read as one more
          block of documentation to a stranger. The decoder ring survives — one click in,

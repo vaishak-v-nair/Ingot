@@ -50,10 +50,10 @@
     {
       "id": "07",
       "path": "assets/voice/07.wav",
-      "duration_s": 5.163,
+      "duration_s": 2.645,
       "words": []
     }
   ],
   "sfx": [],
-  "total_duration_s": 37.824
+  "total_duration_s": 37.461
 }

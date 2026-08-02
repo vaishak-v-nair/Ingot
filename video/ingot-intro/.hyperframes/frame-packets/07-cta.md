@@ -10,8 +10,8 @@
 
 ## Frame 7 — Ask it yourself
 
-- scene: The headline demotes; a terminal pill springs in and types "npx ingot-scan contaminate" with a blinking caret; the URL ingot-six.vercel.app settles beneath with the crosshairs closing the frame
-- voiceover: "Ask it yourself — in your browser, or one command. ingot dash six dot vercel dot app."
+- scene: The headline demotes; a terminal pill springs in and types "npx ingot-scan contaminate" with a blinking caret; the crosshairs close the frame (URL cut 2026-08-02, founder decision)
+- voiceover: "Ask it yourself — in your browser, or one command."
 - duration: 5.163s
 - transition_in: crossfade
 - status: outline
@@ -36,7 +36,8 @@ Scene 2 (1.3–3.4s): on "one command", a terminal pill (navy, hairline, radius 
 enters center on a long-tail settle; "npx ingot-scan contaminate" **types on with
 caret** (`discrete-text-sequence` + `context-sensitive-cursor`), character cadence
 even, machine-steady — no human typos: instruments don't mistype.
-Scene 3 (3.4–5.2s): on the spoken URL, "ingot-six.vercel.app" settles beneath the pill
+Scene 3 (retimed 3.0–4.8s; URL cut 2026-08-02): the card holds on the finished command
+— formerly: on the spoken URL, "ingot-six.vercel.app" settled beneath the pill
 in mono with a 1px signal-green underline **SVG self-draw** (`svg-path-draw`) — the
 film's second and last green — while the four corner crosshairs (static since entrance)
 remain as the closing chrome. Caret executes exactly three finite blinks

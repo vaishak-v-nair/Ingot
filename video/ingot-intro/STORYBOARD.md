@@ -232,9 +232,9 @@ still into the crossfade.
 
 ## Frame 7 — Ask it yourself
 
-- scene: The headline demotes; a terminal pill springs in and types "npx ingot-scan contaminate" with a blinking caret; the URL ingot-six.vercel.app settles beneath with the crosshairs closing the frame
-- voiceover: "Ask it yourself — in your browser, or one command. ingot dash six dot vercel dot app."
-- duration: 5.163s
+- scene: The headline demotes; a terminal pill springs in and types "npx ingot-scan contaminate" with a blinking caret; the crosshairs close the frame (no URL — cut 2026-08-02, founder decision)
+- voiceover: "Ask it yourself — in your browser, or one command."
+- duration: 4.8s
 - transition_in: crossfade
 - status: outline
 - src: compositions/frames/07-cta.html
@@ -254,12 +254,12 @@ no loop (seek-safe core). The end card is the film's exit, so it may resolve ful
 Scene 1 (0.0–1.3s): on "Ask it yourself", the line lands top-center in Archivo via
 **per-word staggered reveal** (`dynamic-content-sequencing`), then demotes (scales to
 ~60%, ink@70%) as the frame's focus hands off.
-Scene 2 (1.3–3.4s): on "one command", a terminal pill (navy, hairline, radius 0, mono)
+Scene 2 (1.3–3.0s): on "one command", a terminal pill (navy, hairline, radius 0, mono)
 enters center on a long-tail settle; "npx ingot-scan contaminate" **types on with
 caret** (`discrete-text-sequence` + `context-sensitive-cursor`), character cadence
 even, machine-steady — no human typos: instruments don't mistype.
-Scene 3 (3.4–5.2s): on the spoken URL, "ingot-six.vercel.app" settles beneath the pill
-in mono with a 1px signal-green underline **SVG self-draw** (`svg-path-draw`) — the
-film's second and last green — while the four corner crosshairs (static since entrance)
-remain as the closing chrome. Caret executes exactly three finite blinks
-(`discrete-text-sequence`, stepped opacity tweens) and holds ON. Full stop.
+Scene 3 (3.0–4.8s): the card holds on the finished command while the four corner
+crosshairs (static since entrance) remain as the closing chrome. Caret executes exactly
+three finite blinks (`discrete-text-sequence`, stepped opacity tweens) and holds ON.
+Full stop. (The URL lockup that closed this scene was cut 2026-08-02 with its spoken
+line — founder decision.)

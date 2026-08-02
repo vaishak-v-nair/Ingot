@@ -16,6 +16,11 @@ principle: atoms are sacred · composition is free · numbers come from the scri
 # now graphite; "ink" is the VOICE and is now paper-white; "coral" is the scarce voltage
 # and is now the signal green (colour is testimony: green = verified states only);
 # "tile-strong" is amber, allowed ONLY on findings moments; navy* are panel graphites.
+#
+# ✱ RETIRED (founder decision, 2026-08-02): every ✱ spike mandate below is VOID. The
+# mark appeared in too many frames and the founder cut it film-wide — kickers are plain
+# mono uppercase with no prefix glyph; the wordmark is the five letters alone. Do not
+# reintroduce the spike in any frame edit.
 colors:
   ink: "#E8EAEC"
   cream: "#0C0E0F"

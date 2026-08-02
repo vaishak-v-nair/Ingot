@@ -6,8 +6,9 @@
 
     Scene 1 (0.0–1.3s)  "Ingot answers differently" — four registration crosshairs
                         SVG self-draw simultaneously in the corners (svg-path-draw);
-                        "✱ I N G O T" mono wordmark lands top-center, letters as units
+                        "I N G O T" mono wordmark lands top-center, letters as units
                         on a precomputed sequencer (dynamic-content-sequencing mechanics).
+                        No spike mark: the founder retired the ✱ across the film 2026-08-02.
     Scene 2 (1.3–2.688s) "It shows you the words." — claim slides up into center
                         (slide-up crossfade + blur-snap), then HOLDS dead still.
                         The stillness is allocated — no exit (injector owns the transition).
@@ -16,10 +17,10 @@
     are absent; capture/extracted/fonts-manifest.json is empty), so per the
     font_family_without_font_face rule this frame names no font family — generic
     sans-serif carries the Archivo display voice, generic monospace the JetBrains
-    Mono index voice. The ✱ spike is inline SVG (no glyph-fallback dependency).
+    Mono index voice.
 
     Palette (frame.md, dark-native inversion): ground #0C0E0F · voice #E8EAEC ·
-    the single green voltage moment = the ✱ spike (#4ADE80). No amber, no second green.
+    fully achromatic — no amber, no green, no mark.
     Caption keep-out: all content ends by y=844 (< 896 = 0.83 × 1080).
   -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
@@ -90,16 +91,6 @@
       line-height: 1;
       color: #e8eaec;
     }
-    [class~="03-intro-spike"] {
-      width: 2cqw;
-      height: 2cqw;
-    }
-    [class~="03-intro-spike"] path {
-      fill: none;
-      stroke: #9BA1A6; /* the frame's ONE voltage moment */
-      stroke-width: 6;
-      stroke-linecap: round;
-    }
 
     /* — the claim, hero scale, centered in the top-83% region — */
     [id="03-intro-claim-wrap"] {
@@ -158,13 +149,9 @@
         <circle class="03-intro-xh-seg 03-intro-xh-c" cx="44" cy="44" r="16" transform="rotate(-90 44 44)" />
       </svg>
 
-      <!-- wordmark lockup: spike (SVG ✱, the one green) + five letters as units -->
+      <!-- wordmark lockup: five letters as units. No spike mark — the founder retired
+           the ✱ across the film 2026-08-02. -->
       <div id="03-intro-brand">
-        <svg class="03-intro-bl 03-intro-spike" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M 24 6 L 24 42" />
-          <path d="M 8.4 33 L 39.6 15" />
-          <path d="M 8.4 15 L 39.6 33" />
-        </svg>
         <span class="03-intro-bl">I</span>
         <span class="03-intro-bl">N</span>
         <span class="03-intro-bl">G</span>
@@ -209,22 +196,13 @@
       units.forEach(function (el, i) {
         SEQ.push({ el: el, start: BASE + i * STEP });
       });
-      SEQ.forEach(function (u, i) {
-        var from = { opacity: 0, y: -12, filter: "blur(6px)" };
-        var to = {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: DUR,
-          ease: "power2.out",
-          immediateRender: true,
-        };
-        if (i === 0) {
-          /* spike-mark: fades + scales 0.92→1 on its single emphasis beat */
-          from.scale = 0.92;
-          to.scale = 1;
-        }
-        tl.fromTo(u.el, from, to, u.start);
+      SEQ.forEach(function (u) {
+        tl.fromTo(
+          u.el,
+          { opacity: 0, y: -12, filter: "blur(6px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: DUR, ease: "power2.out", immediateRender: true },
+          u.start
+        );
       });
 
       /* ── Scene 2 (1.3–2.688s) · "It shows you the words." ─────────────────

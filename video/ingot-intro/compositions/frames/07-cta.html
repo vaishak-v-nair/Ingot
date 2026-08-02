@@ -3,6 +3,9 @@
     07-cta — "Ask it yourself" install-command end card.
     Blueprint: prompt-type-submit-generate (Adapt) — the ask IS the typed command;
     the card holds on the caret. Final frame: resolves fully, no exit.
+    NO URL: the founder cut the ingot-six.vercel.app lockup 2026-08-02 (a vercel
+    domain on the end card reads unprofessional); the voice line lost it too, so the
+    frame retimed from 5.163s to 4.8s against the regenerated 2.645s take.
     SEEK-SAFE: caret blink is exactly three finite stepped opacity sets, then held ON.
     Fonts: this capture shipped no font files (fonts-manifest is empty), so per the
     frame-worker contract no unshipped family is named — generic stacks carry the
@@ -103,37 +106,6 @@
       background: rgba(232, 234, 236, 0.5); /* segment-driven in onUpdate */
     }
 
-    /* ── URL lockup — Scene 3 ─────────────────────────────────────────── */
-    .cta07-url {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 60.2cqh;
-      text-align: center;
-    }
-    .cta07-url-lockup {
-      display: inline-block;
-      will-change: transform, opacity;
-    }
-    .cta07-url-text {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 2cqw;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-      color: #e8eaec;
-    }
-    .cta07-underline {
-      display: block;
-      height: 4px;
-      margin: 9px auto 0;
-      overflow: visible;
-    }
-    .cta07-underline path {
-      fill: none;
-      stroke: #4ade80; /* the film's second and last green */
-      stroke-width: 1;
-    }
-
     /* ── corner crosshairs — closing chrome, static since entrance ────── */
     .cta07-cross {
       position: absolute;
@@ -169,13 +141,13 @@
     id="root"
     data-composition-id="07-cta"
     data-start="0"
-    data-duration="5.163"
+    data-duration="4.8"
     data-width="1920"
     data-height="1080"
   >
-    <div class="clip cta07-bg" data-start="0" data-duration="5.163" data-track-index="0"></div>
+    <div class="clip cta07-bg" data-start="0" data-duration="4.8" data-track-index="0"></div>
 
-    <div class="clip cta07-stage" data-start="0" data-duration="5.163" data-track-index="1">
+    <div class="clip cta07-stage" data-start="0" data-duration="4.8" data-track-index="1">
       <div class="cta07-cam" id="cta07-cam">
         <h1 class="cta07-headline" id="cta07-headline">
           <span class="cta07-w">Ask</span> <span class="cta07-w">it</span> <span class="cta07-w">yourself</span>
@@ -185,19 +157,10 @@
           <span class="cta07-prompt">$</span>
           <span class="cta07-cmdwrap"><span class="cta07-text" id="cta07-text"></span><span class="cta07-caret" id="cta07-caret"></span></span>
         </div>
-
-        <div class="cta07-url">
-          <div class="cta07-url-lockup" id="cta07-url-lockup">
-            <div class="cta07-url-text" id="cta07-url-text">ingot-six.vercel.app</div>
-            <svg class="cta07-underline" id="cta07-underline-svg" xmlns="http://www.w3.org/2000/svg">
-              <path id="cta07-uline" d="M 0 2 L 440 2" />
-            </svg>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div id="cta07-chrome" class="clip cta07-chrome" data-start="0" data-duration="5.163" data-track-index="2"
+    <div id="cta07-chrome" class="clip cta07-chrome" data-start="0" data-duration="4.8" data-track-index="2"
       style="position: absolute; inset: 0; pointer-events: none">
       <div class="cta07-cross cta07-cross-tl"></div>
       <div class="cta07-cross cta07-cross-tr"></div>
@@ -209,7 +172,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
   <script>
     (function () {
-      var DUR = 5.163;
+      var DUR = 4.8;
 
       window.__timelines = window.__timelines || {};
       var tl = gsap.timeline({ paused: true });
@@ -244,7 +207,7 @@
       /* headline demotes — focus hands off to the pill */
       tl.to("#cta07-headline", { scale: 0.6, opacity: 0.7, duration: 0.5, ease: "power2.inOut" }, 1.1);
 
-      /* ── Scene 2 (1.3–3.4s) — terminal pill, long-tail settle ───────── */
+      /* ── Scene 2 (1.3–3.0s) — terminal pill, long-tail settle ───────── */
       tl.fromTo(
         "#cta07-pill",
         { y: 46, scale: 0.95, opacity: 0 },
@@ -256,10 +219,10 @@
          (no typos: instruments don't mistype) + context-sensitive-cursor
          segment colors written in the same onUpdate. */
       var CMD = "npx ingot-scan contaminate";
-      var TYPE_START = 1.95, CHAR_DT = 0.05;
+      var TYPE_START = 1.7, CHAR_DT = 0.05;
       var INK = "#E8EAEC",
         DIM = "rgba(232, 234, 236, 0.5)",
-        TEAL = "#E8EAEC"; /* fixed syntax decoration — green stays reserved for the URL */
+        TEAL = "#E8EAEC"; /* fixed syntax decoration — the frame stays achromatic */
       function segColor(charIdx) {
         if (charIdx < 4) return DIM; /* "npx " — chrome */
         if (charIdx < 15) return INK; /* "ingot-scan " — brand */
@@ -270,7 +233,7 @@
         SEQUENCE.push({ t: TYPE_START + i * CHAR_DT, text: CMD.slice(0, i), color: segColor(i - 1) });
       }
       /* command complete — caret rests to idle ink for the closing hold */
-      SEQUENCE.push({ t: 3.4, text: CMD, color: INK });
+      SEQUENCE.push({ t: 3.05, text: CMD, color: INK });
 
       function entryAt(time) {
         for (var j = SEQUENCE.length - 1; j >= 0; j--) {
@@ -301,34 +264,14 @@
         0
       );
 
-      /* ── Scene 3 (3.4–5.2s) — URL settles, green underline self-draws ─ */
-      tl.fromTo(
-        "#cta07-url-lockup",
-        { y: 26, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
-        3.45
-      );
-
-      /* svg-path-draw — measured length, never guessed */
-      var urlTextEl = document.getElementById("cta07-url-text");
-      var ulSvg = document.getElementById("cta07-underline-svg");
-      var ulPath = document.getElementById("cta07-uline");
-      var uw = urlTextEl.offsetWidth || 440;
-      ulSvg.setAttribute("viewBox", "0 0 " + uw + " 4");
-      ulSvg.style.width = uw + "px";
-      ulPath.setAttribute("d", "M 0 2 L " + uw + " 2");
-      var ulen = ulPath.getTotalLength();
-      ulPath.style.strokeDasharray = String(ulen);
-      ulPath.style.strokeDashoffset = String(ulen);
-      tl.to(ulPath, { strokeDashoffset: 0, duration: 0.55, ease: "power2.out" }, 3.72);
-
-      /* caret: exactly THREE finite stepped blinks, then held ON — no loop */
-      tl.set(caretEl, { opacity: 0 }, 3.55);
-      tl.set(caretEl, { opacity: 1 }, 3.8);
-      tl.set(caretEl, { opacity: 0 }, 4.05);
-      tl.set(caretEl, { opacity: 1 }, 4.3);
-      tl.set(caretEl, { opacity: 0 }, 4.55);
-      tl.set(caretEl, { opacity: 1 }, 4.8);
+      /* ── Scene 3 (3.0–4.8s) — the card holds on the finished command ──
+         caret: exactly THREE finite stepped blinks, then held ON — no loop */
+      tl.set(caretEl, { opacity: 0 }, 3.15);
+      tl.set(caretEl, { opacity: 1 }, 3.4);
+      tl.set(caretEl, { opacity: 0 }, 3.65);
+      tl.set(caretEl, { opacity: 1 }, 3.9);
+      tl.set(caretEl, { opacity: 0 }, 4.15);
+      tl.set(caretEl, { opacity: 1 }, 4.4);
       /* holds ON through the end. Full stop. */
 
       window.__timelines["07-cta"] = tl;

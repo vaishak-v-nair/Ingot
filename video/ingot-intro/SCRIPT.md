@@ -51,6 +51,9 @@ narrator selling. Slight downward cadence at line ends. Never excited.
 ## Line 7 — Ask it yourself (Frame 7)
 
 **Time:** 45.0 – 51.0s
-**Delivery:** Calm invitation; read the URL slowly and clearly.
+**Delivery:** Calm invitation; land cleanly on "one command" and stop.
 
-    Ask it yourself — in your browser, or one command. ingot dash six dot vercel dot app.
+    Ask it yourself — in your browser, or one command.
+
+> 2026-08-02: the spoken URL was cut with the on-screen one (founder decision — a
+> vercel domain on the end card reads unprofessional). Regenerated take: 2.645s.
