@@ -399,6 +399,11 @@ const html = `<!doctype html>
 <meta property="og:url" content="https://ingot-six.vercel.app/registry.html">
 <meta property="og:image" content="https://ingot-six.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<!-- Dark browser chrome from the first paint; without this the scrollbar is the
+     browser's light default over the graphite. Same rule as index.html. -->
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
 <style>
   /* Same two faces the rest of the site serves, from the same origin. This page is
      generated, which is exactly why it was the page that never got them: nobody edits it,
@@ -421,6 +426,7 @@ const html = `<!doctype html>
   /* Cleanroom Instrument tokens (DESIGN.md 2026-08-01): dark graphite identity, designed
      light inverse. Same values as index.html so the generated page cannot drift. */
   :root {
+    color-scheme: dark;
     --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31; --card: #121415;
     --gold: #9BA1A6; --hot: #F59E0B; --ok: #4ADE80;
     --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -428,10 +434,18 @@ const html = `<!doctype html>
     --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   }
   @media (prefers-color-scheme: light) {
-    :root { --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
+    :root { color-scheme: light;
+            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
             --gold: #43474B; --hot: #B45309; --ok: #15803D; }
   }
   html { -webkit-text-size-adjust: 100%; }
+  /* Scrollbars are chassis — dark via color-scheme, hairline via these. Same block as
+     index.html; the -webkit rules are the Safari fallback. */
+  html { scrollbar-color: var(--line) transparent; }
+  .scroll, pre { scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); }
+  ::-webkit-scrollbar-track { background: transparent; }
   /* The same ultra-wide scale and shell rules as the rest of the site, so the nav sits at
      identical coordinates on every page and the composition grows past 94rem instead of
      drowning in margins. */

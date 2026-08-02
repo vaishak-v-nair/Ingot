@@ -16,6 +16,17 @@
 <meta property="og:url" content="https://ingot-six.vercel.app/">
 <meta property="og:image" content="https://ingot-six.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<!-- Declared before any CSS parses, so the first paint already uses dark browser chrome.
+     Without this the page is dark but the scrollbar is the browser's light default —
+     17px of white on Windows, over a graphite bench. -->
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<!-- The three faces above the fold. Preloaded so the hero never flashes fallback type;
+     same-origin, so the network panel claim is untouched. -->
+<link rel="preload" href="fonts/archivo-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/public-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   /* Self-hosted, latin subset only. Same-origin on purpose: a webfont fetched from a CDN
      would put a third-party request in the network panel, and the privacy claim on this
@@ -44,6 +55,7 @@
      testimony and decoration gets none), --hot is signal amber for findings that need
      reading, --ember is the refusal red, --ok is the only green anywhere. */
   :root {
+    color-scheme: dark;
     --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31; --card: #121415;
     --gold: #9BA1A6; --hot: #F59E0B; --ember: #F87171; --ok: #4ADE80; --bad: #F87171;
     --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -53,10 +65,21 @@
     --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
   }
   @media (prefers-color-scheme: light) {
-    :root { --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
+    :root { color-scheme: light;
+            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
             --gold: #43474B; --hot: #B45309; --ember: #B91C1C; --ok: #15803D; --bad: #B91C1C; }
   }
   html { -webkit-text-size-adjust: 100%; }
+  /* The scrollbar is chassis, and it was the one piece of chrome the design forgot: the
+     browser painted its light default over the dark bench. color-scheme above makes it
+     dark; these rules make it a hairline instrument edge. Inner scrollers — the rail,
+     tables, receipts — thin theirs further. The -webkit rules are the Safari fallback;
+     browsers that understand scrollbar-color ignore them. */
+  html { scrollbar-color: var(--line) transparent; }
+  .rail, .scroll, pre { scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); }
+  ::-webkit-scrollbar-track { background: transparent; }
   /* Every dimension on this page is in rem, so the root font size is the scale of the
      whole composition. Fixed at 16px, the layout stops growing at ~1500px and wide
      screens get dead margins on both sides — measured at 1904px: 336px of nothing left,
@@ -101,7 +124,7 @@
                  height: 1px; background: var(--gold); transition: right .18s ease; }
   nav a:hover::after { right: 0; }
 
-  header { padding: 3.6rem 0 0; }
+  header { padding: 2.7rem 0 0; }
   /* Etched, not molten: Archivo 600, tight tracking, plain ink. Two lines maximum. */
   h1 { font-family: var(--display); font-weight: 600;
        font-size: clamp(2.1rem, 5.2vw, 3.4rem); line-height: 1.02; margin: 0 0 .6rem; letter-spacing: -.03em; }
@@ -118,8 +141,8 @@
   .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
 
   /* ---------- the tool ---------- */
-  .tool { padding-bottom: 3.5rem; }
-  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: 1.75rem 0 1rem; }
+  .tool { padding-bottom: 2.6rem; }
+  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: 1.4rem 0 1rem; }
   .muted { color: var(--dim); font-size: .86rem; }
   select { font: inherit; font-size: .92rem; padding: .45rem .6rem; border-radius: 0; border: 1px solid var(--line);
            background: var(--card); color: var(--ink); }
@@ -172,7 +195,7 @@
      Red belongs to refusals — the machine declining to answer, not the answer. */
   .big.clean { color: var(--ok); } .big.dirty { color: var(--hot); }
   .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
-  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin: 2rem 0 .6rem; font-weight: 600; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin: 1.7rem 0 .6rem; font-weight: 600; }
   /* Findings are a ruled record, not a stack of cards. A border around each match adds no
      information and makes the most important content on the site look like a template. */
   .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
@@ -219,7 +242,9 @@
   td.num, th.num { font-family: var(--mono); }
 
   /* ---------- evidence sections ---------- */
-  section { padding: 4.8rem 0; border-top: 1px solid var(--line); }
+  /* 3.4rem, down from 4.8: the founder read the page as a stranger and called the gaps
+     what they were. Air between sections is not evidence of anything. */
+  section { padding: 3.4rem 0; border-top: 1px solid var(--line); }
   /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
      for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
      being drawn and then tightened on top of it. */
@@ -256,7 +281,7 @@
         border-radius: 0; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
   /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
      ink rule opens it, a hairline closes it, and the caption reads like a plate caption. */
-  .guide-film { margin: 2.2rem 0; border-top: 2px solid var(--ink);
+  .guide-film { margin: 1.8rem 0; border-top: 2px solid var(--ink);
                 border-bottom: 1px solid var(--line); padding: 1.2rem 0 1rem; }
   .guide-film video { display: block; width: 100%; height: auto; background: var(--paper); }
   .guide-film figcaption { margin-top: .8rem; font-family: var(--mono); font-size: .74rem;
@@ -375,7 +400,7 @@
                              width .45s ease, height .45s ease; }
   }
 
-  footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim);
+  footer { padding: 2rem 0 3rem; border-top: 1px solid var(--line); color: var(--dim);
            font-family: var(--mono); font-size: .78rem; }
 </style>
 </head>
@@ -415,11 +440,6 @@
     <select id="bench"></select>
     <span class="muted" id="benchmeta"></span>
   </div>
-  <!-- The menu is meaningless to anyone who has not met these names. One line decodes it:
-       these are the exams, and this is what each one examines. -->
-  <p class="muted" style="margin:-.35rem 0 1rem">The exam to look for. GSM8K — maths ·
-  HumanEval — code · MMLU — general knowledge.</p>
-
   <div class="drop" id="drop">
     <strong>Drop training data here</strong>
     <p>JSONL — one <code>{"text": …}</code> record per line. Plain or gzipped — any size,
@@ -452,41 +472,44 @@
     <em>contamination</em>)? Ingot answers both the same way: it finds the exact
     overlapping words and shows them to you.</p>
     <ul class="plain">
-      <li><b>Pick the exam.</b> GSM8K — maths · HumanEval — code · MMLU — general knowledge.</li>
+      <li><b>Pick the exam.</b> Three public benchmarks live in the menu — maths, code,
+      general knowledge.</li>
       <li><b>Drop the study material.</b> Read here, in this tab — nothing is uploaded anywhere.</li>
       <li><b>Read the overlaps.</b> Every match shown with the words around it. Some overlap is
       innocent — that is why you see the words, not a score.</li>
     </ul>
-    <p class="sub" style="margin-top:1.4rem">No file to hand? <strong>Watch it work</strong> runs a
-    real scan for you, step by step — or press play below.</p>
-    <!-- The guidance video. Click-to-play from a poster, so it costs zero bytes until
-         asked — the network panel stays empty on load, which is this page's claim. It
-         complements the tour rather than replacing it: the tour runs the real scanner,
-         this is for people who want to watch before touching anything. Self-hosted,
-         same-origin; the CSP's default-src 'self' already covers it. -->
+    <p class="sub" style="margin-top:1.4rem">The scan that ran when you arrived was real — the
+    built-in sample, read in this tab. <strong>Watch it work</strong> replays it step by step,
+    or press play for the film.</p>
+    <!-- The introduction film, in the site's own design system (the previous guide film
+         still wore the archived cream-and-serif v1 look — a page from a retired site
+         playing inside this one). Click-to-play from a poster, so it costs zero bytes
+         until asked — the network panel stays empty on load, which is this page's claim.
+         Self-hosted, same-origin; the CSP's default-src 'self' already covers it. -->
     <figure class="guide-film">
       <video controls preload="none" playsinline
-             poster="media/guide-poster.jpg" width="1920" height="1080">
-        <source src="media/ingot-guide.webm" type="video/webm">
-        <source src="media/ingot-guide.mp4" type="video/mp4">
+             poster="media/intro-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-intro.mp4" type="video/mp4">
       </video>
-      <figcaption>57 seconds, voiced and captioned. Nothing plays or downloads until you
-      press play.</figcaption>
+      <figcaption>38 seconds, voiced. Nothing plays or downloads until you press play.</figcaption>
     </figure>
-    <!-- Open, not folded. The folds hold expert depth; this table is the decoder ring for
-         the exact reader who would never guess a gold line hides definitions. -->
-    <p class="sub" style="margin:1.6rem 0 .6rem">Six words this page keeps using:</p>
-    <div class="scroll">
-      <table>
-        <tr><th>term</th><th>plain meaning</th></tr>
-        <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
-        <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
-        <tr><td class="num">token</td><td>roughly one word</td></tr>
-        <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
-        <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
-        <tr><td class="num">canonical</td><td>famous text the whole world quotes — it matches, but it is not leakage</td></tr>
-      </table>
-    </div>
+    <!-- Folded on the founder's tune pass 2026-08-02: open, the table read as one more
+         block of documentation to a stranger. The decoder ring survives — one click in,
+         under a summary that says exactly what it holds. -->
+    <details class="more">
+      <summary>six words this page keeps using</summary>
+      <div class="scroll">
+        <table>
+          <tr><th>term</th><th>plain meaning</th></tr>
+          <tr><td class="num">benchmark</td><td>a standard exam for AI models</td></tr>
+          <tr><td class="num">training data · corpus</td><td>the pile of text a model studied</td></tr>
+          <tr><td class="num">token</td><td>roughly one word</td></tr>
+          <tr><td class="num">n = 10</td><td>ten identical words in a row is what counts as a match</td></tr>
+          <tr><td class="num">contamination</td><td>exam questions found inside the study pile</td></tr>
+          <tr><td class="num">canonical</td><td>famous text the whole world quotes — it matches, but it is not leakage</td></tr>
+        </table>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -692,10 +715,12 @@
 <script type="module">
 import { loadIndexFromBytes, renderContaminationReport, reportFileName } from './ingot.js';
 
+// The decode lives in the label itself. A separate caption explaining what each exam
+// examines said the same thing twice on one screen; the menu is where the eye already is.
 const INDEXES = [
-  { id: 'gsm8k', label: 'GSM8K (1,319 items)' },
-  { id: 'humaneval', label: 'HumanEval (164 items)' },
-  { id: 'mmlu', label: 'MMLU (14,042 items)' },
+  { id: 'gsm8k', label: 'GSM8K — maths · 1,319 items' },
+  { id: 'humaneval', label: 'HumanEval — code · 164 items' },
+  { id: 'mmlu', label: 'MMLU — general knowledge · 14,042 items' },
 ];
 
 /**

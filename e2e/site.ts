@@ -25,7 +25,7 @@ export async function assembleSite(): Promise<{ dir: string; planted: string }> 
   }
   cpSync('web/fonts', join(dir, 'fonts'), { recursive: true });
   mkdirSync(join(dir, 'media'), { recursive: true });
-  cpSync('web/media/guide-poster.jpg', join(dir, 'media', 'guide-poster.jpg'));
+  cpSync('web/media/intro-poster.jpg', join(dir, 'media', 'intro-poster.jpg'));
 
   const items = Array.from({ length: 20 }, (_, i) => ({ id: `e2e-${i}`, text: words(40, 90000 + i) }));
   const index = NgramIndex.build('e2e', items, { n: 10 });

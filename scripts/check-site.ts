@@ -41,6 +41,8 @@ const REQUIRED = [
   'web/fonts/public-sans-latin-500.woff2',
   'web/fonts/jetbrains-mono-400.woff2',
   'web/og.png',
+  'web/media/ingot-intro.mp4',
+  'web/media/intro-poster.jpg',
 ];
 
 process.stdout.write('\n  checking the built site\n\n');
