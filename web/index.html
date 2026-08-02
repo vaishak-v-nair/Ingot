@@ -760,24 +760,35 @@ for (const b of INDEXES) {
 
 let indexBytes = null;
 let loading = null;
+// Loads race: pick MMLU (slow), switch back to GSM8K (fast) — without a generation
+// check the stale MMLU response lands LAST and overwrites indexBytes, so the next drop
+// scans one benchmark while the receipt names another. Latest selection wins, always.
+let loadGen = 0;
 
 async function loadIndex(id) {
+  const gen = ++loadGen;
   indexBytes = null;
   $('benchmeta').textContent = 'loading index…';
   const started = performance.now();
-  const res = await fetch(`./indexes/${id}.idx.bin.gz`);
-  if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
-  // Decoded once for the meta line, then released. The scan runs in the worker from the
-  // raw bytes — retained so no second fetch is ever needed, which is what makes the
-  // pick-the-exam-then-go-offline story true — and a decoded MMLU index is tens of MB
-  // the main thread has no reason to keep.
-  const idx = await loadIndexFromBytes(bytes);
-  indexBytes = bytes;
-  const secs = ((performance.now() - started) / 1000).toFixed(1);
-  $('benchmeta').textContent =
-    `${idx.itemIds.length.toLocaleString()} items · n=${idx.n} · ` +
-    `${(bytes.length / 1e6).toFixed(1)} MB in ${secs}s · hashes only, no benchmark text`;
+  try {
+    const res = await fetch(`./indexes/${id}.idx.bin.gz`);
+    if (!res.ok) throw new Error(`index ${id} not found (${res.status})`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    // Decoded once for the meta line, then released. The scan runs in the worker from the
+    // raw bytes — retained so no second fetch is ever needed, which is what makes the
+    // pick-the-exam-then-go-offline story true — and a decoded MMLU index is tens of MB
+    // the main thread has no reason to keep.
+    const idx = await loadIndexFromBytes(bytes);
+    if (gen !== loadGen) return; // superseded by a newer selection — its result owns the state
+    indexBytes = bytes;
+    const secs = ((performance.now() - started) / 1000).toFixed(1);
+    $('benchmeta').textContent =
+      `${idx.itemIds.length.toLocaleString()} items · n=${idx.n} · ` +
+      `${(bytes.length / 1e6).toFixed(1)} MB in ${secs}s · hashes only, no benchmark text`;
+  } catch (err) {
+    if (gen !== loadGen) return; // a stale failure must not clobber the newer load's meta line
+    throw err;
+  }
 }
 
 function selectIndex(id) {
@@ -803,9 +814,22 @@ for (const ev of ['dragleave', 'drop']) {
   drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); });
 }
 drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) run(e.dataTransfer.files[0]); });
-$('file').addEventListener('change', (e) => { if (e.target.files[0]) run(e.target.files[0]); });
+// The value resets after every pick: browsers skip the change event when the chosen path
+// equals the input's current value, so re-picking the same file after a cancel or an
+// error would otherwise do nothing at all — a silent dead control.
+$('file').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (f) run(f);
+});
 
 $('try').addEventListener('click', async () => {
+  // Same guard as run(): flipping the select mid-scan would null the index out from
+  // under the running scan and stamp the wrong --index into its receipt.
+  if (scanning) {
+    $('status').textContent = 'a scan is already running — cancel it first';
+    return;
+  }
   if (benchSel.value !== 'humaneval') {
     benchSel.value = 'humaneval';
     selectIndex('humaneval');
@@ -960,7 +984,9 @@ $('tour').addEventListener('click', tourStart);
  */
 setTimeout(() => {
   if (navigator.webdriver || new URLSearchParams(location.search).has('noauto')) return;
-  if (tourAt >= 0 || document.querySelector('#out .hit') || !$('bar').hidden) return;
+  // ANY rendered output blocks the demo — a refusal or a clean verdict inside the first
+  // 900ms is still the visitor's result, and the sample must never clobber it.
+  if (tourAt >= 0 || scanning || $('out').innerHTML.trim() !== '' || !$('bar').hidden) return;
   $('try').click();
 }, 900);
 
@@ -1095,6 +1121,10 @@ async function run(file, isSample = false) {
       const w = new Worker('./scan.worker.js', { type: 'module' });
       scanWorker = w;
       w.onmessage = (e) => {
+        // terminate() clears the WORKER's queue, not messages already queued on this
+        // thread — a progress event delivered after cancel would repaint the mid-scan
+        // UI over the cancel state and leave the rail ticking forever.
+        if (!scanning || w !== scanWorker) return;
         const m = e.data;
         if (m.type === 'progress') onProgress(m.docs, m.tokens, m.bytesRead);
         else if (m.type === 'done') { w.terminate(); scanWorker = null; resolve(m.report); }
@@ -1298,10 +1328,13 @@ ${esc(r.command)}</pre>
       const rest = exact.hits.slice(25);
       let at = 0;
       const chunk = () => {
-        $('more-out').insertAdjacentHTML('beforeend', rest.slice(at, at + 40).map(hitRow).join(''));
+        // A new scan can wipe #out between frames; the loop must die with its DOM.
+        const more = $('more-out');
+        if (!more) return;
+        more.insertAdjacentHTML('beforeend', rest.slice(at, at + 40).map(hitRow).join(''));
         at += 40;
         if (at < rest.length) requestAnimationFrame(chunk);
-        else $('more-row').remove();
+        else $('more-row')?.remove();
       };
       requestAnimationFrame(chunk);
     });

@@ -7,6 +7,8 @@ import { gzipSync } from 'node:zlib';
 import { NgramIndex, forEachNgram, tokenHash } from '../src/contamination/ngramIndex.ts';
 import { hashTokens } from '../src/contamination/fastTokens.ts';
 import { scanCorpus } from '../src/contamination/scan.ts';
+import { ScanSession } from '../src/contamination/scanSession.ts';
+import { runContaminate } from '../src/cli.ts';
 import { IndexVersionError } from '../src/errors.ts';
 import { mulberry32, tokenize } from '../src/text.ts';
 import { INDEX_FORMAT_VERSION } from '../src/contamination/types.ts';
@@ -430,4 +432,118 @@ test('an index built at one n does not silently match grams at another', () => {
     if (idx13.lookup(key)) hits8++;
   });
   assert.equal(hits8, 0, '8-grams must not collide with a 13-gram index');
+});
+
+test('the corpus digest binds line boundaries, not just their concatenation', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 5 }, (_, i) => ({
+    id: `lb${i}`,
+    text: words(50, 8100 + i),
+  }));
+  const index = NgramIndex.build('digest-bench', bench, { n: N });
+
+  // Same bytes once the newline moves: without a per-line separator in the full digest,
+  // these two files — which parse into different documents — shared one attestation.
+  const pa = join(scratch, 'digest-a.jsonl');
+  writeFileSync(pa, '{"id":"a","text":"x"}\n{"id":"b","text":"y"}\n', 'utf8');
+  const pb = join(scratch, 'digest-b.jsonl');
+  writeFileSync(pb, '{"id":"a","text":"x"}{"id":"b","text":"y"}\n', 'utf8');
+
+  const ra = await scanCorpus(index, pa);
+  const rb = await scanCorpus(index, pb);
+  assert.notEqual(
+    ra.receipt.corpusHashFull,
+    rb.receipt.corpusHashFull,
+    'two different line structures must not share one attestation',
+  );
+});
+
+test('an invalid byte does not split the corpus identity between gz and plain', async () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 5 }, (_, i) => ({
+    id: `iv${i}`,
+    text: words(50, 8200 + i),
+  }));
+  const index = NgramIndex.build('invalid-bench', bench, { n: N });
+
+  // 0xE9 is not valid UTF-8 on its own; it decodes to U+FFFD, which re-encodes as three
+  // bytes. Counting bytes AFTER decoding therefore disagreed with the browser's raw
+  // count, and the byte count folds into the corpus hash: same shard, two identities.
+  const raw = Buffer.concat([
+    Buffer.from('{"id":"a","text":"caf'),
+    Buffer.from([0xe9]),
+    Buffer.from(` ${words(20, 8300)}"}\n`),
+  ]);
+  const pp = join(scratch, 'invalid.jsonl');
+  writeFileSync(pp, raw);
+  writeFileSync(`${pp}.gz`, gzipSync(raw));
+
+  const plain = await scanCorpus(index, pp);
+  const gz = await scanCorpus(index, `${pp}.gz`);
+  assert.equal(gz.receipt.corpusBytes, plain.receipt.corpusBytes, 'bytes are the raw stream on both paths');
+  assert.equal(gz.corpusHash, plain.corpusHash, 'an invalid byte must not fork the corpus identity');
+});
+
+test('a --bench file that is not the benchmark the index was built from is refused', () => {
+  const bench: BenchmarkItem[] = Array.from({ length: 6 }, (_, i) => ({
+    id: `mm${i}`,
+    text: words(50, 8400 + i),
+  }));
+  const index = NgramIndex.build('mismatch-bench', bench, { n: N });
+
+  // Same items, different order: near-tier hits used to resolve bench positions through
+  // index.itemIds, so this exact pairing misattributed every near hit. Now it refuses.
+  const shuffled = [bench[1], bench[0], ...bench.slice(2)];
+  assert.throws(
+    () => new ScanSession(index, { benchmarkItems: shuffled }),
+    /IndexMismatch|not the benchmark/,
+    'a reordered bench file must be refused, not misattributed',
+  );
+  assert.doesNotThrow(() => new ScanSession(index, { benchmarkItems: bench }));
+});
+
+test('a document whose every exact match is a certain drop is still near-checked', () => {
+  // Seven filler documents each quote items[3] in full, so by the time the target
+  // arrives, every gram of items[3] is past the frequency threshold — the target's exact
+  // runs are all certain drops at capture time. The target IS a copy of items[3]: the
+  // exact tier discards it as ordinary language, and the old gate (`raw.length === 0`)
+  // then skipped the near tier for it too, so the one document most worth flagging was
+  // flagged by neither tier.
+  const bench: BenchmarkItem[] = Array.from({ length: 10 }, (_, i) => ({
+    id: `cd${i}`,
+    text: words(100, 8500 + i),
+  }));
+  const index = NgramIndex.build('certain-drop-bench', bench, { n: N });
+  const session = new ScanSession(index, { benchmarkItems: bench });
+
+  for (let i = 0; i < 7; i++) session.addDocument(`filler${i}`, `${bench[3].text} ${words(15, 8600 + i)}`);
+  session.addDocument('target', `${bench[3].text} zz1 zz2`);
+
+  const report = session.finish({
+    corpusName: 'certain-drop', corpusHash: 'x', corpusBytes: 1, command: 'test', elapsedMs: 0,
+  });
+  const near = report.tiers.find((t) => t.tier === 'near')!;
+  assert.ok(
+    near.hits.some((h) => h.benchmarkItemId === 'cd3' && h.corpusDocId === 'target'),
+    'the near tier must see a document whose exact matches are all certain drops',
+  );
+});
+
+test('a verbatim copy against a strided index is one run, not one per stride step', () => {
+  const item: BenchmarkItem = { id: 'st0', text: words(60, 8700) };
+  const strided = NgramIndex.build('stride-bench', [item], { n: 13, stride: 4 });
+  const session = new ScanSession(strided);
+  session.addDocument('d1', item.text);
+
+  const report = session.finish({
+    corpusName: 'stride', corpusHash: 'x', corpusBytes: 1, command: 'test', elapsedMs: 0,
+  });
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+  assert.equal(exact.itemsHit, 1);
+  assert.equal(exact.totalHits, 1, 'stride-spaced hits of one copy must merge into one span');
+});
+
+test('a valued flag with a missing value is refused, never defaulted to zero', async () => {
+  // `--max-doc-freq` with nothing after it parsed as '' and Number('') is 0 — a threshold
+  // that drops every match as ordinary language and prints a manufactured green verdict.
+  assert.equal(await runContaminate(['--index', 'humaneval', '--corpus', 'x.jsonl', '--max-doc-freq']), 2);
+  assert.equal(await runContaminate(['--index', 'humaneval', '--corpus', 'x.jsonl', '--max-doc-freq', '0']), 2);
 });

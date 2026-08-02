@@ -76,6 +76,13 @@ async function humaneval(): Promise<void> {
  * Question plus choices, because the choice set is part of what identifies the item.
  */
 async function mmlu(limit = 14_100): Promise<void> {
+  // The known size of the MMLU test split. A fetch that lands far below it is truncated —
+  // and a truncated write is the "silently biased benchmark" the header warns about: the
+  // subjects that happen to sort late vanish, every downstream index under-counts, and
+  // the page's item counts stop being true. This file used to catch the error, print one
+  // line, and write the partial file anyway with exit 0; the existsSync guard below then
+  // made the truncation permanent.
+  const EXPECTED_MIN = 14_000;
   const items: Item[] = [];
   let offset = 0;
   while (offset < limit) {
@@ -86,8 +93,9 @@ async function mmlu(limit = 14_100): Promise<void> {
     try {
       body = JSON.parse(await get(url));
     } catch (err) {
-      process.stdout.write(`  mmlu stopped at offset ${offset}: ${String(err).slice(0, 80)}\n`);
-      break;
+      process.stderr.write(`\n  REFUSED — mmlu fetch failed at offset ${offset}: ${String(err).slice(0, 120)}\n`);
+      process.stderr.write(`  Writing the partial benchmark would bias every scan against it. Nothing was written.\n\n`);
+      process.exit(1);
     }
     const rows = body.rows ?? [];
     if (rows.length === 0) break;
@@ -103,6 +111,13 @@ async function mmlu(limit = 14_100): Promise<void> {
     }
     offset += rows.length;
     if (offset % 2000 === 0) process.stdout.write(`    mmlu ${offset} rows...\n`);
+  }
+  if (items.length < EXPECTED_MIN) {
+    process.stderr.write(
+      `\n  REFUSED — mmlu fetched ${items.length} items, expected at least ${EXPECTED_MIN}. ` +
+        `Truncated upstream response; nothing was written.\n\n`,
+    );
+    process.exit(1);
   }
   write('mmlu', items, 'MIT');
 }

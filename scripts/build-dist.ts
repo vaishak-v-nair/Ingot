@@ -15,7 +15,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { NPX_OPTS } from './npx.ts';
+import { ESBUILD, NPX_OPTS } from './npx.ts';
 
 type Target = { entry: string; out: string; platform: 'node' | 'browser' };
 
@@ -32,7 +32,7 @@ process.stdout.write('\n  building dist\n\n');
 
 for (const t of TARGETS) {
   const args = [
-    '--yes', 'esbuild', t.entry,
+    '--yes', ESBUILD, t.entry,
     '--bundle', '--format=esm', `--outfile=${t.out}`,
     `--platform=${t.platform}`, '--target=node24',
   ];

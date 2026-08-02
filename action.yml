@@ -47,12 +47,17 @@ runs:
       with:
         node-version: '24'
 
+    # Every input reaches bash through env:, never through ${{ }} inside run:. GitHub
+    # substitutes ${{ }} before bash parses, so a value carrying a quote breaks out of any
+    # quoting and executes — and marketplace consumers do wire event payloads into inputs.
+    # An env var has no such path: bash only ever sees "$VAR".
     - name: Fetch the index when it is a URL
       id: resolve
       shell: bash
+      env:
+        INDEX: ${{ inputs.index }}
       run: |
         set -euo pipefail
-        INDEX='${{ inputs.index }}'
         case "$INDEX" in
           http://*|https://*)
             curl -fsSL "$INDEX" -o /tmp/ingot-index.idx.bin.gz
@@ -66,15 +71,19 @@ runs:
     - name: Scan
       id: scan
       shell: bash
+      env:
+        INDEX: ${{ steps.resolve.outputs.index }}
+        CORPUS: ${{ inputs.corpus }}
+        REPORT: ${{ inputs.report }}
+        TEXT_FIELD: ${{ inputs.text-field }}
+        MAX_ITEMS: ${{ inputs.max-items }}
+        FAIL_ON_FINDINGS: ${{ inputs.fail-on-findings }}
       run: |
         set -euo pipefail
 
-        ARGS=(contaminate
-          --index '${{ steps.resolve.outputs.index }}'
-          --corpus '${{ inputs.corpus }}'
-          --json '${{ inputs.report }}')
-        if [ -n '${{ inputs.text-field }}' ]; then
-          ARGS+=(--text-field '${{ inputs.text-field }}')
+        ARGS=(contaminate --index "$INDEX" --corpus "$CORPUS" --json "$REPORT")
+        if [ -n "$TEXT_FIELD" ]; then
+          ARGS+=(--text-field "$TEXT_FIELD")
         fi
 
         # The whole report goes to the log on purpose. A gate that says "3 findings" and
@@ -84,29 +93,30 @@ runs:
         npx --yes ingot-scan@0.1.3 "${ARGS[@]}" | tee /tmp/ingot-out.txt
 
         FOUND=$(node -e "
-          const r = require('${{ github.workspace }}/${{ inputs.report }}');
+          const { resolve } = require('node:path');
+          const r = require(resolve(process.env.REPORT));
           const exact = r.tiers.find((t) => t.tier === 'exact');
           process.stdout.write(String(exact.itemsHit));
         ")
         echo "items-found=$FOUND" >> "$GITHUB_OUTPUT"
-        echo "report=${{ inputs.report }}" >> "$GITHUB_OUTPUT"
+        echo "report=$REPORT" >> "$GITHUB_OUTPUT"
 
         {
           echo "### Ingot contamination scan"
           echo
-          echo "**$FOUND** benchmark item(s) found in \`${{ inputs.corpus }}\`."
+          echo "**$FOUND** benchmark item(s) found in \`$CORPUS\`."
           echo
           echo '```'
           sed -n '/EVIDENCE/,/RECEIPT/p' /tmp/ingot-out.txt || true
           echo '```'
         } >> "$GITHUB_STEP_SUMMARY"
 
-        if [ '${{ inputs.fail-on-findings }}' != 'true' ]; then
+        if [ "$FAIL_ON_FINDINGS" != 'true' ]; then
           echo "fail-on-findings is false; reporting only"
           exit 0
         fi
-        if [ "$FOUND" -gt '${{ inputs.max-items }}' ]; then
-          echo "::error::$FOUND benchmark items found, threshold is ${{ inputs.max-items }}."
+        if [ "$FOUND" -gt "$MAX_ITEMS" ]; then
+          echo "::error::$FOUND benchmark items found, threshold is $MAX_ITEMS."
           echo "::error::Read the matches above before acting: canonical text with one natural"
           echo "::error::phrasing looks identical to leakage in any count."
           exit 1

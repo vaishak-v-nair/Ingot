@@ -111,6 +111,16 @@ export class IndexMismatchError extends IngotError {
   }
 }
 
+export class IndexTruncatedError extends IngotError {
+  constructor(detail: string) {
+    super(
+      'IndexTruncatedError',
+      `${detail}. A truncated index decodes into a smaller one that scans "clean" — ` +
+        `refusing to load it is the only honest answer. Re-download or rebuild the index.`,
+    );
+  }
+}
+
 export class PartitionTooSmallError extends IngotError {
   constructor(partition: string, have: number, need: number) {
     super(

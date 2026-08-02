@@ -574,8 +574,9 @@ ${sftSection()}
     what counts as a match, and an <em>unscannable</em> item is one too short to ever produce a
     match at that length — named, never silently skipped.</p>
     <p>${registry.benchmarks.length} benchmarks against ${registry.corpora.length} corpora.
-    <strong>${totalFlagged} distinct benchmark items flagged out of
-    ${num(totalItems)}</strong>${flagRows !== totalFlagged ? `, appearing as ${flagRows} rows below because an item found in two corpora is one finding, not two` : ''}.</p>
+    <!-- One line on purpose: this phrase is gated by check-published-numbers.ts, and a
+         load-bearing phrase may never line-wrap mid-figure (DESIGN.md, hard constraint 3). -->
+    <strong>${totalFlagged} distinct benchmark items flagged out of ${num(totalItems)}</strong>${flagRows !== totalFlagged ? `, appearing as ${flagRows} rows below because an item found in two corpora is one finding, not two` : ''}.</p>
     <div class="scroll">
 ${table(DEFAULT_N)}
     </div>
@@ -673,6 +674,22 @@ if (MOTION) {
 </body>
 </html>
 `;
+
+// A results file missing a field renders "undefined" or "NaN" straight into the page,
+// and no other gate can see it: check-published-numbers asserts phrases that SHOULD
+// exist, not phrases that shouldn't. One dumb tripwire over the finished HTML catches
+// every present and future case at once. (The page's own prose says "undetermined",
+// never "undefined", so the match is safe.)
+const leaked = html.match(/\b(?:undefined|NaN)\b/);
+if (leaked) {
+  const at = html.indexOf(leaked[0]);
+  process.stderr.write(
+    `\n  REFUSED — the generated page contains "${leaked[0]}" near ` +
+      `…${html.slice(Math.max(0, at - 60), at + 60).replace(/\s+/g, ' ')}…\n` +
+      `  A results file is missing a field this generator renders. Not writing the page.\n\n`,
+  );
+  process.exit(1);
+}
 
 writeFileSync(resolve('web/registry.html'), html, 'utf8');
 process.stdout.write(

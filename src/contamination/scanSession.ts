@@ -1,7 +1,8 @@
+import { IndexMismatchError } from '../errors.ts';
 import { minhashSignature } from '../signals/nearDup.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import { hashTokens } from './fastTokens.ts';
-import { forEachNgramHashed, NgramIndex } from './ngramIndex.ts';
+import { contentHash, forEachNgramHashed, NgramIndex } from './ngramIndex.ts';
 import { DEFAULT_MAX_CORPUS_DOC_FREQUENCY, INDEX_FORMAT_VERSION } from './types.ts';
 import type { BenchmarkItem, ContaminationHit, ContaminationReport, TierResult } from './types.ts';
 
@@ -49,15 +50,21 @@ export type FinishInput = {
 type RawHit = { itemIdx: number; offset: number; key: number };
 type Run = { itemIdx: number; start: number; end: number; keys: number[] };
 
-/** Merges runs of consecutive n-gram hits into one span. A 100-token verbatim copy is one match, not 88. */
-export function mergeRuns(hits: RawHit[]): Run[] {
+/**
+ * Merges runs of consecutive n-gram hits into one span. A 100-token verbatim copy is one
+ * match, not 88. `stride` is the gap the index itself introduces: a stride-built index
+ * stores every stride-th gram of each item, so the hits of one verbatim copy land ~stride
+ * apart — with the old `+ 1` threshold a single copied passage fragmented into dozens of
+ * runs, each carrying one key for the frequency filter to judge alone.
+ */
+export function mergeRuns(hits: RawHit[], stride = 1): Run[] {
   if (hits.length === 0) return [];
   const sorted = hits.slice().sort((a, b) => a.itemIdx - b.itemIdx || a.offset - b.offset);
   const runs: Run[] = [];
   let cur: Run = { itemIdx: sorted[0].itemIdx, start: sorted[0].offset, end: sorted[0].offset, keys: [sorted[0].key] };
   for (let i = 1; i < sorted.length; i++) {
     const h = sorted[i];
-    if (h.itemIdx === cur.itemIdx && h.offset <= cur.end + 1) {
+    if (h.itemIdx === cur.itemIdx && h.offset <= cur.end + stride) {
       cur.end = h.offset;
       if (cur.keys.length < MAX_KEYS_PER_RUN) cur.keys.push(h.key);
     } else {
@@ -79,8 +86,12 @@ export class ScanSession {
   private readonly seenGramsInDoc = new Set<number>();
   private truncatedRuns = 0;
 
+  // Keyed by the bench item's OWN id, never by its position: the near tier matches
+  // against --bench text, and a position in that array said nothing about
+  // index.itemIds — resolving one through the other misattributed every near hit the
+  // moment the two files differed in order or length.
   private readonly nearHits: ContaminationHit[] = [];
-  private readonly nearItemsHit = new Set<number>();
+  private readonly nearItemsHit = new Set<string>();
   private nearTotal = 0;
 
   corpusDocs = 0;
@@ -93,6 +104,22 @@ export class ScanSession {
   constructor(index: NgramIndex, options: SessionOptions = {}) {
     this.index = index;
     this.maxDocFrequency = options.maxCorpusDocFrequency ?? DEFAULT_MAX_CORPUS_DOC_FREQUENCY;
+    // --bench must be THE benchmark the index was built from. The report merges exact-tier
+    // ids (from the index) with near-tier ids (from the bench file) and stamps one
+    // benchmark hash in the receipt — a mismatched pair would mix two item sets under one
+    // name, silently. Refusing is the house discipline; the hash is the same one build()
+    // stamped, computed the same way.
+    if (options.benchmarkItems) {
+      const benchHash = contentHash(options.benchmarkItems.map((it) => `${it.id}\u0001${it.text}`));
+      if (benchHash !== index.benchmarkHash) {
+        throw new IndexMismatchError(
+          `the --bench file is not the benchmark this index was built from ` +
+            `(index ${index.benchmarkHash}, --bench ${benchHash}). Near-tier results would ` +
+            `mix two different item sets under one receipt. Use the benchmark file the ` +
+            `index was built from.`,
+        );
+      }
+    }
     this.benchSignatures = options.benchmarkItems
       ? options.benchmarkItems.map((it) => ({ id: it.id, sig: minhashSignature(it.text) }))
       : null;
@@ -106,6 +133,12 @@ export class ScanSession {
     const { hashes, starts, ends, count } = hashTokens(text);
     this.corpusTokens += count;
 
+    // True while any of this document's exact runs could still survive the frequency
+    // filter. Frequencies only grow, so a run whose rarest matched gram is already past
+    // the threshold is certain to be dropped — and a document whose EVERY exact match is
+    // a certain drop must still be near-checked, or a paraphrased near-copy that happens
+    // to share one common n-gram with the benchmark is flagged by neither tier.
+    let survivorPossible = false;
     const raw: RawHit[] = [];
     forEachNgramHashed(hashes, count, n, (key, offset) => {
       const owners = this.index.lookup(key);
@@ -120,9 +153,12 @@ export class ScanSession {
     this.seenGramsInDoc.clear();
 
     if (raw.length > 0) {
-      for (const run of mergeRuns(raw)) {
+      for (const run of mergeRuns(raw, this.index.stats.stride)) {
         if (this.provisional.length >= MAX_PROVISIONAL_RUNS) {
           this.truncatedRuns++;
+          // Never frequency-checked, so its survival is unknown — treat it as a possible
+          // survivor rather than letting the near tier double-report the document.
+          survivorPossible = true;
           continue;
         }
         // Evidence is captured now, because the text is only available on this pass.
@@ -137,6 +173,7 @@ export class ScanSession {
         let rarestNow = Number.POSITIVE_INFINITY;
         for (const key of run.keys) rarestNow = Math.min(rarestNow, this.gramDocCount.get(key) ?? 1);
         const certainDrop = rarestNow > this.maxDocFrequency;
+        if (!certainDrop) survivorPossible = true;
         const wantText = certainDrop
           ? this.droppedTextCaptured < MAX_STORED_HITS
           : this.survivorTextCaptured < MAX_STORED_HITS * 4;
@@ -160,8 +197,12 @@ export class ScanSession {
       }
     }
 
-    // Tier 2 only for documents the exact tier did not already flag.
-    if (this.benchSignatures && raw.length === 0) {
+    // Tier 2 for documents the exact tier will not flag: no raw hits at all, or every
+    // run already certain to be dropped as ordinary language. The old gate was
+    // `raw.length === 0`, which let one generic shared n-gram exempt a document from the
+    // near check entirely — the tier that exists to catch edited copies never saw the
+    // edited copies most likely to contain a common phrase.
+    if (this.benchSignatures && !survivorPossible) {
       const docSig = minhashSignature(text);
       if (docSig) {
         for (let b = 0; b < this.benchSignatures.length; b++) {
@@ -172,7 +213,7 @@ export class ScanSession {
           const jaccard = same / docSig.length;
           if (jaccard >= NEAR_THRESHOLD) {
             this.nearTotal++;
-            this.nearItemsHit.add(b);
+            this.nearItemsHit.add(bench.id);
             if (this.nearHits.length < MAX_STORED_HITS) {
               this.nearHits.push({
                 tier: 'near',
@@ -262,7 +303,7 @@ export class ScanSession {
 
     const contaminated = new Set<string>();
     for (const i of exactItemsHit) contaminated.add(this.index.itemIds[i]);
-    for (const i of this.nearItemsHit) contaminated.add(this.index.itemIds[i]);
+    for (const id of this.nearItemsHit) contaminated.add(id);
 
     const generatedAt = new Date().toISOString();
 

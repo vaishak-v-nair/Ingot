@@ -24,6 +24,9 @@ function json<T>(path: string): T {
 const REPORT = 'docs/silent-failures.md';
 const README = 'README.md';
 const MEASUREMENTS = 'docs/measurements.md';
+// The about page quotes measured figures too. It went ungated because nobody edits it —
+// which is precisely how a page drifts.
+const ABOUT = 'web/about.html';
 // The front page publishes numbers too, and until now nothing checked it. It is the
 // surface most people see and the one least likely to be updated when a scan is re-run.
 const SITE = 'web/index.html';
@@ -32,7 +35,7 @@ const SITE = 'web/index.html';
 // page had moved on to C4. Gating the generated page catches the stale-build failure mode.
 const REGISTRY = 'web/registry.html';
 
-for (const p of [REPORT, README, MEASUREMENTS, SITE, REGISTRY, 'results/pretraining-c4.json']) {
+for (const p of [REPORT, README, MEASUREMENTS, SITE, REGISTRY, ABOUT, 'results/pretraining-c4.json', 'results/registry.json']) {
   if (!existsSync(resolve(p))) {
     process.stderr.write(`\n  missing: ${p}\n\n`);
     process.exit(2);
@@ -57,7 +60,13 @@ const c4 = json<{
 
 const shard = json<{ results: { benchmark: string; corpusDocs: number }[] }>('results/pretraining-c4-1shard.json');
 const sweep = json<{
-  rows: { n: number; paraphraseRecall: number; benchmarkUncheckable: number; benchmarkItems: number }[];
+  rows: {
+    n: number;
+    paraphraseRecall: number;
+    benchmarkUncheckable: number;
+    benchmarkItems: number;
+    controlFalsePositives: number;
+  }[];
 }>('results/contamination-validation.json');
 
 const mmlu = c4.results.find((r) => r.benchmark === 'mmlu')!;
@@ -92,10 +101,56 @@ const claims: Claim[] = [
     expected: `${n13.benchmarkUncheckable} / ${n13.benchmarkItems}`,
   },
   // The throughput figure is the one that was already published wrong once. It is quoted in
-  // three places, so all three are checked against the same source of truth.
+  // five places, so all five are checked against the same source of truth — the front page
+  // and the about page were the two this comment used to miss, and the front page is the
+  // surface most people see.
   { doc: REPORT, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
   { doc: README, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
   { doc: MEASUREMENTS, label: 'end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
+  { doc: SITE, label: 'site: end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
+  { doc: ABOUT, label: 'about: end-to-end throughput', expected: `${gsm8k.throughputMBs.toFixed(1)} MB/sec` },
+  // The Method section's resolution-sweep table and its bolded conclusions, gated on the
+  // front page with the same figures the report is gated on. A re-run that shifts recall
+  // used to update docs/silent-failures.md under CI pressure while the front page's
+  // hand-typed table kept the old numbers and passed everything.
+  ...sweep.rows.flatMap((row) => {
+    const rowClaims: Claim[] = [
+      {
+        doc: SITE,
+        label: `site: sweep n=${row.n} edited-copy recall`,
+        expected: `${(row.paraphraseRecall * 100).toFixed(1)}%`,
+      },
+      {
+        doc: SITE,
+        label: `site: sweep n=${row.n} unscannable`,
+        expected: `${row.benchmarkUncheckable} / ${row.benchmarkItems}`,
+      },
+    ];
+    if (row.controlFalsePositives > 0) {
+      rowClaims.push({
+        doc: SITE,
+        label: `site: sweep n=${row.n} false positives`,
+        expected: `${row.controlFalsePositives} / ${row.benchmarkItems}`,
+      });
+    }
+    return rowClaims;
+  }),
+  {
+    doc: SITE,
+    label: 'site: unscannable at n=13',
+    expected: `${((n13.benchmarkUncheckable / n13.benchmarkItems) * 100).toFixed(1)}%`,
+  },
+  {
+    doc: SITE,
+    label: 'site: unscannable at n=10',
+    expected: `${((n10.benchmarkUncheckable / n10.benchmarkItems) * 100).toFixed(1)}%`,
+  },
+  // The benchmark menu itself publishes item counts now; they come from the same runs.
+  ...c4.results.map((r) => ({
+    doc: SITE,
+    label: `site: ${r.benchmark} menu item count`,
+    expected: `${r.itemsTotal.toLocaleString('en-US')} items`,
+  })),
   // The front page carries the C4 registry table. Each row is checked separately so a
   // re-run that moves one benchmark cannot slip through because the others still match.
   { doc: SITE, label: 'site: corpus size', expected: `${(c4.corpus.uncompressedBytes / 1e9).toFixed(2)} GB` },
@@ -149,6 +204,42 @@ const claims: Claim[] = [
   { doc: REGISTRY, label: 'registry: total discarded by filter', expected: `${droppedTotal} matches` },
 ];
 
+// The instruction-tuning section of the registry page renders results/registry.json — the
+// one results file this gate never read, which meant both of its tables and the distinct-
+// flagged headline could go stale without anything noticing: the exact stale-build failure
+// the REGISTRY gating exists to catch.
+const reg = json<{
+  defaultN: number;
+  results: {
+    benchmark: string;
+    corpus: string;
+    n: number;
+    itemsHit: number;
+    itemsTotal: number;
+    contaminatedItemIds: string[];
+  }[];
+}>('results/registry.json');
+const regDefault = reg.results.filter((r) => r.n === reg.defaultN);
+const regTotalItems = [...new Map(regDefault.map((r) => [r.benchmark, r.itemsTotal])).values()].reduce(
+  (a, n) => a + n,
+  0,
+);
+const regFlagged = new Set(
+  regDefault.flatMap((r) => r.contaminatedItemIds.map((id) => `${r.benchmark}::${id}`)),
+).size;
+claims.push(
+  {
+    doc: REGISTRY,
+    label: 'registry: instruction distinct-flagged headline',
+    expected: `${regFlagged} distinct benchmark items flagged out of ${regTotalItems.toLocaleString('en-US')}`,
+  },
+  ...reg.results.map((r) => ({
+    doc: REGISTRY,
+    label: `registry: instruction ${r.benchmark} in ${r.corpus} n=${r.n}`,
+    expected: `${r.itemsHit} / ${r.itemsTotal.toLocaleString('en-US')}`,
+  })),
+);
+
 // The suite count is a published figure like any other, and it drifted: the README said
 // 44 while the suite had grown to 64, and no gate noticed because the count was
 // hand-typed. Derived here from the test files themselves — the number of top-level
@@ -157,6 +248,19 @@ const testCount = readdirSync(resolve('test'))
   .filter((f) => f.endsWith('.test.ts'))
   .reduce((a, f) => a + (readFileSync(resolve('test', f), 'utf8').match(/^test\(/gm)?.length ?? 0), 0);
 claims.push({ doc: README, label: 'test suite size', expected: `${testCount} tests` });
+
+// Release coherence: one version, three hand-bumped places that must all name it. The
+// action pin decides which scanner every Action consumer runs; the changelog heading is
+// the release's public record; SCANNER_VERSION is stamped into every receipt. A release
+// that forgets one leaves consumers silently running — or receipts silently attributing —
+// the wrong scanner, and 0.1.1 through 0.1.3 shipped receipts saying ingot-0.1.0 because
+// exactly nothing checked this.
+const pkgVersion = json<{ version: string }>('package.json').version;
+claims.push(
+  { doc: 'action.yml', label: 'action pins the released package', expected: `ingot-scan@${pkgVersion}` },
+  { doc: 'CHANGELOG.md', label: 'changelog names the release', expected: `## ${pkgVersion}` },
+  { doc: 'src/types.ts', label: 'receipts name the released scanner', expected: `'ingot-${pkgVersion}'` },
+);
 
 // The canonicality run is optional: the report ships whether or not that scan has been run,
 // so the file's absence is not a failure, but a mismatch is.

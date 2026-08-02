@@ -110,6 +110,18 @@ for (const shard of manifest.shards) {
   }
 }
 
+// Same refusal leak-triage.ts makes: a doc the evidence names but the stream never
+// yielded would compare against '' and report "not reproduced" — a wrong verdict from a
+// wrong --corpus dir, published with exit 0.
+const missingDocs = [...docIds].filter((id) => !docNormed.has(id));
+if (missingDocs.length > 0) {
+  process.stderr.write(
+    `\n  REFUSED — ${missingDocs.length} of ${docIds.size} evidence documents were not found in ` +
+      `${corpusDir} (first: ${missingDocs[0]}). Wrong corpus directory, or a shard is missing.\n\n`,
+  );
+  process.exit(2);
+}
+
 type ItemRow = {
   testItemId: string;
   testQuestion: string;

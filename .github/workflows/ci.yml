@@ -10,10 +10,20 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+# Nothing here writes to the repository; say so, so the default token cannot either.
+permissions:
+  contents: read
+
 jobs:
   test:
     name: tests
-    runs-on: ubuntu-latest
+    # Windows is in the matrix because the maintainer develops there and the repo has
+    # already hit a Windows-only failure (spawnSync npx.cmd EINVAL, scripts/npx.ts) that
+    # no ubuntu job can reproduce.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +37,7 @@ jobs:
         run: node scripts/build-web.ts --bundle-only
 
       - name: Run the test suite
+        shell: bash
         run: node --test test/*.test.ts
 
   e2e:
@@ -51,7 +62,10 @@ jobs:
 
   package:
     name: npx works for a stranger
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -62,13 +76,16 @@ jobs:
       # The published package cannot ship raw TypeScript: Node refuses to strip types under
       # node_modules, so a package that runs from source installs fine and then fails on
       # first use. Only an install-and-run proves it works, so that is what this does.
+      # shell: bash on both platforms — Git Bash's /tmp keeps the paths portable, and the
+      # windows leg is the regression net for the npx.cmd spawn class.
       - name: Pack, install into a clean directory, and run
+        shell: bash
         run: |
           set -euo pipefail
-          npm pack
+          npm pack --pack-destination /tmp
           mkdir -p /tmp/stranger && cd /tmp/stranger
           npm init -y > /dev/null
-          npm install "$GITHUB_WORKSPACE"/ingot-scan-*.tgz
+          npm install /tmp/ingot-scan-*.tgz
           cp "$GITHUB_WORKSPACE/web/sample-corpus.jsonl" mine.jsonl
           npx ingot contaminate --index humaneval --corpus mine.jsonl | tee out.txt
           grep -q "HumanEval-78" out.txt
@@ -93,12 +110,14 @@ jobs:
         id: week
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
+      # The fetch script's hash is part of the key: a PR that changes WHAT is fetched must
+      # not validate against last week's bytes fetched by the old script.
       - name: Cache reference corpora
         id: corpora
         uses: actions/cache@v4
         with:
           path: ingot-data
-          key: corpora-${{ steps.week.outputs.week }}
+          key: corpora-${{ steps.week.outputs.week }}-${{ hashFiles('scripts/fetch-corpora.ts') }}
 
       - name: Fetch reference corpora
         if: steps.corpora.outputs.cache-hit != 'true'
@@ -142,3 +161,12 @@ jobs:
       # without this check would have been the same mistake in the same repository.
       - name: Published prose still matches the results files
         run: node scripts/check-published-numbers.ts
+
+      # Until now this gate ran only inside the Vercel deploy build, so a PR that broke
+      # site completeness or added a third-party origin merged green and main silently
+      # stopped deploying. CI runs the identical sequence the deploy build runs.
+      - name: Build the browser bundles
+        run: node scripts/build-web.ts --bundle-only
+
+      - name: The site is complete and makes no third-party request
+        run: node scripts/check-site.ts

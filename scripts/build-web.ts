@@ -16,13 +16,9 @@ import { loadBatch } from '../src/loader.ts';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { encodeIndex, gzipBytes } from '../src/contamination/indexCodec.ts';
 import { DEFAULT_N } from '../src/contamination/types.ts';
-import { NPX_OPTS } from './npx.ts';
+import { ESBUILD, NPX_OPTS } from './npx.ts';
 
 const BENCHES = ['gsm8k', 'humaneval', 'mmlu'];
-
-// Pinned exactly: an unpinned esbuild means two checkouts can produce two different
-// bundles, which is the one drift a reproducibility tool cannot shrug at. Bump on purpose.
-const ESBUILD = 'esbuild@0.25.0';
 
 /** Indexes need the benchmark files; the bundle does not. CI builds the bundle alone. */
 const bundleOnly = process.argv.includes('--bundle-only');

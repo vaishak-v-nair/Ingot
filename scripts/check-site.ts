@@ -71,14 +71,27 @@ else process.stdout.write('  ok    web/index.html carries the drop target\n');
  * of trusted. github.com is allowed because those are prose links, not subresources.
  */
 const PAGES = ['web/index.html', 'web/about.html', 'web/registry.html'];
-const EXTERNAL = /(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi;
+// Four ways a page can name a remote resource, each with its own syntax. The attribute
+// pattern was the only one checked for a while, which left CSS url() — a webfont or
+// background fetched from a CDN inside the inline <style> blocks — invisible to the one
+// gate whose job is "the network panel stays empty". github.com stays allowed for prose
+// links only: a CSS url() is always a subresource, never prose.
+const EXTERNAL_PATTERNS: { re: RegExp; allowGithub: boolean }[] = [
+  { re: /(?:src|href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi, allowGithub: true },
+  { re: /url\(\s*["']?(https?:\/\/[^"')]+)["']?\s*\)/gi, allowGithub: false },
+  { re: /@import\s+["'](https?:\/\/[^"']+)["']/gi, allowGithub: false },
+  { re: /srcset\s*=\s*["']([^"']*https?:\/\/[^"']*)["']/gi, allowGithub: false },
+];
 
 for (const page of PAGES) {
   const text = readFileSync(resolve(page), 'utf8');
   const offenders: string[] = [];
-  for (const m of text.matchAll(EXTERNAL)) {
-    const url = m[1];
-    if (!/^https?:\/\/(?:[\w.-]+\.)?github\.com\//i.test(url)) offenders.push(url);
+  for (const { re, allowGithub } of EXTERNAL_PATTERNS) {
+    for (const m of text.matchAll(re)) {
+      const url = m[1];
+      if (allowGithub && /^https?:\/\/(?:[\w.-]+\.)?github\.com\//i.test(url)) continue;
+      offenders.push(url);
+    }
   }
   if (offenders.length > 0) {
     for (const url of offenders) fail(`${page} references an external resource: ${url}`);

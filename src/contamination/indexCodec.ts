@@ -1,5 +1,5 @@
 import { INDEX_FORMAT_VERSION } from './types.ts';
-import { IndexVersionError } from '../errors.ts';
+import { IndexTruncatedError, IndexVersionError } from '../errors.ts';
 import type { NgramIndexData } from './types.ts';
 
 /**
@@ -93,7 +93,20 @@ class ByteReader {
     this.buf = buf;
   }
 
+  // Every read is bounds-checked. Past-the-end reads on a Uint8Array yield undefined,
+  // and undefined & 127 is 0 — so a truncated buffer used to decode into a silently
+  // SMALLER index whose remaining keys collapsed into duplicates: the scan then reported
+  // clean over grams it never held. That is the silent-zero failure this project forbids.
+  private need(n: number): void {
+    if (this.pos + n > this.buf.length) {
+      throw new IndexTruncatedError(
+        `index data ends at byte ${this.buf.length}, read needs ${this.pos + n}`,
+      );
+    }
+  }
+
   u32(): number {
+    this.need(4);
     const v =
       this.buf[this.pos] |
       (this.buf[this.pos + 1] << 8) |
@@ -104,6 +117,7 @@ class ByteReader {
   }
 
   take(n: number): Uint8Array {
+    this.need(n);
     const out = this.buf.subarray(this.pos, this.pos + n);
     this.pos += n;
     return out;
@@ -114,6 +128,7 @@ class ByteReader {
     let scale = 1;
     let b: number;
     do {
+      this.need(1);
       b = this.buf[this.pos++];
       result += (b & 127) * scale;
       scale *= 128;
@@ -146,7 +161,6 @@ export function encodeIndex(data: NgramIndexData): Uint8Array {
     itemSubjects: data.itemSubjects,
     uncheckableItemIds: data.uncheckableItemIds,
     stats: data.stats,
-    createdAt: data.createdAt,
     scannerVersion: data.scannerVersion,
   };
   const metaBytes = new TextEncoder().encode(JSON.stringify(meta));
@@ -207,7 +221,16 @@ export function decodeIndex(bytes: Uint8Array): NgramIndexData {
   const count = reader.u32();
   const flagsLength = reader.u32();
   const keyLength = reader.u32();
-  reader.u32(); // owner stream length, implied by what follows
+  const ownerLength = reader.u32();
+
+  // The header promises an exact total. Checking it up front turns "truncated in
+  // transit" into a named refusal before a single gram is decoded.
+  const expectedTotal = reader.offset + metaLength + flagsLength + keyLength + ownerLength;
+  if (bytes.length !== expectedTotal) {
+    throw new IndexTruncatedError(
+      `index header promises ${expectedTotal} bytes, file has ${bytes.length}`,
+    );
+  }
 
   const meta = JSON.parse(new TextDecoder().decode(reader.take(metaLength))) as MetaFields;
   if (meta.formatVersion !== INDEX_FORMAT_VERSION) {
@@ -249,6 +272,16 @@ export function decodeIndex(bytes: Uint8Array): NgramIndexData {
       }
       items[i] = owners;
     }
+  }
+
+  // Both streams must land exactly on their declared boundaries: a short landing means
+  // keys collapsed into duplicates somewhere upstream, and the Map would silently absorb
+  // the collision.
+  if (keyReader.offset !== keysAt + keyLength || ownerReader.offset !== ownersAt + ownerLength) {
+    throw new IndexTruncatedError(
+      `index streams misaligned: keys ended at ${keyReader.offset} of ${keysAt + keyLength}, ` +
+        `owners at ${ownerReader.offset} of ${ownersAt + ownerLength}`,
+    );
   }
 
   return { ...meta, keys, items };

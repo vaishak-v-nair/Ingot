@@ -54,3 +54,70 @@ now understands the motivation. Each item came out of a review; none is a guess.
   README updated the same day; the page deliberately deferred).
 - **Depends on / blocked by:** a DESIGN.md-guided pass; check-published-numbers gates must
   keep passing.
+
+## Exact rarest-gram tracking in the frequency filter
+
+- **What:** Replace scanSession's first-16-keys sampling (MAX_KEYS_PER_RUN) with an exact
+  running minimum: as hits merge into a run, keep the key whose capture-time document
+  frequency is lowest, O(1) memory per run.
+- **Why:** A long verbatim copy whose opening 16 grams are corpus-common but whose
+  distinctive gram comes later is dropped wholesale as "ordinary language" — the comment
+  claims the sample is "enough to find the rarest," and in exactly the adversarial case it
+  is not. Eng review 2026-08-02, scanner-core finding 8.
+- **Pros:** Kills a class of undisclosed false negatives; less memory than 16 keys.
+- **Cons:** BEHAVIOR-CHANGING: drop decisions can differ from the published C4 runs, so
+  this ships with a scanner-version bump and a revalidation run (contamination-validate +
+  a C4 spot pass), never as a quiet patch. Capture-time vs finish-time frequency semantics
+  need one careful decision, written down in the code.
+- **Context:** Found by the 2026-08-02 whole-product review; deferred from the same-day
+  fix pass precisely because it moves published-adjacent numbers.
+- **Depends on / blocked by:** a release window (0.1.4) and the revalidation run.
+
+## Benchmark revision pinning, and a committed-index parity gate
+
+- **What:** Pin fetch-benchmarks.ts to exact upstream revisions (GSM8K/HumanEval commit
+  SHAs in the raw URLs, an MMLU dataset revision on the datasets-server call), and add a
+  CI check that rebuilding the indexes from data/bench reproduces the committed
+  web/indexes/*.idx.bin.gz byte for byte.
+- **Why:** Today the fetches follow master, MMLU ids are positional (`mmlu-N` by row
+  order), and nothing verifies the committed indexes match a rebuild — an upstream edit
+  silently reorders ids that every published finding cites, and the npm CLI (committed
+  indexes) can diverge from the Vercel deploy (rebuilt indexes) with every parity test
+  green. Outside-voice finding 2, eng review 2026-08-02 (fetch fail-loud landed the same
+  day; the pins and the parity gate are this item).
+- **Pros:** Published item ids become durable; the two distribution surfaces provably
+  scan the same benchmark.
+- **Cons:** Pinning needs the actual SHAs looked up; the parity gate needs benchmark
+  fetches in CI (network, cache design) or a checked-in fixture hash.
+- **Context:** The registry's institutional-wing credibility rests on ids meaning the
+  same thing next year.
+- **Depends on / blocked by:** nothing — good first candidate for the next infra day.
+
+## Decide the provenance scanner's future at the week-3 gate
+
+- **What:** Decide whether the batch-provenance subsystem (src/signals/, scorer.ts,
+  baseline.ts, ~12 tests, the weekly validate corpora) stays, freezes, or retires.
+- **Why:** It is the largest single block of code and CI in the repo and defends the
+  weakest number (50% detection floor, 13% FPR, 2023-era reference). Post-reframe,
+  neither the writer story nor the contamination story consumes it. Outside-voice
+  finding 4, eng review 2026-08-02.
+- **Pros:** Retiring or freezing frees maintenance budget for the wedge; keeping it is
+  legitimate only with a consumer named.
+- **Cons:** Removal is a public-surface change (the `scan` command is documented and
+  published); freezing still costs CI minutes.
+- **Context:** The design doc's week-3 demand-test gate is the natural decision point —
+  the demand data says which product the code should serve.
+- **Depends on / blocked by:** the 5-writer demand test outcome (design doc kill rules).
+
+## Pin GitHub Actions to commit SHAs
+
+- **What:** Replace `actions/checkout@v4`-style mutable tags with full commit SHAs across
+  the three workflows (permissions blocks landed 2026-08-02; this is the remaining half).
+- **Why:** A moved first-party tag is unlikely but nonzero, and the repo publishes to npm
+  with provenance — the workflows are part of the supply chain the threat model claims to
+  care about.
+- **Pros:** Closes the last unpinned input in the build chain.
+- **Cons:** SHA bumps become manual (or Dependabot-managed) maintenance.
+- **Context:** Eng review 2026-08-02, CI finding 7; low urgency, recorded so it is a
+  decision rather than an accident.
+- **Depends on / blocked by:** nothing.

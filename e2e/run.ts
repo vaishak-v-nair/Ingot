@@ -59,8 +59,16 @@ async function freshPage(): Promise<void> {
 
 // ---- S1: a real scan through the worker, with the receipt contract ----
 await freshPage();
+// The flagship claim — nothing leaves this machine — asserted, not assumed: every
+// request from drop to verdict must target the suite's own server. A stray beacon,
+// CDN import or telemetry call fails the run.
+browser.requests = [];
 await browser.eval(drop(`new File([${CORPUS_EXPR}], 'planted.jsonl')`));
 check('S1 verdict renders', await browser.waitFor(`document.querySelector('#out .verdict')`));
+const offsite = browser.requests.filter(
+  (u) => !u.startsWith(`http://127.0.0.1:${server.port}/`) && !u.startsWith('data:'),
+);
+check('S1 network stays on this machine', offsite.length === 0, offsite.join(' '));
 await sleep(1300); // count-up (650ms) settles before the number is read
 check('S1 exactly one item flagged', (await browser.eval<string>(`document.querySelector('#out .big')?.textContent`)) === '1');
 check('S1 specimen rendered', await browser.eval<boolean>(`!!document.querySelector('#out .hit--lead mark')`));
@@ -127,6 +135,15 @@ check(
   'S4 scan visibly under way',
   await browser.waitFor(`!document.getElementById('bar').hidden && document.getElementById('bar').value > 0`, 10000),
 );
+// The worker must be observable as a real browser target mid-scan, so that its DEATH
+// after cancel is observable too — "nothing renders" cannot distinguish a terminated
+// worker from a live one still burning CPU on a 48-minute file.
+let workerSeen = false;
+for (let i = 0; i < 20 && !workerSeen; i++) {
+  workerSeen = (await browser.targets()).some((t) => t.type === 'worker');
+  if (!workerSeen) await sleep(150);
+}
+check('S4 worker is a live target mid-scan', workerSeen);
 const doubleDrop = await browser.eval<string>(`(() => {
   const dt = new DataTransfer();
   dt.items.add(new File(['{"text": "tiny"}'], 'second.jsonl'));
@@ -154,6 +171,12 @@ check(
   'S4 nothing renders after cancel — the worker is dead',
   (await browser.eval<number>(`document.getElementById('out').innerHTML.trim().length`)) === 0,
 );
+let workerGone = !workerSeen; // only meaningful if the worker was observed alive
+for (let i = 0; i < 25 && !workerGone; i++) {
+  workerGone = !(await browser.targets()).some((t) => t.type === 'worker');
+  if (!workerGone) await sleep(200);
+}
+check('S4 cancel terminates the worker target', workerGone);
 
 // ---- S7: print never sees the scroll-reveal's hidden state ----
 // Print rendering does not scroll, so an IntersectionObserver reveal that applies in
@@ -165,6 +188,25 @@ const printOpacity = await browser.eval<string>(
 );
 check('S7 sections are visible under print media', printOpacity === '1', `opacity=${printOpacity}`);
 await browser.send('Emulation.setEmulatedMedia', { media: '' });
+
+// ---- S8: the auto-demo — the page opens already measuring ----
+// The one behavior every real visitor sees first is gated off under automation
+// (navigator.webdriver), so it was the one behavior this suite could never reach.
+// Spoofing webdriver false and loading WITHOUT ?noauto exercises the real wiring:
+// no interaction, and the instrument must still produce a result on its own.
+await browser.send('Page.addScriptToEvaluateOnNewDocument', {
+  source: `Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });`,
+});
+await browser.goto(`http://127.0.0.1:${server.port}/`);
+check(
+  'S8 the instrument runs itself on arrival',
+  await browser.waitFor(`document.querySelector('#out .verdict, #out .refusal')`, 20000),
+);
+check(
+  'S8 auto-demo picked the sample benchmark',
+  (await browser.eval<string>(`document.getElementById('bench').value`)) === 'humaneval',
+);
+check('S8 no console errors', browser.errors.length === 0, browser.errors.join(' | '));
 
 browser.close();
 server.close();

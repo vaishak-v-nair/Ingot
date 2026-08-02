@@ -15,6 +15,14 @@
 export const NPX_OPTS = { shell: true, windowsHide: true } as const;
 
 /**
+ * The one build-time tool, pinned exactly — and pinned HERE, once. build-web.ts held this
+ * pin privately while build-dist.ts invoked bare `esbuild`, so the site bundles were
+ * reproducible and the published npm artifact was built by whatever version was newest at
+ * publish time. Two build scripts, one pin, no second copy to drift.
+ */
+export const ESBUILD = 'esbuild@0.25.0';
+
+/**
  * For spawning node directly, where no shell is involved and none is wanted. Keeps a child
  * process from being handed its own console window on Windows.
  */

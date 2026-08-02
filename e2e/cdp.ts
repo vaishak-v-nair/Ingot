@@ -19,6 +19,8 @@ export class Browser {
   private loadWaiters: (() => void)[] = [];
   /** Console and page errors observed since the last navigation. */
   errors: string[] = [];
+  /** Every request URL since the last navigation (Network domain is enabled at connect). */
+  requests: string[] = [];
 
   private constructor(proc: ChildProcess, port: number) {
     this.proc = proc;
@@ -79,6 +81,8 @@ export class Browser {
         this.errors.push(String(m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text));
       } else if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error') {
         this.errors.push(String(m.params.entry.text));
+      } else if (m.method === 'Network.requestWillBeSent') {
+        this.requests.push(String(m.params.request.url));
       } else if (m.method === 'Page.loadEventFired') {
         for (const w of this.loadWaiters.splice(0)) w();
       }
@@ -87,6 +91,9 @@ export class Browser {
     await this.send('Page.enable');
     await this.send('Runtime.enable');
     await this.send('Log.enable');
+    // The page's flagship claim is that nothing leaves the machine. The suite can only
+    // assert that if it sees every request, so the Network domain is always on.
+    await this.send('Network.enable');
     // The guided tour auto-starts once per fresh profile and would race the scenarios —
     // its step 3 runs a scan of its own. The flag is set before any page script runs.
     await this.send('Page.addScriptToEvaluateOnNewDocument', {
@@ -114,9 +121,18 @@ export class Browser {
 
   async goto(url: string): Promise<void> {
     this.errors = [];
+    this.requests = [];
     const loaded = new Promise<void>((r) => this.loadWaiters.push(r));
     await this.send('Page.navigate', { url });
     await loaded;
+  }
+
+  /** Live target list from the DevTools HTTP endpoint — dedicated workers appear here. */
+  async targets(): Promise<{ type: string; url: string }[]> {
+    return (await (await fetch(`http://127.0.0.1:${this.port}/json/list`)).json()) as {
+      type: string;
+      url: string;
+    }[];
   }
 
   /** Polls an in-page expression until truthy or the deadline passes. */

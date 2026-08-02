@@ -43,9 +43,16 @@ type Manifest = { shards: { name: string }[] };
 const file = JSON.parse(readFileSync(resultsPath, 'utf8')) as ResultsFile;
 const manifest = JSON.parse(readFileSync(join(corpusDir, 'manifest.json'), 'utf8')) as Manifest;
 
+// A missing benchmark file is a refusal, not a skip: every flagged item from that
+// benchmark would silently vanish from the triage (or score against ''), and the verdict
+// counts would publish wrong-but-gate-consistent. Same discipline as the scanner itself.
 const benchText = new Map<string, string>();
 for (const b of file.benchmarks) {
-  if (!existsSync(resolve(b.path))) continue;
+  if (!existsSync(resolve(b.path))) {
+    process.stderr.write(`\n  REFUSED — benchmark file missing: ${b.path}\n`);
+    process.stderr.write(`  Its flagged items cannot be scored; a triage without them is a wrong triage.\n\n`);
+    process.exit(2);
+  }
   for (const line of readFileSync(resolve(b.path), 'utf8').split('\n')) {
     const t = line.trim();
     if (!t) continue;
@@ -85,6 +92,29 @@ for (const shard of manifest.shards) {
     }
     if (row.id && row.text && docsNeeded.has(row.id)) docText.set(row.id, row.text);
   }
+}
+
+// Every document the evidence names must have been found, and every flagged item must
+// have benchmark text. A lookup that falls back to '' scores a longest-run of zero and
+// quietly degrades the verdict to "phrase" — run against the wrong --corpus dir, that is
+// every verdict, and the script used to exit 0 and publish it.
+const missingDocs = [...docsNeeded.keys()].filter((id) => !docText.has(id));
+if (missingDocs.length > 0) {
+  process.stderr.write(
+    `\n  REFUSED — ${missingDocs.length} of ${docsNeeded.size} evidence documents were not found in ` +
+      `${corpusDir} (first: ${missingDocs[0]}).\n  Wrong corpus directory, or a shard is missing. ` +
+      `Scoring flagged items against nothing would publish a wrong triage.\n\n`,
+  );
+  process.exit(2);
+}
+const allItemKeys = new Set([...docsNeeded.values()].flatMap((s) => [...s]));
+const missingBench = [...allItemKeys].filter((key) => !benchText.has(key));
+if (missingBench.length > 0) {
+  process.stderr.write(
+    `\n  REFUSED — ${missingBench.length} flagged item(s) have no benchmark text ` +
+      `(first: ${missingBench[0]}). The benchmark files do not match the results file.\n\n`,
+  );
+  process.exit(2);
 }
 
 type TriageRow = {

@@ -80,7 +80,17 @@ function parseArgs(argv: string[]): { positional: string[]; flags: Map<string, s
     if (a.startsWith('--')) {
       const key = a.slice(2);
       if (key === 'quiet') flags.set(key, 'true');
-      else flags.set(key, argv[++i] ?? '');
+      else {
+        // A flag whose value is missing — end of argv, or the next token is another
+        // flag — must NOT eat that next token, and must not quietly become a value.
+        // `--max-doc-freq` with nothing after it used to parse as '' and Number('')
+        // is 0, which dropped every match as ordinary language: a green verdict
+        // manufactured by a typo. The empty value survives to the per-flag checks,
+        // which refuse it loudly.
+        const next = argv[i + 1];
+        if (next === undefined || next.startsWith('--')) flags.set(key, '');
+        else flags.set(key, argv[++i]);
+      }
     } else positional.push(a);
   }
   return { positional, flags };
@@ -236,7 +246,10 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
   lines.push(`    benchmark hash ${r.benchmarkHash}`);
   lines.push(`    corpus         ${r.corpus} · ${r.corpusBytes.toLocaleString()} bytes · ${r.corpusDocs.toLocaleString()} docs`);
   lines.push(`    corpus hash    ${r.corpusHash}  (sampled, matches the browser)`);
-  if (r.corpusHashFull) lines.push(`    corpus sha256  ${r.corpusHashFull}`);
+  // Named for what it is: SHA-256 over the trimmed non-empty lines joined by \n — a
+  // canonicalized-line digest, not the digest of the file's raw bytes. `sha256sum` on the
+  // file will not reproduce it; re-running the scanner will.
+  if (r.corpusHashFull) lines.push(`    corpus digest  ${r.corpusHashFull}  (sha-256, trimmed lines \\n-joined)`);
   lines.push(`    generated      ${r.generatedAt}`);
   lines.push(`    command        ${r.command}`);
   lines.push('');
@@ -254,6 +267,17 @@ export async function runContaminate(argv: string[]): Promise<number> {
     process.stdout.write(USAGE);
     return 2;
   }
+
+  // Flags are validated before any file is touched, so a malformed invocation gets usage
+  // and exit 2 — never a scan configured by accident. The threshold must be a positive
+  // integer: 0 would drop every match as ordinary language and print a manufactured
+  // green verdict, the exact silent failure this tool exists to refuse.
+  const maxDocFreq = flags.has('max-doc-freq') ? Number(flags.get('max-doc-freq')) : undefined;
+  if (maxDocFreq !== undefined && (!Number.isInteger(maxDocFreq) || maxDocFreq < 1)) {
+    process.stderr.write(`--max-doc-freq must be a positive integer, got "${flags.get('max-doc-freq')}"\n`);
+    return 2;
+  }
+
   const indexPath = resolveIndexPath(indexArg);
   if (!existsSync(corpusPath)) throw new CorpusStreamError(basename(corpusPath), 'file not found');
 
@@ -266,12 +290,6 @@ export async function runContaminate(argv: string[]): Promise<number> {
   const benchmarkItems = benchPath
     ? loadBatch(benchPath).records.map((r) => ({ id: r.id, text: r.text }))
     : undefined;
-
-  const maxDocFreq = flags.has('max-doc-freq') ? Number(flags.get('max-doc-freq')) : undefined;
-  if (maxDocFreq !== undefined && !Number.isFinite(maxDocFreq)) {
-    process.stderr.write(`--max-doc-freq must be a number\n`);
-    return 2;
-  }
 
   const command =
     `npx ingot-scan contaminate --index ${indexArg} --corpus ${corpusPath}` +

@@ -66,14 +66,21 @@ function openLines(path: string, onBytes: (n: number) => void): AsyncIterable<st
   // containing one was three unparseable fragments here and one clean document in the
   // browser: same bytes, two different reports, on the pair of surfaces whose agreement
   // this product promises. Found by scanning our own derived corpus, not by a test.
-  // setEncoding keeps multibyte sequences whole across chunk boundaries; the trailing \r
-  // of CRLF corpora is removed by the caller's trim, exactly as before.
-  input.setEncoding('utf8');
+  //
+  // Bytes are counted on the RAW stream, before decoding — the browser counts them the
+  // same way. This used to count the re-encoded decoded string, and the two disagree the
+  // moment a corpus carries an invalid byte: it decodes to U+FFFD, which re-encodes as
+  // three bytes where the raw stream had one, and the byte count folds into the corpus
+  // hash — same shard, two identities, on the pair of surfaces whose agreement this
+  // product promises. TextDecoder with {stream: true} keeps multibyte sequences whole
+  // across chunk boundaries, exactly as setEncoding did; the trailing \r of CRLF corpora
+  // is removed by the caller's trim, exactly as before.
+  const decoder = new TextDecoder('utf-8');
   return (async function* () {
     let carry = '';
-    for await (const chunk of input as AsyncIterable<string>) {
-      onBytes(Buffer.byteLength(chunk));
-      carry += chunk;
+    for await (const chunk of input as AsyncIterable<Buffer>) {
+      onBytes(chunk.length);
+      carry += decoder.decode(chunk, { stream: true });
       let nl = carry.indexOf('\n');
       while (nl !== -1) {
         yield carry.slice(0, nl);
@@ -81,6 +88,7 @@ function openLines(path: string, onBytes: (n: number) => void): AsyncIterable<st
         nl = carry.indexOf('\n');
       }
     }
+    carry += decoder.decode();
     if (carry.length > 0) yield carry;
   })();
 }
@@ -97,6 +105,13 @@ export async function scanCorpus(
   // Two hashes on this path. The sampled one is what a browser can also compute, so the
   // two surfaces produce comparable identities; the full one is the stronger attestation
   // and exists only here. Reporting both beats quietly picking one.
+  //
+  // The full digest is SHA-256 over the trimmed non-empty lines JOINED BY \n. The
+  // separator is load-bearing: without it ["abcd","ef"] and ["abc","def"] — two corpora
+  // that parse into different documents — hashed identically, so the "stronger
+  // attestation" did not bind line structure at all. It is still a canonicalized-line
+  // digest rather than a digest of the file's raw bytes (trim and blank-line removal are
+  // deliberate, so the .gz and the file it expands to agree); the receipt says so.
   const fullHasher = createHash('sha256');
   const portable = new CorpusHasher();
   const session = new ScanSession(index, {
@@ -123,6 +138,7 @@ export async function scanCorpus(
         const trimmed = line.trim();
         if (trimmed.length === 0) continue;
         fullHasher.update(trimmed);
+        fullHasher.update('\n');
         portable.add(trimmed);
         totalLines++;
 

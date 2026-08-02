@@ -51,6 +51,21 @@ test('a round trip through the binary format changes nothing', () => {
   assert.equal(back.scannerVersion, original.scannerVersion);
 });
 
+test('a truncated index is refused, never silently smaller', () => {
+  const bytes = encodeIndex(NgramIndex.build('trunc', bench(200)).serialize());
+
+  // Past-the-end reads on a Uint8Array yield undefined, and undefined & 127 is 0 — an
+  // unchecked reader decoded a chopped buffer into a SMALLER index whose remaining keys
+  // collapsed into duplicates, and the scan then reported clean over grams it never held.
+  for (const cut of [bytes.length - 1, bytes.length - 40, Math.floor(bytes.length * 0.9), 40]) {
+    assert.throws(
+      () => decodeIndex(bytes.subarray(0, cut)),
+      /IndexTruncatedError|truncated|promises|ends at/i,
+      `a cut at ${cut} of ${bytes.length} bytes must refuse to decode`,
+    );
+  }
+});
+
 test('keys near the 53-bit ceiling survive, where 32-bit shifts would not', () => {
   const original = NgramIndex.build('wide', bench(400, 60, 99)).serialize();
   const largest = Math.max(...original.keys);
