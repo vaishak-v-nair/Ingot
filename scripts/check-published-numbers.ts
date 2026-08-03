@@ -263,6 +263,72 @@ claims.push(
   { doc: 'src/types.ts', label: 'receipts name the released scanner', expected: `'ingot-${pkgVersion}'` },
 );
 
+// The feasibility decision is argued from measured numbers like everything else, and it is
+// the kind of document that rots quietly: it concludes "kill", so nobody re-reads it, and
+// the figures it killed on would go stale without a single reader noticing. Gated on the
+// same terms as every published claim.
+if (existsSync(resolve('results/membership-size.json'))) {
+  const m = json<{
+    projected: { gramsPerByte: number; totalGrams: number; distinctGrams: number };
+    heaps: { beta: number };
+    corpus: { uncompressedBytes: number };
+    sizes: {
+      winnowRate: number;
+      projectedCorpusDistinct: number;
+      bytesAt1pct: number;
+      falsePositivesPer1000Words: number;
+      detection: { words: number; probability: number }[];
+    }[];
+  }>('results/membership-size.json');
+
+  const SELFSERVE = 'docs/self-serve-feasibility.md';
+  const mb = (bytes: number): string =>
+    (bytes / 1e6).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const rate = (r: number) => m.sizes.find((s) => s.winnowRate === r)!;
+  const detect = (r: number, words: number): string =>
+    `${(rate(r).detection.find((d) => d.words === words)!.probability * 100).toFixed(1)}%`;
+
+  claims.push(
+    { doc: SELFSERVE, label: 'corpus size', expected: `${(m.corpus.uncompressedBytes / 1e9).toFixed(2)} GB` },
+    { doc: SELFSERVE, label: 'grams per byte', expected: m.projected.gramsPerByte.toFixed(4) },
+    {
+      doc: SELFSERVE,
+      label: 'total grams',
+      expected: Math.round(m.projected.totalGrams).toLocaleString('en-US'),
+    },
+    {
+      doc: SELFSERVE,
+      label: 'distinct grams',
+      expected: Math.round(m.projected.distinctGrams).toLocaleString('en-US'),
+    },
+    { doc: SELFSERVE, label: 'heaps exponent', expected: m.heaps.beta.toFixed(4) },
+    {
+      doc: SELFSERVE,
+      label: 'share of grams that are unique',
+      expected: `${((m.projected.distinctGrams / m.projected.totalGrams) * 100).toFixed(1)}% of grams are unique`,
+    },
+    { doc: SELFSERVE, label: 'unwinnowed structure size', expected: `${mb(rate(1).bytesAt1pct)} MB` },
+    {
+      doc: SELFSERVE,
+      label: 'winnowed 1/64 distinct',
+      expected: rate(64).projectedCorpusDistinct.toLocaleString('en-US'),
+    },
+    { doc: SELFSERVE, label: 'winnowed 1/64 size', expected: `${mb(rate(64).bytesAt1pct)} MB` },
+    {
+      doc: SELFSERVE,
+      label: 'winnowed 1/256 distinct',
+      expected: rate(256).projectedCorpusDistinct.toLocaleString('en-US'),
+    },
+    { doc: SELFSERVE, label: 'winnowed 1/256 size', expected: `${mb(rate(256).bytesAt1pct)} MB` },
+    // The false-positive column is the argument, so it is gated cell by cell.
+    { doc: SELFSERVE, label: 'false hits, unwinnowed', expected: rate(1).falsePositivesPer1000Words.toFixed(3) },
+    { doc: SELFSERVE, label: 'false hits, 1/64', expected: rate(64).falsePositivesPer1000Words.toFixed(3) },
+    { doc: SELFSERVE, label: 'false hits, 1/256', expected: rate(256).falsePositivesPer1000Words.toFixed(3) },
+    { doc: SELFSERVE, label: 'detection 1/64 at 200 words', expected: detect(64, 200) },
+    { doc: SELFSERVE, label: 'detection 1/256 at 500 words', expected: detect(256, 500) },
+  );
+}
+
 // The canonicality run is optional: the report ships whether or not that scan has been run,
 // so the file's absence is not a failure, but a mismatch is.
 if (existsSync(resolve('results/canonicality.json'))) {

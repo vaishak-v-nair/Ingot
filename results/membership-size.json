@@ -1,0 +1,201 @@
+{
+  "measuredAt": "2026-08-03T12:00:42.739Z",
+  "shard": "../corpora/c4-en/c4-train.00000-of-01024.json.gz",
+  "n": 10,
+  "stride": 1,
+  "sample": {
+    "docs": 20000,
+    "bytes": 43672240,
+    "totalGrams": 7267810,
+    "distinctGrams": 7197922
+  },
+  "checkpoints": [
+    {
+      "docs": 1000,
+      "bytes": 2200107,
+      "totalGrams": 369672,
+      "distinctGrams": 366917
+    },
+    {
+      "docs": 2000,
+      "bytes": 4471773,
+      "totalGrams": 746866,
+      "distinctGrams": 740392
+    },
+    {
+      "docs": 5000,
+      "bytes": 11135006,
+      "totalGrams": 1857449,
+      "distinctGrams": 1843138
+    },
+    {
+      "docs": 10000,
+      "bytes": 21458947,
+      "totalGrams": 3570748,
+      "distinctGrams": 3538973
+    },
+    {
+      "docs": 20000,
+      "bytes": 43672240,
+      "totalGrams": 7267810,
+      "distinctGrams": 7197922
+    }
+  ],
+  "heaps": {
+    "K": 0.9999171100347352,
+    "beta": 0.9994124457318239,
+    "maxRelativeError": 0.0008292403898157212
+  },
+  "corpus": {
+    "uncompressedBytes": 21328472590,
+    "shardCount": 26
+  },
+  "projected": {
+    "gramsPerByte": 0.16641715652780806,
+    "totalGrams": 3549423761.5090938,
+    "distinctGrams": 3503568525.6122155
+  },
+  "sizes": [
+    {
+      "winnowRate": 1,
+      "sampleDistinct": 7197922,
+      "shareOfDistinct": 1,
+      "projectedCorpusDistinct": 3503568526,
+      "bytesAt1pct": 4197738606,
+      "bytesAt10pct": 2098869303,
+      "detection": [
+        {
+          "words": 20,
+          "probability": 1
+        },
+        {
+          "words": 50,
+          "probability": 1
+        },
+        {
+          "words": 100,
+          "probability": 1
+        },
+        {
+          "words": 200,
+          "probability": 1
+        },
+        {
+          "words": 500,
+          "probability": 1
+        },
+        {
+          "words": 1000,
+          "probability": 1
+        }
+      ],
+      "falsePositivesPer1000Words": 9.91
+    },
+    {
+      "winnowRate": 16,
+      "sampleDistinct": 449900,
+      "shareOfDistinct": 0.06250415050343697,
+      "projectedCorpusDistinct": 218987574,
+      "bytesAt1pct": 262376086,
+      "bytesAt10pct": 131188043,
+      "detection": [
+        {
+          "words": 20,
+          "probability": 0.5083183046418185
+        },
+        {
+          "words": 50,
+          "probability": 0.9290712457235912
+        },
+        {
+          "words": 100,
+          "probability": 0.9971855978597549
+        },
+        {
+          "words": 200,
+          "probability": 0.9999955688771335
+        },
+        {
+          "words": 500,
+          "probability": 0.9999999999999827
+        },
+        {
+          "words": 1000,
+          "probability": 1
+        }
+      ],
+      "falsePositivesPer1000Words": 0.619375
+    },
+    {
+      "winnowRate": 64,
+      "sampleDistinct": 112214,
+      "shareOfDistinct": 0.015589777160686097,
+      "projectedCorpusDistinct": 54619853,
+      "bytesAt1pct": 65441809,
+      "bytesAt10pct": 32720905,
+      "detection": [
+        {
+          "words": 20,
+          "probability": 0.159057444763547
+        },
+        {
+          "words": 50,
+          "probability": 0.475695489055471
+        },
+        {
+          "words": 100,
+          "probability": 0.7614319022141207
+        },
+        {
+          "words": 200,
+          "probability": 0.9506064870846691
+        },
+        {
+          "words": 500,
+          "probability": 0.9995616282535424
+        },
+        {
+          "words": 1000,
+          "probability": 0.999999833225253
+        }
+      ],
+      "falsePositivesPer1000Words": 0.15484375
+    },
+    {
+      "winnowRate": 256,
+      "sampleDistinct": 28267,
+      "shareOfDistinct": 0.0039271056285411264,
+      "projectedCorpusDistinct": 13758884,
+      "bytesAt1pct": 16484963,
+      "bytesAt10pct": 8242481,
+      "detection": [
+        {
+          "words": 20,
+          "probability": 0.042139274952387784
+        },
+        {
+          "words": 50,
+          "probability": 0.14825651562879738
+        },
+        {
+          "words": 100,
+          "probability": 0.2996428349110397
+        },
+        {
+          "words": 200,
+          "probability": 0.5264769892259085
+        },
+        {
+          "words": 500,
+          "probability": 0.8536456534624673
+        },
+        {
+          "words": 1000,
+          "probability": 0.97932177836019
+        }
+      ],
+      "falsePositivesPer1000Words": 0.0387109375
+    }
+  ],
+  "note": "Distinct-gram projection is a Heaps-law extrapolation from a single-shard sample, not a measurement of the whole corpus. Bloom sizes are the structure alone and exclude any index, header or transport overhead. Winnowing shares are measured on the sample and assumed to hold at corpus scale."
+}

@@ -243,6 +243,8 @@ instead of trusting it. All are written up in `docs/measurements.md` and guarded
 - `docs/index-format.md` — the index format, specified completely enough to implement
   independently
 - `docs/github-action.md` — running the scan as a gate in your own CI
+- `docs/self-serve-feasibility.md` — why the check cannot run entirely in your browser,
+  measured rather than asserted, and what the measurement leaves standing
 
 ## Licences of the reference data
 
