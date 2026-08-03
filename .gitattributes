@@ -1,0 +1,26 @@
+# Line endings are LF, in the repository and in the working tree.
+#
+# This is not a style preference. A CRLF that reaches a `run: |` block in a workflow puts a
+# carriage return at the end of every shell line, and bash answers with
+# `$'\r': command not found` — a failure whose cause is invisible in the diff that caused
+# it, because a carriage return looks like nothing. It got in exactly once, when a script
+# rewrote three workflow files on a Windows machine and Python helpfully translated the
+# newlines on the way out. core.autocrlf is false here, so git committed them verbatim and
+# a thirty-line change arrived as seven hundred.
+#
+# Same family as the U+2028 that once ended a JSONL line early inside a JSON string. An
+# invisible character that changes how a file parses is the kind of defect this repository
+# is about, and it deserves a guard rather than a habit.
+* text=auto eol=lf
+
+# Binaries, declared rather than detected. git's heuristic reads NUL bytes and would get
+# every one of these right; saying so anyway costs one line each and removes the question.
+*.gz binary
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.mp4 binary
+*.wav binary
+*.onnx binary
