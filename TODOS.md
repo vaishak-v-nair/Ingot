@@ -55,24 +55,6 @@ now understands the motivation. Each item came out of a review; none is a guess.
 - **Depends on / blocked by:** a DESIGN.md-guided pass; check-published-numbers gates must
   keep passing.
 
-## Exact rarest-gram tracking in the frequency filter
-
-- **What:** Replace scanSession's first-16-keys sampling (MAX_KEYS_PER_RUN) with an exact
-  running minimum: as hits merge into a run, keep the key whose capture-time document
-  frequency is lowest, O(1) memory per run.
-- **Why:** A long verbatim copy whose opening 16 grams are corpus-common but whose
-  distinctive gram comes later is dropped wholesale as "ordinary language" — the comment
-  claims the sample is "enough to find the rarest," and in exactly the adversarial case it
-  is not. Eng review 2026-08-02, scanner-core finding 8.
-- **Pros:** Kills a class of undisclosed false negatives; less memory than 16 keys.
-- **Cons:** BEHAVIOR-CHANGING: drop decisions can differ from the published C4 runs, so
-  this ships with a scanner-version bump and a revalidation run (contamination-validate +
-  a C4 spot pass), never as a quiet patch. Capture-time vs finish-time frequency semantics
-  need one careful decision, written down in the code.
-- **Context:** Found by the 2026-08-02 whole-product review; deferred from the same-day
-  fix pass precisely because it moves published-adjacent numbers.
-- **Depends on / blocked by:** a release window (0.1.4) and the revalidation run.
-
 ## Decide the provenance scanner's future at the week-3 gate
 
 - **What:** Decide whether the batch-provenance subsystem (src/signals/, scorer.ts,
