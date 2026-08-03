@@ -14,6 +14,7 @@
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 type Claim = { doc: string; label: string; expected: string };
 
@@ -364,6 +365,25 @@ for (const claim of claims) {
   if (!docs.has(claim.doc)) docs.set(claim.doc, readFileSync(resolve(claim.doc), 'utf8'));
 }
 
+// The two indexes that ship — inside the npm tarball and to every browser — each record
+// the scanner that built them, and nothing regenerated them when 0.1.3 landed. Both still
+// said ingot-0.1.0 while action.yml, the changelog and SCANNER_VERSION had all been
+// bumped: the exact drift the release-coherence block above exists to stop, surviving in
+// the two artifacts a stranger actually receives. A provenance tool whose own shipped
+// artifact misstates its provenance is the failure it was built to find.
+//
+// They seed the document map directly because they are gzipped binary rather than prose,
+// and the loop above would read the compressed bytes. latin1 leaves the ASCII header
+// exact instead of folding the binary tail into replacement characters.
+for (const idx of ['web/indexes/humaneval.idx.bin.gz', 'web/indexes/gsm8k.idx.bin.gz']) {
+  docs.set(idx, gunzipSync(readFileSync(resolve(idx))).toString('latin1'));
+  claims.push({
+    doc: idx,
+    label: 'shipped index names its builder',
+    expected: `"scannerVersion":"ingot-${pkgVersion}"`,
+  });
+}
+
 let failed = 0;
 process.stdout.write(`\n  checking ${claims.length} published figures against results/\n\n`);
 for (const claim of claims) {
@@ -371,7 +391,7 @@ for (const claim of claims) {
   const ok = text.includes(claim.expected);
   if (!ok) failed++;
   process.stdout.write(
-    `  ${(ok ? 'ok  ' : 'FAIL').padEnd(6)}${claim.doc.padEnd(26)}${claim.label.padEnd(30)}${claim.expected}\n`,
+    `  ${(ok ? 'ok  ' : 'FAIL').padEnd(6)}${claim.doc.padEnd(34)}${claim.label.padEnd(30)}${claim.expected}\n`,
   );
 }
 

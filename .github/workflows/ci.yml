@@ -165,8 +165,34 @@ jobs:
       # Until now this gate ran only inside the Vercel deploy build, so a PR that broke
       # site completeness or added a third-party origin merged green and main silently
       # stopped deploying. CI runs the identical sequence the deploy build runs.
-      - name: Build the browser bundles
-        run: node scripts/build-web.ts --bundle-only
+      #
+      # "Identical" has to be literal, and for a day it was not. This job built with
+      # --bundle-only, which prints "skipping indexes" and exits before writing any, and
+      # then asked check-site whether the site was COMPLETE — where completeness includes
+      # web/indexes/mmlu.idx.bin.gz, the 5.35 MB that .gitignore deliberately keeps out of
+      # the repository. The gate was being asked a question about a tree that could not
+      # answer yes, so main went red on every push while the deploy stayed green. The
+      # benchmarks are fetched and the indexes built for real, exactly as Vercel does it.
+      # Worth the minute: this is the only place in CI where the index encoder runs against
+      # a real benchmark rather than a fixture.
+      #
+      # Ordered after the corpora steps deliberately. Those run `cp -r ingot-data data`,
+      # which copies INTO data/ instead of creating it when data/ already exists — a
+      # benchmark cache restored earlier would leave data/ingot-data/ and break the
+      # validation above with a file-not-found on the corpora.
+      - name: Cache benchmarks
+        id: benchmarks
+        uses: actions/cache@v4
+        with:
+          path: data/bench
+          key: bench-${{ steps.week.outputs.week }}-${{ hashFiles('scripts/fetch-benchmarks.ts') }}
+
+      - name: Fetch benchmarks
+        if: steps.benchmarks.outputs.cache-hit != 'true'
+        run: node scripts/fetch-benchmarks.ts
+
+      - name: Build the browser bundles and the indexes
+        run: node scripts/build-web.ts
 
       - name: The site is complete and makes no third-party request
         run: node scripts/check-site.ts

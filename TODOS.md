@@ -91,7 +91,17 @@ now understands the motivation. Each item came out of a review; none is a guess.
   fetches in CI (network, cache design) or a checked-in fixture hash.
 - **Context:** The registry's institutional-wing credibility rests on ids meaning the
   same thing next year.
-- **Depends on / blocked by:** nothing — good first candidate for the next infra day.
+- **It happened, 2026-08-03:** the divergence this item predicts is no longer
+  hypothetical. The committed indexes still recorded `"scannerVersion":"ingot-0.1.0"`
+  after the 0.1.3 bump — one byte inside the header, grams byte-identical — so
+  `ingot-scan@0.1.3` on npm ships indexes naming a builder three versions stale while the
+  Vercel deploy rebuilds them correctly. Found by hand, not by a gate. The repository is
+  corrected and check-published-numbers now asserts the shipped indexes name
+  package.json's version, which closes this one field; the published 0.1.3 tarball cannot
+  be corrected and rides to 0.1.4. Byte parity would have caught it with nobody looking.
+- **Depends on / blocked by:** nothing, and now cheaper: the validate job already fetches
+  benchmarks behind a weekly cache and builds the indexes for real, so the cache design
+  this item listed as a cost already exists.
 
 ## Decide the provenance scanner's future at the week-3 gate
 
