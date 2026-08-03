@@ -75,9 +75,16 @@
       data-duration="4.105"
       data-track-index="1"
     >
-      <div id="02-score-line-1">a score.</div>
-      <div id="02-score-line-2">a percentage.</div>
-      <div id="02-score-line-3">trust us.</div>
+      <!-- All three share one anchor and ride upward on y transforms as each new line
+           lands (the waterfall seam below), so their boxes genuinely cross during the
+           0.9s transit. The layout checker is right that they overlap and wrong that it
+           matters: verified against the rendered master at 6.6s, where "a score." sits
+           dimmed above "a percentage." exactly as designed. Marked so this known crossing
+           stops masking an unknown one — an checker warning nobody can act on is a warning
+           everybody learns to skip. -->
+      <div id="02-score-line-1" data-layout-allow-overlap>a score.</div>
+      <div id="02-score-line-2" data-layout-allow-overlap>a percentage.</div>
+      <div id="02-score-line-3" data-layout-allow-overlap>trust us.</div>
     </div>
   </div>
 
