@@ -25,11 +25,23 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      # Every action is pinned to a commit rather than a tag. A tag is a mutable pointer,
+      # and this repository publishes to npm with provenance — a workflow is part of the
+      # supply chain the threat model claims to cover, so it gets the same treatment as the
+      # esbuild pin. The trailing comment is the human-readable version; the SHA is what
+      # actually runs.
+      #
+      # package-manager-cache is off deliberately. setup-node v5 and later start caching
+      # automatically when package.json carries a packageManager field, and caching needs a
+      # lockfile. This repo has zero dependencies by design and no lockfile at all, so the
+      # feature does nothing today and would fail the first build after somebody adds that
+      # field. Off on purpose beats off by luck.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
+          package-manager-cache: false
 
       # Built first so the bundle test runs for real instead of skipping. The page loads
       # the bundle, and a bundling regression passes every other test in the suite.
@@ -44,11 +56,12 @@ jobs:
     name: the real page in a real browser
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
+          package-manager-cache: false
 
       # The suite drives the shipped page — index.html, ingot.js, scan.worker.js — in
       # headless Chrome (preinstalled on the runner) against synthetic indexes, so it
@@ -67,11 +80,12 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
+          package-manager-cache: false
 
       # The published package cannot ship raw TypeScript: Node refuses to strip types under
       # node_modules, so a package that runs from source installs fine and then fails on
@@ -96,11 +110,12 @@ jobs:
     name: detection still works
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
+          package-manager-cache: false
 
       # The key rotates weekly. With a fixed key the cache never expired, so the weekly
       # scheduled run — whose stated purpose is catching upstream drift — always restored
@@ -114,7 +129,7 @@ jobs:
       # not validate against last week's bytes fetched by the old script.
       - name: Cache reference corpora
         id: corpora
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ingot-data
           key: corpora-${{ steps.week.outputs.week }}-${{ hashFiles('scripts/fetch-corpora.ts') }}
@@ -182,7 +197,7 @@ jobs:
       # validation above with a file-not-found on the corpora.
       - name: Cache benchmarks
         id: benchmarks
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: data/bench
           key: bench-${{ steps.week.outputs.week }}-${{ hashFiles('scripts/fetch-benchmarks.ts') }}
