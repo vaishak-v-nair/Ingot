@@ -667,6 +667,25 @@
       <li><b>No unmeasured claims.</b> The false-positive rate prints beside the detection rate,
       from the same run.</li>
     </ul>
+    <!-- Parity with the README's "read this before the numbers" list. These three limits
+         lived only there, which meant the readers most likely to act on a clean result —
+         the ones who never open a repository — were exactly the ones who never met them.
+         check-published-numbers.ts now asserts each phrase in BOTH surfaces, so the two
+         cannot drift apart again the way they did here. -->
+    <details class="more">
+      <summary>What a clean result does not prove</summary>
+      <p class="sub"><b>Canonical is not the same as harmless.</b> A test item written from a
+      public web page can sit in a training corpus as ordinary web text: nobody leaked it, and a
+      model trained on that corpus still saw it. The canonicality label says where text came
+      from, not that seeing it was free.</p>
+      <p class="sub"><b>Questions are indexed; answers are not.</b> Published indexes exclude
+      answer text, so a corpus that reproduces every solution while paraphrasing its questions
+      scans clean.</p>
+      <p class="sub"><b>&ldquo;Verbatim&rdquo; means after normalization.</b> Matching runs on
+      lowercased tokens with punctuation stripped. For prose the difference is cosmetic; for
+      code it is not — a HumanEval match is a run of identifiers and words, with operators and
+      structure invisible.</p>
+    </details>
   </div>
 </section>
 

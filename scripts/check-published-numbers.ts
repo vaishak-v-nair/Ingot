@@ -263,6 +263,25 @@ claims.push(
   { doc: 'src/types.ts', label: 'receipts name the released scanner', expected: `'ingot-${pkgVersion}'` },
 );
 
+// Caveat parity, and the only gate here that asserts a phrase rather than a figure.
+//
+// The README's "read this before the numbers" list gained three epistemic limits that the
+// front page never got. That is the wrong way round: the site is the surface most readers
+// meet, and someone who acts on a clean result without ever opening the repository is
+// precisely the person the limits are for. Asserting each phrase in BOTH documents means
+// neither surface can quietly lose one, and a future edit that rewords a caveat has to
+// reword it in both places or fail here.
+for (const phrase of [
+  'Canonical is not the same as harmless',
+  'Questions are indexed; answers are not',
+  'means after normalization',
+]) {
+  claims.push(
+    { doc: README, label: 'caveat parity', expected: phrase },
+    { doc: SITE, label: 'caveat parity', expected: phrase },
+  );
+}
+
 // The feasibility decision is argued from measured numbers like everything else, and it is
 // the kind of document that rots quietly: it concludes "kill", so nobody re-reads it, and
 // the figures it killed on would go stale without a single reader noticing. Gated on the
