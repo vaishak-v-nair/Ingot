@@ -191,6 +191,14 @@ jobs:
         if: steps.benchmarks.outputs.cache-hit != 'true'
         run: node scripts/fetch-benchmarks.ts
 
+      # Must run BEFORE the build, and the ordering is the whole point: build-web.ts
+      # overwrites web/indexes/, so afterwards the "committed" files on disk are the rebuild
+      # and the comparison would pass by construction. Here it compares what the checkout
+      # actually carries — the bytes that ship inside the npm tarball — against what this
+      # code builds from the pinned benchmarks.
+      - name: The npm tarball and the deployed site build the same indexes
+        run: node scripts/check-index-parity.ts
+
       - name: Build the browser bundles and the indexes
         run: node scripts/build-web.ts
 

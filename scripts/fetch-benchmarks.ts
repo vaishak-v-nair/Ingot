@@ -10,12 +10,55 @@
  * that plays loose with data licensing has no standing to audit anyone else.
  */
 import { gunzipSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 type Item = { id: string; text: string; subject?: string; source: string };
 
-const OUT_DIR = resolve('data/bench');
+const argv = process.argv.slice(2);
+const outFlag = argv.indexOf('--out');
+if (outFlag !== -1 && (argv[outFlag + 1] === undefined || argv[outFlag + 1].startsWith('--'))) {
+  process.stderr.write('\n  --out needs a value\n\n');
+  process.exit(2);
+}
+/** Overridable so a verification run can fetch somewhere other than the data that produced published results. */
+const OUT_DIR = resolve(outFlag === -1 ? 'data/bench' : argv[outFlag + 1]);
+
+/**
+ * Upstream revisions, and the hash of what they normalize to.
+ *
+ * Two of these follow immutable commits; MMLU cannot. The datasets-server /rows endpoint
+ * takes no revision parameter, so there is no URL that pins it — which is exactly why the
+ * hash matters more than the pin. Every benchmark is asserted by CONTENT, so drift is
+ * caught the same way whether or not the source offered a revision to name.
+ *
+ * Why any of this: MMLU ids are positional (`mmlu-N` by row order), and every published
+ * finding cites them. An upstream edit that inserts one row renumbers everything after it,
+ * and each of the 342 flagged MMLU items in the registry would silently start pointing at a
+ * different question. Nothing would look wrong. The scan would still pass every gate.
+ *
+ * Updating a hash here is not a chore — it means the benchmark moved, and every published
+ * number measured against it needs re-deriving before the new hash is written down.
+ */
+const PINS = {
+  gsm8k: {
+    // Repo HEAD. The data file itself last changed 2021-10-28 and has been stable since.
+    url: 'https://raw.githubusercontent.com/openai/grade-school-math/3101c7d5072418e28b9008a6636bde82a006892c/grade_school_math/data/test.jsonl',
+    sha256: 'e219be40e9298d3ba8ca9b9bd0d40ad20de2e701e2f5d040c25d0c0ec9df959c',
+  },
+  humaneval: {
+    // Repo HEAD 2025-01-17; HumanEval.jsonl.gz last changed 2021-07-08.
+    url: 'https://github.com/openai/human-eval/raw/6d43fb980f9fee3c892a914eda09951f772ad10d/data/HumanEval.jsonl.gz',
+    sha256: 'e81f109a7397ae2134d69b968525786515fd7fdbb434243e317a39867a5bf3f7',
+  },
+  mmlu: {
+    // No revision parameter exists on this endpoint. Recorded for the record: the dataset
+    // repository has been at c30699e8356da336a370243923dbaf21066bb9fe since 2024-03-08.
+    revision: 'c30699e8356da336a370243923dbaf21066bb9fe',
+    sha256: 'fba811640999d4eac516ad2c680451dd114af3e24726157573dcb3437a223e92',
+  },
+} as const;
 
 async function get(url: string, asBuffer = false): Promise<string> {
   // The datasets server rate-limits. Give up too early and MMLU truncates mid-subject,
@@ -33,18 +76,38 @@ async function get(url: string, asBuffer = false): Promise<string> {
   }
 }
 
-function write(name: string, items: Item[], licence: string): void {
+function write(name: keyof typeof PINS, items: Item[], licence: string): void {
   mkdirSync(OUT_DIR, { recursive: true });
   const path = resolve(OUT_DIR, `${name}.jsonl`);
-  writeFileSync(path, items.map((i) => JSON.stringify(i)).join('\n') + '\n', 'utf8');
-  process.stdout.write(`  ${name.padEnd(12)} ${String(items.length).padStart(6)} items  ${licence}\n`);
+  const body = items.map((i) => JSON.stringify(i)).join('\n') + '\n';
+  const digest = createHash('sha256').update(body, 'utf8').digest('hex');
+  const expected = PINS[name].sha256;
+
+  // Refuse before writing, not after. A benchmark that no longer hashes to its pin has
+  // moved upstream, and writing it would rebuild every index and re-run every scan against
+  // silently different data — the failure this whole pin exists to make loud.
+  if (digest !== expected) {
+    process.stderr.write(
+      `\n  REFUSED — ${name} does not match its pinned content.\n` +
+        `    expected  ${expected}\n` +
+        `    fetched   ${digest}\n\n` +
+        `  The benchmark changed upstream. Item ids are positional, so every published\n` +
+        `  finding that cites one may now point at a different item. Re-derive the\n` +
+        `  published numbers before updating the hash in scripts/fetch-benchmarks.ts.\n` +
+        `  Nothing was written.\n\n`,
+    );
+    process.exit(1);
+  }
+
+  writeFileSync(path, body, 'utf8');
+  process.stdout.write(
+    `  ${name.padEnd(12)} ${String(items.length).padStart(6)} items  ${licence}  sha ${digest.slice(0, 12)}\n`,
+  );
 }
 
 /** GSM8K test split — grade school maths word problems. MIT. */
 async function gsm8k(): Promise<void> {
-  const raw = await get(
-    'https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl',
-  );
+  const raw = await get(PINS.gsm8k.url);
   const items: Item[] = [];
   let i = 0;
   for (const line of raw.split('\n')) {
@@ -59,7 +122,7 @@ async function gsm8k(): Promise<void> {
 
 /** HumanEval — Python function synthesis. The prompt is signature plus docstring. MIT. */
 async function humaneval(): Promise<void> {
-  const raw = await get('https://github.com/openai/human-eval/raw/master/data/HumanEval.jsonl.gz', true);
+  const raw = await get(PINS.humaneval.url, true);
   const items: Item[] = [];
   for (const line of raw.split('\n')) {
     const t = line.trim();

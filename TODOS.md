@@ -73,36 +73,6 @@ now understands the motivation. Each item came out of a review; none is a guess.
   fix pass precisely because it moves published-adjacent numbers.
 - **Depends on / blocked by:** a release window (0.1.4) and the revalidation run.
 
-## Benchmark revision pinning, and a committed-index parity gate
-
-- **What:** Pin fetch-benchmarks.ts to exact upstream revisions (GSM8K/HumanEval commit
-  SHAs in the raw URLs, an MMLU dataset revision on the datasets-server call), and add a
-  CI check that rebuilding the indexes from data/bench reproduces the committed
-  web/indexes/*.idx.bin.gz byte for byte.
-- **Why:** Today the fetches follow master, MMLU ids are positional (`mmlu-N` by row
-  order), and nothing verifies the committed indexes match a rebuild — an upstream edit
-  silently reorders ids that every published finding cites, and the npm CLI (committed
-  indexes) can diverge from the Vercel deploy (rebuilt indexes) with every parity test
-  green. Outside-voice finding 2, eng review 2026-08-02 (fetch fail-loud landed the same
-  day; the pins and the parity gate are this item).
-- **Pros:** Published item ids become durable; the two distribution surfaces provably
-  scan the same benchmark.
-- **Cons:** Pinning needs the actual SHAs looked up; the parity gate needs benchmark
-  fetches in CI (network, cache design) or a checked-in fixture hash.
-- **Context:** The registry's institutional-wing credibility rests on ids meaning the
-  same thing next year.
-- **It happened, 2026-08-03:** the divergence this item predicts is no longer
-  hypothetical. The committed indexes still recorded `"scannerVersion":"ingot-0.1.0"`
-  after the 0.1.3 bump — one byte inside the header, grams byte-identical — so
-  `ingot-scan@0.1.3` on npm ships indexes naming a builder three versions stale while the
-  Vercel deploy rebuilds them correctly. Found by hand, not by a gate. The repository is
-  corrected and check-published-numbers now asserts the shipped indexes name
-  package.json's version, which closes this one field; the published 0.1.3 tarball cannot
-  be corrected and rides to 0.1.4. Byte parity would have caught it with nobody looking.
-- **Depends on / blocked by:** nothing, and now cheaper: the validate job already fetches
-  benchmarks behind a weekly cache and builds the indexes for real, so the cache design
-  this item listed as a cost already exists.
-
 ## Decide the provenance scanner's future at the week-3 gate
 
 - **What:** Decide whether the batch-provenance subsystem (src/signals/, scorer.ts,
