@@ -105,7 +105,7 @@ yourself are used.
 From a clone, with no install step at all:
 
 ```bash
-node --test test/*.test.ts        # 94 tests; the defect log is docs/measurements.md
+node --test test/*.test.ts        # 96 tests; the defect log is docs/measurements.md
 
 node scripts/fetch-benchmarks.ts  # public benchmarks, normalised
 node scripts/build-web.ts         # browser bundle + publishable indexes

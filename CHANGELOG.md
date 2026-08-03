@@ -2,6 +2,30 @@
 
 Numbers quoted here trace to `results/`; defect write-ups live in `docs/measurements.md`.
 
+## 0.1.4 — August 2026
+
+One scan-behavior change, and it removes a class of missed contamination rather than
+adding one. Verified not to move any published number: the validation harness reproduces
+identically, and a two-shard C4 spot pass finds the same 57 MMLU items with the same 10
+discards and no difference in which items were found.
+
+- **The frequency filter now judges every gram that could still be rare, not the first
+  sixteen it met.** A verbatim copy that opens with common phrasing and turns distinctive
+  later handed the filter sixteen ordinary grams and was discarded whole, as "ordinary
+  language", with nothing in the output to say otherwise. The rarer the opening, the more
+  likely the copy — so the sampling failed hardest on exactly the case that matters. Grams
+  already past the drop threshold are now discarded on sight instead of occupying a slot,
+  which is exact rather than merely a bigger sample: document frequencies only grow, so a
+  gram that is common when seen can never become the one that saves the run.
+- Every discard still names the frequency that condemned it, including when no gram
+  survived long enough to supply one.
+- Receipts stamp `ingot-0.1.4`. The 0.1.3 tarball shipped indexes built by `ingot-0.1.0`
+  because nothing compared the committed indexes to a rebuild; `scripts/check-index-parity.ts`
+  now does, in CI, before every merge.
+- Benchmarks are pinned: GSM8K and HumanEval to upstream commits, and all three asserted
+  by content hash, because MMLU item ids are positional and an upstream insertion would
+  silently renumber every published finding.
+
 ## 0.1.3 — August 2026
 
 The reframe release. No scan-behavior changes: results and receipts are identical to

@@ -26,8 +26,12 @@ const NEAR_THRESHOLD = 0.55;
 /** Runs buffered for the document-frequency pass. Overflow is counted and surfaced, never silent. */
 const MAX_PROVISIONAL_RUNS = 200_000;
 
-/** Distinct gram keys retained per run, enough to find the rarest without unbounded memory. */
-const MAX_KEYS_PER_RUN = 16;
+/**
+ * Memory backstop on the keys retained per run. Reaching it is not a truncation of the
+ * evidence in any meaningful sense — see mergeRuns for why a run with this many still-rare
+ * grams is treated as a survivor outright.
+ */
+const MAX_KEYS_PER_RUN = 256;
 
 export type SessionOptions = {
   benchmarkItems?: BenchmarkItem[];
@@ -48,7 +52,20 @@ export type FinishInput = {
 };
 
 type RawHit = { itemIdx: number; offset: number; key: number };
-type Run = { itemIdx: number; start: number; end: number; keys: number[] };
+type Run = {
+  itemIdx: number;
+  start: number;
+  end: number;
+  keys: number[];
+  keysTruncated: boolean;
+  /**
+   * The rarest gram this run ever saw, kept or discarded, for reporting only. When every
+   * key is ruled out on sight there is nothing left to name the frequency that condemned
+   * the run, and "dropped as ordinary language" without a number is the silent judgement
+   * this scanner refuses to make.
+   */
+  witnessKey: number | null;
+};
 
 /**
  * Merges runs of consecutive n-gram hits into one span. A 100-token verbatim copy is one
@@ -56,20 +73,83 @@ type Run = { itemIdx: number; start: number; end: number; keys: number[] };
  * stores every stride-th gram of each item, so the hits of one verbatim copy land ~stride
  * apart — with the old `+ 1` threshold a single copied passage fragmented into dozens of
  * runs, each carrying one key for the frequency filter to judge alone.
+ *
+ * `keep` decides which gram keys the run carries into the frequency filter, and it is the
+ * fix for a false negative that was invisible by construction. The run used to keep its
+ * FIRST sixteen keys, with a comment claiming that was "enough to find the rarest". In the
+ * one case that matters it is not: a long verbatim copy that opens with common phrasing and
+ * turns distinctive later hands the filter sixteen ordinary grams, and the whole passage is
+ * discarded as ordinary language. The rarer the opening, the likelier the copy was found —
+ * so the sampling failed hardest on exactly the adversarial case.
+ *
+ * The predicate is exact rather than a bigger sample, and the reason is a one-way property:
+ * document frequencies only ever grow. A key already past the drop threshold when it is
+ * seen is past it at the end too, so it can never be the gram that saves the run — and it
+ * can be discarded on sight rather than occupying a slot. What is left is every key that
+ * could still matter, which is what "find the rarest" needed all along.
+ *
+ * A running minimum would have been wrong here, incidentally, and cheaper. Keeping only the
+ * key that is rarest AT CAPTURE loses the run when that key later becomes common while a
+ * discarded sibling stays rare — a new false negative traded for the old one. Only the set
+ * survives the fact that the counts are still moving.
+ *
+ * MAX_KEYS_PER_RUN remains as a memory backstop. Hitting it means the run has 256 grams
+ * that are all still rare, which is not a marginal call about ordinary language — it is an
+ * overwhelming verbatim match, so a truncated run is treated as a survivor outright and
+ * never silently dropped.
  */
-export function mergeRuns(hits: RawHit[], stride = 1): Run[] {
+export function mergeRuns(
+  hits: RawHit[],
+  stride = 1,
+  filter?: { frequency: (key: number) => number; max: number },
+): Run[] {
   if (hits.length === 0) return [];
   const sorted = hits.slice().sort((a, b) => a.itemIdx - b.itemIdx || a.offset - b.offset);
   const runs: Run[] = [];
-  let cur: Run = { itemIdx: sorted[0].itemIdx, start: sorted[0].offset, end: sorted[0].offset, keys: [sorted[0].key] };
+
+  let witnessFreq = Number.POSITIVE_INFINITY;
+
+  const add = (run: Run, key: number): void => {
+    if (filter) {
+      const freq = filter.frequency(key);
+      if (freq < witnessFreq) {
+        witnessFreq = freq;
+        run.witnessKey = key;
+      }
+      if (freq > filter.max) return;
+    }
+    if (run.keys.length >= MAX_KEYS_PER_RUN) {
+      run.keysTruncated = true;
+      return;
+    }
+    // Linear, and deliberately so: the array is capped, and a repeated phrase inside one
+    // run would otherwise spend slots on a key already held.
+    if (!run.keys.includes(key)) run.keys.push(key);
+  };
+
+  const start = (h: RawHit): Run => {
+    const run: Run = {
+      itemIdx: h.itemIdx,
+      start: h.offset,
+      end: h.offset,
+      keys: [],
+      keysTruncated: false,
+      witnessKey: null,
+    };
+    witnessFreq = Number.POSITIVE_INFINITY;
+    add(run, h.key);
+    return run;
+  };
+
+  let cur = start(sorted[0]);
   for (let i = 1; i < sorted.length; i++) {
     const h = sorted[i];
     if (h.itemIdx === cur.itemIdx && h.offset <= cur.end + stride) {
       cur.end = h.offset;
-      if (cur.keys.length < MAX_KEYS_PER_RUN) cur.keys.push(h.key);
+      add(cur, h.key);
     } else {
       runs.push(cur);
-      cur = { itemIdx: h.itemIdx, start: h.offset, end: h.offset, keys: [h.key] };
+      cur = start(h);
     }
   }
   runs.push(cur);
@@ -153,7 +233,14 @@ export class ScanSession {
     this.seenGramsInDoc.clear();
 
     if (raw.length > 0) {
-      for (const run of mergeRuns(raw, this.index.stats.stride)) {
+      // Counts for this document are already folded in above, so the filter sees the
+      // frequency as of now — the earliest point at which a key can be ruled out forever.
+      const filter = {
+        frequency: (key: number): number => this.gramDocCount.get(key) ?? 1,
+        max: this.maxDocFrequency,
+      };
+
+      for (const run of mergeRuns(raw, this.index.stats.stride, filter)) {
         if (this.provisional.length >= MAX_PROVISIONAL_RUNS) {
           this.truncatedRuns++;
           // Never frequency-checked, so its survival is unknown — treat it as a possible
@@ -172,7 +259,10 @@ export class ScanSession {
         let hit: ContaminationHit | null = null;
         let rarestNow = Number.POSITIVE_INFINITY;
         for (const key of run.keys) rarestNow = Math.min(rarestNow, this.gramDocCount.get(key) ?? 1);
-        const certainDrop = rarestNow > this.maxDocFrequency;
+        // No key survived the predicate, so every gram in this run is already past the
+        // threshold and can only get commoner: certain to drop, and known so on this pass.
+        // A truncated run is the opposite case and is never a certain drop.
+        const certainDrop = !run.keysTruncated && rarestNow > this.maxDocFrequency;
         if (!certainDrop) survivorPossible = true;
         const wantText = certainDrop
           ? this.droppedTextCaptured < MAX_STORED_HITS
@@ -245,12 +335,23 @@ export class ScanSession {
     for (const { run, hit } of this.provisional) {
       let rarest = Number.POSITIVE_INFINITY;
       for (const key of run.keys) rarest = Math.min(rarest, this.gramDocCount.get(key) ?? 1);
-      if (rarest > this.maxDocFrequency) {
+      // 256 grams still rare when the cap was hit. Whatever the kept ones did afterwards,
+      // this is not the ordinary-language case the filter exists to catch.
+      if (!run.keysTruncated && rarest > this.maxDocFrequency) {
         droppedGeneric++;
         // Kept (capped) so the discard count is inspectable: "dropped as ordinary
-        // language" is itself a judgement, and the reader gets to check it.
+        // language" is itself a judgement, and the reader gets to check it. When every key
+        // was ruled out on sight there is no kept key left to name a frequency, so the run
+        // falls back to the rarest gram it ever saw. That gram was already past the
+        // threshold when it was discarded and frequencies only grow, so the number shown
+        // is always a real reason for the drop.
+        const condemned = Number.isFinite(rarest)
+          ? rarest
+          : run.witnessKey === null
+            ? undefined
+            : this.gramDocCount.get(run.witnessKey);
         if (hit && droppedSamples.length < MAX_STORED_HITS) {
-          droppedSamples.push({ ...hit, corpusDocFrequency: Number.isFinite(rarest) ? rarest : undefined });
+          droppedSamples.push({ ...hit, corpusDocFrequency: condemned });
         }
         continue;
       }

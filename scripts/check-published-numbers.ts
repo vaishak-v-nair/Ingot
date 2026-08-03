@@ -250,6 +250,16 @@ const testCount = readdirSync(resolve('test'))
   .reduce((a, f) => a + (readFileSync(resolve('test', f), 'utf8').match(/^test\(/gm)?.length ?? 0), 0);
 claims.push({ doc: README, label: 'test suite size', expected: `${testCount} tests` });
 
+// The defect count on the front page was hand-typed, and by the time anyone looked it said
+// eleven while the log held twelve — the same drift as the test count, in the number that
+// advertises how carefully this thing is checked. Derived from the log's own numbered list.
+const defectCount = (
+  readFileSync(resolve('docs/measurements.md'), 'utf8')
+    .split('## Defects found by measurement')[1]
+    ?.split('\n## ')[0] ?? ''
+).match(/^\d+\. \*\*/gm)?.length ?? 0;
+claims.push({ doc: SITE, label: 'defects written up', expected: `All ${defectCount} are written up` });
+
 // Release coherence: one version, three hand-bumped places that must all name it. The
 // action pin decides which scanner every Action consumer runs; the changelog heading is
 // the release's public record; SCANNER_VERSION is stamped into every receipt. A release

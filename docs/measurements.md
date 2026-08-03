@@ -233,6 +233,27 @@ Each one is now a guard in the code and a test under `test/`.
     threshold, while still being everywhere in English. Independence across corpora turned
     out to be the stronger signal, and it sharpens with every corpus added.
 
+13. **The frequency filter judged a run by the first sixteen grams it met.** A run kept its
+    first sixteen gram keys and picked the rarest among them, under a comment claiming that
+    was "enough to find the rarest". For a verbatim copy that opens with common phrasing and
+    turns distinctive later, all sixteen are ordinary, and the entire passage was discarded
+    as ordinary language — silently, because a correct drop and this drop are the same
+    output. The rarer the opening, the more likely the copy is real, so the sampling failed
+    hardest on the adversarial case it was there to survive. It is now exact rather than a
+    larger sample, on a one-way property: document frequencies only grow, so a gram already
+    past the drop threshold when it is seen can never become the gram that saves the run and
+    is discarded on sight instead of taking a slot. What remains is every gram that could
+    still matter. A running minimum would have been cheaper and wrong — keeping only the
+    rarest gram *at capture* loses the run when that gram later turns common while a
+    discarded sibling stays rare, trading one false negative for another.
+
+    Found by review rather than by measurement, which is the uncomfortable part: nothing in
+    any output distinguished it, and both the validation harness and a two-shard C4 spot
+    pass reproduce identically before and after the fix — same 57 MMLU items, same 10
+    discards, no difference in which items were found. A defect that moves no number is
+    invisible to every gate this repository has, and the only thing that catches it is
+    someone reading the comment and disbelieving it.
+
 Also fixed along the way: a TypeScript parameter property unsupported by Node's strip-only
 mode; a CLI arg parser that swallowed the batch path as a command; a test asserting a
 variance message on signals that had no baseline at all.

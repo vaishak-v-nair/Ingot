@@ -90,7 +90,7 @@ runs:
         # nothing else forces everyone to go and look; the matching text is the finding.
         # The version is pinned: unpinned, every consumer silently ran whatever was newest
         # on npm, whatever action ref they pinned. Bumped alongside each npm release.
-        npx --yes ingot-scan@0.1.3 "${ARGS[@]}" | tee /tmp/ingot-out.txt
+        npx --yes ingot-scan@0.1.4 "${ARGS[@]}" | tee /tmp/ingot-out.txt
 
         FOUND=$(node -e "
           const { resolve } = require('node:path');

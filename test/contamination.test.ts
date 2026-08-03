@@ -11,7 +11,7 @@ import { ScanSession } from '../src/contamination/scanSession.ts';
 import { runContaminate } from '../src/cli.ts';
 import { IndexVersionError } from '../src/errors.ts';
 import { mulberry32, tokenize } from '../src/text.ts';
-import { INDEX_FORMAT_VERSION } from '../src/contamination/types.ts';
+import { DEFAULT_MAX_CORPUS_DOC_FREQUENCY, INDEX_FORMAT_VERSION } from '../src/contamination/types.ts';
 import type { BenchmarkItem } from '../src/contamination/types.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'ingot-contam-'));
@@ -369,6 +369,79 @@ test('text common across the corpus is dropped as ordinary language, not reporte
   assert.equal(exact.totalHits, 0, 'text appearing in 12 documents is not evidence');
   assert.ok((exact.droppedGeneric ?? 0) > 0, 'the drop must be counted, not silent');
   assert.equal(report.contaminatedItemIds.length, 0);
+});
+
+/**
+ * The false negative that the first-sixteen-keys sample could not see.
+ *
+ * A verbatim copy that opens with common phrasing and only turns distinctive later handed
+ * the frequency filter sixteen ordinary grams and was discarded whole — and nothing in the
+ * output said so, because the drop looked exactly like ordinary language. The filter now
+ * keeps every gram that could still be rare at the end, so the distinctive tail decides.
+ */
+test('a copy that turns distinctive only after its opening still survives the filter', async () => {
+  // 40 common words: at n=13 that is 28 grams lying entirely inside the common half, well
+  // past the sixteen the run used to keep. The rare tail begins after all of them.
+  const commonOpening = words(40, 60000);
+  const distinctiveTail = words(20, 60001);
+
+  const bench: BenchmarkItem[] = [
+    { id: 'late-bloomer', text: `${commonOpening} ${distinctiveTail}` },
+    ...Array.from({ length: 9 }, (_, i) => ({ id: `f${i}`, text: words(50, 61000 + i) })),
+  ];
+  const index = NgramIndex.build('late-bench', bench, { n: N });
+
+  // Ten documents carry the opening and nothing else — canonical phrasing, correctly
+  // common. The eleventh carries the whole item, and it is the only real copy. The leak
+  // goes LAST on purpose: by then the opening's grams are already past the threshold, so
+  // they are ruled out on sight and only the tail can save the run.
+  const rows = [
+    ...Array.from({ length: 10 }, (_, i) => ({
+      id: `boilerplate-${i}`,
+      text: `${words(15, 62000 + i)} ${commonOpening} ${words(15, 63000 + i)}`,
+    })),
+    { id: 'leak', text: `${words(20, 64000)} ${commonOpening} ${distinctiveTail} ${words(20, 64001)}` },
+  ];
+  const corpusPath = writeCorpus('late-distinctive.jsonl', rows);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  assert.ok(
+    report.contaminatedItemIds.includes('late-bloomer'),
+    'the distinctive tail is evidence even when the opening is boilerplate',
+  );
+  assert.equal(exact.itemsHit, 1, 'the ten boilerplate copies are still ordinary language');
+  assert.ok((exact.droppedGeneric ?? 0) > 0, 'and they are still dropped, and still counted');
+});
+
+/**
+ * Every discard names the frequency that condemned it. Once a gram past the threshold is
+ * ruled out on sight, no kept key is left to supply that number, so the run carries the
+ * rarest gram it ever saw purely so the judgement stays checkable.
+ */
+test('a drop still reports the frequency that condemned it, with nothing kept', async () => {
+  const phrase = words(60, 65000);
+  const bench: BenchmarkItem[] = [{ id: 'boiler', text: phrase }];
+  const index = NgramIndex.build('condemn-bench', bench, { n: N });
+
+  const rows = Array.from({ length: 12 }, (_, i) => ({
+    id: `copy-${i}`,
+    text: `${words(15, 66000 + i)} ${phrase} ${words(15, 67000 + i)}`,
+  }));
+  const corpusPath = writeCorpus('condemned.jsonl', rows);
+
+  const report = await scanCorpus(index, corpusPath);
+  const exact = report.tiers.find((t) => t.tier === 'exact')!;
+
+  assert.equal(exact.totalHits, 0);
+  assert.ok((exact.droppedSamples?.length ?? 0) > 0, 'the drops are readable');
+  for (const h of exact.droppedSamples!) {
+    assert.ok(
+      (h.corpusDocFrequency ?? 0) > DEFAULT_MAX_CORPUS_DOC_FREQUENCY,
+      'the number shown is a real reason for the drop, never absent',
+    );
+  }
 });
 
 test('a distinctive passage appearing once still counts, after the frequency filter', async () => {
