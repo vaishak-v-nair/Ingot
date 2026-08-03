@@ -255,6 +255,14 @@
             color: var(--gold); display: flex; align-items: center; gap: .7rem; }
   .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
   .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
+  /* The single permitted break in the section metronome — see the comment at its only use.
+     Sized between a section heading (1.95rem ceiling) and the page title (3.4rem), so it
+     reads as the loudest sentence on the page without competing with the title. Hairline
+     rules rather than a panel: an instrument marks a reading, it does not frame it. */
+  .landmark { font-family: var(--display); font-weight: 600; color: var(--ink);
+              font-size: clamp(1.5rem, 3.8vw, 2.4rem); line-height: 1.16; letter-spacing: -.02em;
+              max-width: 36ch; margin: 2.2rem 0 1.5rem; padding: 1.5rem 0 1.6rem;
+              border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
      row is the single most recognisable generated-page layout there is, and these three
      were the page's clearest example of it. The rules do the dividing; the boxes were only
@@ -613,8 +621,18 @@
         <tr><td>mmlu</td><td class="num">342 / 14042</td><td class="num">2.436%</td><td class="num">865</td><td class="num">642</td><td class="num">28</td></tr>
       </table>
     </div>
-    <p class="sub" style="margin-top:1.4rem"><strong>"2.4% of MMLU is contaminated in C4" is wrong,
-    and that is the finding.</strong> We inspected 200 retained matches and found no contamination —
+    <!-- The page's one landmark, and there must never be a second.
+         Every section runs kicker → heading → prose → record at one scale, which keeps a
+         scrolling reader's eye level — including at the exact sentence the registry exists
+         to deliver. So the rhythm breaks here and nowhere else: larger than a section
+         heading, quieter than the page title, and re-measured — 36ch of display type is
+         physically wider than 56ch of body text, which is what large type needs, so the
+         change is of measure as well as scale. It lands in two lines, the same ceiling the
+         hero keeps. No new width is invented: this sits inside the existing shell.
+         No colour, deliberately — the chassis is achromatic and colour is testimony, so it
+         belongs to measured states. This is a claim ABOUT measurements, not one of them. -->
+    <p class="landmark">&ldquo;2.4% of MMLU is contaminated in C4&rdquo; is wrong, and that is the finding.</p>
+    <p class="sub">We inspected 200 retained matches and found no contamination —
     we found NATO Article 5, Patrick Henry, the Fifth Amendment: canonical text, the famous passages
     the whole world quotes. MMLU quotes famous documents; web text contains them. The overlap is
     exact, reproducible and evidentially worthless.</p>
