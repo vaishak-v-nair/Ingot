@@ -2,6 +2,13 @@ import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { normalizeText } from './text.ts';
 import { EmptyBatchError, SchemaMismatchError } from './errors.ts';
+import {
+  AUTHOR_FIELD_CANDIDATES,
+  ID_FIELD_CANDIDATES,
+  isUsableText,
+  PROMPT_FIELD_CANDIDATES,
+  TEXT_FIELD_CANDIDATES,
+} from './fields.ts';
 import type { DataRecord, LoadResult, SkippedLine } from './types.ts';
 
 export type LoadOptions = {
@@ -11,16 +18,14 @@ export type LoadOptions = {
   promptField?: string;
 };
 
-const TEXT_FIELD_CANDIDATES = ['text', 'response', 'output', 'completion', 'answer', 'content'];
-const AUTHOR_FIELD_CANDIDATES = ['annotator_id', 'annotatorId', 'author_id', 'authorId', 'worker_id', 'contributor'];
-const ID_FIELD_CANDIDATES = ['id', '_id', 'record_id', 'uuid'];
-const PROMPT_FIELD_CANDIDATES = ['prompt', 'instruction', 'question', 'input'];
-
-function pickField(row: Record<string, unknown>, explicit: string | undefined, candidates: string[]): string | null {
+function pickField(
+  row: Record<string, unknown>,
+  explicit: string | undefined,
+  candidates: readonly string[],
+): string | null {
   if (explicit) return explicit in row ? explicit : null;
   for (const c of candidates) {
-    const v = row[c];
-    if (typeof v === 'string' && v.trim().length > 0) return c;
+    if (isUsableText(row[c])) return c;
   }
   return null;
 }
@@ -61,11 +66,25 @@ export function loadBatch(path: string, options: LoadOptions = {}): LoadResult {
       continue;
     }
 
+    if (firstRowFields.length === 0) firstRowFields = Object.keys(row);
+
+    // Field detection walks forward until a record actually carries usable text, rather
+    // than reading the first record and condemning the file on it.
+    //
+    // A JSONL whose first row has an empty text field is ordinary — an export with a
+    // placeholder header row, a scrape whose first page 404'd — and it used to abort the
+    // whole load with "no text field found. Fields present: text", a sentence that
+    // contradicts itself. The first row is a sample, not a schema.
     if (textField === null) {
-      firstRowFields = Object.keys(row);
       textField = pickField(row, options.textField, TEXT_FIELD_CANDIDATES);
       if (textField === null) {
-        throw new SchemaMismatchError(options.textField ?? 'text', firstRowFields);
+        skipped.push({
+          line: i + 1,
+          reason: options.textField
+            ? `no usable "${options.textField}"`
+            : 'no field holding usable text',
+        });
+        continue;
       }
       authorField = pickField(row, options.authorField, AUTHOR_FIELD_CANDIDATES);
       idField = pickField(row, options.idField, ID_FIELD_CANDIDATES);
@@ -73,7 +92,7 @@ export function loadBatch(path: string, options: LoadOptions = {}): LoadResult {
     }
 
     const textValue = row[textField];
-    if (typeof textValue !== 'string' || textValue.trim().length === 0) {
+    if (!isUsableText(textValue)) {
       skipped.push({ line: i + 1, reason: `empty or non-string "${textField}"` });
       continue;
     }
@@ -97,6 +116,12 @@ export function loadBatch(path: string, options: LoadOptions = {}): LoadResult {
     });
   }
 
+  // No record anywhere in the file carried text. That is a schema problem, and saying so
+  // beats "contains no usable records", which sends the reader looking at their data when
+  // the fix is a --text-field flag.
+  if (textField === null && firstRowFields.length > 0) {
+    throw new SchemaMismatchError(options.textField ?? 'text', firstRowFields);
+  }
   if (records.length === 0) throw new EmptyBatchError(basename(path));
 
   return { records, totalLines: lines.filter((l) => l.trim().length > 0).length, skipped, encodingNormalized: changed };

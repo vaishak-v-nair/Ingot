@@ -100,6 +100,17 @@ export type NgramIndexData = {
   keys: number[];
   items: number[][];
   uncheckableItemIds: string[];
+  /**
+   * The subset of uncheckableItemIds whose text is written in a script Ingot does not
+   * segment into words — Chinese, Japanese, Thai and the other unspaced scripts.
+   *
+   * Carried separately because the two cases mean opposite things to whoever reads the
+   * report. "Shorter than n tokens" is a fact about a short item. This is a fact about the
+   * scanner, and saying so is the difference between "we did not find your words" and "we
+   * could not have looked for them". Optional so that indexes built before this existed
+   * still load. See text.ts.
+   */
+  unsegmentedItemIds?: string[];
   stats: IndexStats;
   /**
    * No build timestamp, deliberately. An index is a pure function of its benchmark and its
@@ -249,6 +260,8 @@ export type ContaminationReport = {
   indexStats: IndexStats;
   /** Benchmark items nothing could match, named so a reader knows what was NOT checked. */
   uncheckableItemIds: string[];
+  /** Of those, the ones written in a script the tokenizer cannot segment. See NgramIndexData. */
+  unsegmentedItemIds?: string[];
   /** How the corpus read went. A scan that skipped every line must never present as a
       clean result — zero readable documents is a refusal, not an absence of overlap. */
   load?: { totalLines: number; skipped: number };

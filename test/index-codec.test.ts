@@ -8,6 +8,7 @@ import {
   gunzipIfNeeded,
   gzipBytes,
 } from '../src/contamination/indexCodec.ts';
+import { IngotError } from '../src/errors.ts';
 import { mulberry32 } from '../src/text.ts';
 import type { BenchmarkItem, NgramIndexData } from '../src/contamination/types.ts';
 
@@ -104,7 +105,14 @@ test('grams shared by several items keep every owner', () => {
 
 test('a file that is not an index is refused, not misread', () => {
   const junk = new TextEncoder().encode('this is a JSON file, actually {"keys":[]}');
-  assert.throws(() => decodeIndex(junk), /not an Ingot index/);
+  // A named IngotError, not a bare one: this branch is where a saved HTML error page or a
+  // half-finished download lands, and it must reach the user as a sentence rather than as
+  // a stack trace through Node's module loader.
+  assert.throws(() => decodeIndex(junk), (err: unknown) => {
+    assert.ok(err instanceof IngotError, 'should be an IngotError');
+    assert.match((err as IngotError).userMessage, /not a readable Ingot index/);
+    return true;
+  });
 });
 
 test('an index from a future codec is refused rather than misparsed', () => {

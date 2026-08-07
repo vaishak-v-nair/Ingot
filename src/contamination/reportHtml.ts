@@ -75,19 +75,56 @@ ${exact.droppedSamples
   .join('\n')}`
       : '';
 
+  /** Ids, capped, with the remainder counted rather than dropped in silence. */
+  const idList = (ids: string[]): string =>
+    `    <p class="ids">${ids.slice(0, 60).map(esc).join(', ')}${
+      ids.length > 60 ? `, and ${num(ids.length - 60)} more` : ''
+    }</p>`;
+
+  // Two reasons an item can be unmatchable, and they mean opposite things.
+  //
+  // One is a fact about the item: it is short, or its every gram was so widely shared that
+  // the filter took it for boilerplate. The other is a fact about Ingot: its tokenizer
+  // splits on word boundaries, and Chinese, Japanese and Thai are not written with any.
+  // A 400-character Japanese essay tokenizes to one token and cannot form a 10-gram, which
+  // the old wording reported as "shorter than 10 tokens" — a sentence that describes the
+  // token count accurately and the writing falsely. Merging the two cases let the report
+  // present a limit of the scanner as a property of the text.
+  const unsegmentedIds = report.unsegmentedItemIds ?? [];
+  const shortIds = report.uncheckableItemIds.filter((id) => !unsegmentedIds.includes(id));
+
   const notChecked =
-    uncheckable > 0
+    uncheckable === 0
       ? `    <h2>What was not checked</h2>
-    <p>${num(uncheckable)} benchmark item${uncheckable === 1 ? ' is' : 's are'} shorter than ${report.n} tokens, so
-    ${uncheckable === 1 ? 'it produces' : 'they produce'} no ${report.n}-gram and nothing could ever match
-    ${uncheckable === 1 ? 'it' : 'them'}. A clean result that stayed silent about this would be hiding the
-    part of the benchmark nobody looked at.</p>
-    <p class="ids">${report.uncheckableItemIds.slice(0, 60).map(esc).join(', ')}${
-      report.uncheckableItemIds.length > 60 ? `, and ${num(report.uncheckableItemIds.length - 60)} more` : ''
-    }</p>`
-      : `    <h2>What was not checked</h2>
     <p>Nothing. Every benchmark item produced at least one ${report.n}-gram, so every one of them
-    was genuinely examined.</p>`;
+    was genuinely examined.</p>`
+      : `    <h2>What was not checked</h2>${
+          unsegmentedIds.length > 0
+            ? `
+    <p>${num(unsegmentedIds.length)} item${unsegmentedIds.length === 1 ? ' is' : 's are'} written in a script
+    Ingot does not split into words — Chinese, Japanese, Thai and the other scripts written without
+    spaces between words. ${unsegmentedIds.length === 1 ? 'It produced' : 'They produced'} too few tokens to
+    form a single ${report.n}-gram, so nothing could have matched ${unsegmentedIds.length === 1 ? 'it' : 'them'}
+    whatever this corpus contains.</p>
+    <p><strong>This is a limit of the scanner, not a finding about the text.</strong> &ldquo;We did not find
+    these words&rdquo; and &ldquo;we could not have looked for them&rdquo; are different sentences, and for
+    ${unsegmentedIds.length === 1 ? 'this item' : 'these items'} this report is making the second one.</p>
+${idList(unsegmentedIds)}`
+            : ''
+        }${
+          shortIds.length > 0
+            ? `
+    <p>${num(shortIds.length)} ${unsegmentedIds.length > 0 ? 'further ' : ''}item${
+      shortIds.length === 1 ? '' : 's'
+    } produced no surviving ${report.n}-gram: either ${shortIds.length === 1 ? 'it is' : 'they are'} shorter
+    than ${report.n} tokens, or every gram ${shortIds.length === 1 ? 'it' : 'they'} had was shared with enough
+    of the benchmark to be filtered as boilerplate. Nothing could ever match
+    ${shortIds.length === 1 ? 'it' : 'them'} either.</p>
+${idList(shortIds)}`
+            : ''
+        }
+    <p class="note">A clean result that stayed silent about any of this would be hiding the part of the
+    benchmark nobody looked at.</p>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -175,7 +212,11 @@ ${exact.droppedSamples
     <tr><th>corpus</th><td>${esc(report.corpus)} · ${num(report.corpusDocs)} documents · ${num(report.corpusTokens)} tokens</td></tr>
     <tr><th>matches kept</th><td>${num(exact.totalHits)}</td></tr>
     <tr><th>dropped as ordinary language</th><td>${num(exact.droppedGeneric ?? 0)}</td></tr>
-    <tr><th>could not be checked</th><td>${num(uncheckable)} item${uncheckable === 1 ? '' : 's'}</td></tr>${
+    <tr><th>could not be checked</th><td>${num(uncheckable)} item${uncheckable === 1 ? '' : 's'}${
+      unsegmentedIds.length > 0
+        ? ` &middot; ${num(unsegmentedIds.length)} of them in a script this scanner cannot segment`
+        : ''
+    }</td></tr>${
       report.load && report.load.skipped > 0
         ? `\n    <tr><th>lines skipped</th><td>${num(report.load.skipped)} of ${num(report.load.totalLines)} — unreadable as records, reported rather than silently dropped</td></tr>`
         : ''

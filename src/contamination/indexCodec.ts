@@ -1,5 +1,5 @@
 import { INDEX_FORMAT_VERSION } from './types.ts';
-import { IndexTruncatedError, IndexVersionError } from '../errors.ts';
+import { IndexTruncatedError, IndexUnreadableError, IndexVersionError } from '../errors.ts';
 import type { NgramIndexData } from './types.ts';
 
 /**
@@ -160,6 +160,9 @@ export function encodeIndex(data: NgramIndexData): Uint8Array {
     itemIds: data.itemIds,
     itemSubjects: data.itemSubjects,
     uncheckableItemIds: data.uncheckableItemIds,
+    // JSON.stringify drops an undefined value, so an index with nothing to report encodes
+    // byte-for-byte as it did before this field existed.
+    unsegmentedItemIds: data.unsegmentedItemIds,
     stats: data.stats,
     scannerVersion: data.scannerVersion,
   };
@@ -210,7 +213,9 @@ export function decodeIndex(bytes: Uint8Array): NgramIndexData {
   const reader = new ByteReader(bytes);
   const magic = String.fromCharCode(...reader.take(MAGIC.length));
   if (magic !== MAGIC) {
-    throw new Error(`not an Ingot index: expected magic ${MAGIC}, found ${JSON.stringify(magic)}`);
+    // A named error rather than a bare one: this is the branch a saved HTML error page or
+    // a half-finished download lands in, and it reaches a user on both surfaces.
+    throw new IndexUnreadableError('this file', `expected the magic ${MAGIC}, found ${JSON.stringify(magic)}`);
   }
   const codecVersion = reader.u32();
   if (codecVersion !== CODEC_VERSION) {

@@ -21,6 +21,57 @@ export function tokenize(text: string): string[] {
   return text.toLowerCase().match(WORD_RE) ?? [];
 }
 
+/**
+ * Scripts written without spaces between words.
+ *
+ * Ingot tokenizes on word boundaries, which is the right primitive for the languages its
+ * corpora are overwhelmingly written in and simply does not apply to these. A 400-character
+ * Japanese essay tokenizes to ONE token, produces no 10-gram, and is therefore unmatchable
+ * — not because it is absent from the corpus, but because the scanner has no way to look
+ * for it.
+ *
+ * That distinction has to reach the reader. The report already refuses to call a benchmark
+ * clean when part of it was never examined; a writer whose language the tokenizer cannot
+ * segment is the same situation and a far more personal one. Telling them "0 matches, and
+ * by the way 1 item was shorter than 10 tokens" would be true of the token count and false
+ * about their essay. See docs/coverage.md.
+ *
+ * Han/Hiragana/Katakana cover Chinese, Japanese and the Chinese-derived parts of Korean;
+ * Thai, Lao, Khmer, Myanmar and Tibetan are the other major unspaced scripts. Korean Hangul
+ * is deliberately absent: modern Korean does put spaces between words.
+ */
+const UNSEGMENTED_SCRIPT =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Tibetan}]/u;
+
+const LETTER_RE = /\p{L}/gu;
+
+/**
+ * The fraction of this text's letters that belong to a script Ingot cannot segment into
+ * words. 0 for English, ~1 for Japanese prose, and in between for mixed text.
+ *
+ * Measured over letters rather than all characters so that punctuation, digits and markup
+ * do not dilute the signal — a Japanese page full of ASCII numerals is still Japanese.
+ */
+export function unsegmentedScriptShare(text: string): number {
+  const letters = text.match(LETTER_RE);
+  if (letters === null || letters.length === 0) return 0;
+  let unsegmented = 0;
+  for (const ch of letters) if (UNSEGMENTED_SCRIPT.test(ch)) unsegmented++;
+  return unsegmented / letters.length;
+}
+
+/**
+ * Above this share of unsegmented letters, a text's low token count is a fact about the
+ * tokenizer rather than about the text. Half is deliberately generous: a document that is
+ * half Japanese has had half of itself go unexamined, which is worth saying out loud.
+ */
+export const UNSEGMENTED_SHARE_THRESHOLD = 0.5;
+
+/** True when this text's words cannot be found because they were never separated. */
+export function isUnsegmentedScript(text: string): boolean {
+  return unsegmentedScriptShare(text) >= UNSEGMENTED_SHARE_THRESHOLD;
+}
+
 export function sentences(text: string): string[] {
   return text
     .split(SENTENCE_SPLIT_RE)

@@ -95,6 +95,42 @@ export class IndexMissingError extends IngotError {
   }
 }
 
+/**
+ * The bytes at --index are not an index this build can read.
+ *
+ * Separate from IndexMissingError because "there is nothing there" and "there is something
+ * there and it is not an index" send the user to different places. This used to escape as
+ * a bare Error and print a Node stack trace over eight frames of module loader, which tells
+ * a buyer nothing they can act on.
+ */
+export class IndexUnreadableError extends IngotError {
+  /** Kept separately so a caller that knows the filename can re-issue this with the path. */
+  readonly detail: string;
+
+  constructor(path: string, detail: string) {
+    super(
+      'IndexUnreadableError',
+      `${path} is not a readable Ingot index: ${detail}. Published indexes are the ` +
+        `.idx.bin.gz files built by "node scripts/build-web.ts"; a partial download or an ` +
+        `HTML error page saved under that name looks exactly like this.`,
+    );
+    this.detail = detail;
+  }
+}
+
+/**
+ * The report could not be written where it was asked to go.
+ *
+ * A scan that finished and then failed to save is the most expensive failure the tool has —
+ * the work is done and the artifact is gone — so it gets its own name and says which path
+ * refused.
+ */
+export class ReportWriteError extends IngotError {
+  constructor(path: string, detail: string) {
+    super('ReportWriteError', `could not write the report to ${path}: ${detail}`);
+  }
+}
+
 export class IndexVersionError extends IngotError {
   constructor(found: number, expected: number) {
     super(

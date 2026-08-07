@@ -1,5 +1,6 @@
 import { hashTokens } from './fastTokens.ts';
 import { portableHash } from './portableHash.ts';
+import { isUnsegmentedScript } from '../text.ts';
 import { BenchmarkEmptyError, IndexVersionError } from '../errors.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import {
@@ -133,6 +134,8 @@ export class NgramIndex {
   readonly stats: IndexStats;
   /** Items nothing can ever match. See IndexStats.uncheckableItems. */
   readonly uncheckableItemIds: string[];
+  /** Of those, the ones the tokenizer could not segment. See NgramIndexData. */
+  readonly unsegmentedItemIds: string[];
   private readonly map: Map<number, number[]>;
 
   private constructor(
@@ -144,8 +147,10 @@ export class NgramIndex {
     map: Map<number, number[]>,
     stats: IndexStats,
     uncheckableItemIds: string[] = [],
+    unsegmentedItemIds: string[] = [],
   ) {
     this.uncheckableItemIds = uncheckableItemIds;
+    this.unsegmentedItemIds = unsegmentedItemIds;
     this.n = n;
     this.benchmark = benchmark;
     this.benchmarkHash = benchmarkHash;
@@ -288,6 +293,12 @@ export class NgramIndex {
       map,
       stats,
       uncheckableIdx.map((i) => items[i].id),
+      // Why each uncheckable item is uncheckable, for the ones where the reason is the
+      // scanner rather than the item. An unspaced script tokenizes to almost nothing, so it
+      // lands here by a route that has nothing to do with being short — and a report that
+      // called a Japanese essay "shorter than 10 tokens" would be describing the tokenizer
+      // while appearing to describe the writing.
+      uncheckableIdx.filter((i) => isUnsegmentedScript(items[i].text)).map((i) => items[i].id),
     );
     return built;
   }
@@ -320,6 +331,10 @@ export class NgramIndex {
       keys,
       items,
       uncheckableItemIds: this.uncheckableItemIds,
+      // Omitted entirely when empty, which is the overwhelmingly common case: an index of
+      // an English benchmark should not carry an empty array in every published artifact
+      // just because the field exists.
+      unsegmentedItemIds: this.unsegmentedItemIds.length > 0 ? this.unsegmentedItemIds : undefined,
       stats: this.stats,
       scannerVersion: SCANNER_VERSION,
     };
@@ -340,6 +355,7 @@ export class NgramIndex {
       map,
       data.stats,
       data.uncheckableItemIds ?? [],
+      data.unsegmentedItemIds ?? [],
     );
     return loaded;
   }

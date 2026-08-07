@@ -1,4 +1,5 @@
 import { IndexMismatchError } from '../errors.ts';
+import { isUsableText, TEXT_FIELD_CANDIDATES } from '../fields.ts';
 import { minhashSignature } from '../signals/nearDup.ts';
 import { SCANNER_VERSION } from '../types.ts';
 import { hashTokens } from './fastTokens.ts';
@@ -436,6 +437,8 @@ export class ScanSession {
       contaminatedItemIds: [...contaminated].sort(),
       indexStats: this.index.stats,
       uncheckableItemIds: this.index.uncheckableItemIds,
+      unsegmentedItemIds:
+        this.index.unsegmentedItemIds.length > 0 ? this.index.unsegmentedItemIds : undefined,
       elapsedMs,
       scannerVersion: SCANNER_VERSION,
       generatedAt,
@@ -443,8 +446,12 @@ export class ScanSession {
   }
 }
 
-/** Field names a corpus might use for its text, in preference order. */
-export const TEXT_FIELDS = ['text', 'response', 'output', 'completion', 'content', 'answer'];
+/**
+ * Field names a corpus might use for its text, in preference order.
+ * Re-exported for the browser bundle; the list itself lives in fields.ts so that this
+ * module and the batch loader cannot rank them differently. See fields.ts.
+ */
+export const TEXT_FIELDS = TEXT_FIELD_CANDIDATES;
 
 /** Extracts (docId, text) from one JSONL line, or null when the line carries no text. */
 export function parseCorpusLine(
@@ -461,9 +468,11 @@ export function parseCorpusLine(
   } catch {
     return null;
   }
-  const field = textField ?? TEXT_FIELDS.find((f) => typeof row[f] === 'string');
+  const field = textField ?? TEXT_FIELDS.find((f) => isUsableText(row[f]));
   if (!field) return null;
   const text = row[field];
-  if (typeof text !== 'string' || text.length === 0) return null;
+  // Whitespace-only is not a document: it is skipped, not counted as one more corpus
+  // document that happened to match nothing. See isUsableText.
+  if (!isUsableText(text)) return null;
   return { docId: String(row[idField ?? 'id'] ?? `doc${fallbackId}`), text };
 }

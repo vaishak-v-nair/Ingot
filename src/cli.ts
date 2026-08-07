@@ -1,11 +1,20 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
+import { formatArgErrors, parseArgs } from './args.ts';
 import { loadBatch } from './loader.ts';
 import { runSignals } from './signals/index.ts';
 import { scoreBatch } from './scorer.ts';
 import { renderReport } from './report.ts';
-import { BaselineMissingError, CorpusStreamError, IndexMissingError, IngotError } from './errors.ts';
+import {
+  BaselineMissingError,
+  CorpusStreamError,
+  IndexMissingError,
+  IndexUnreadableError,
+  IngotError,
+  ReportWriteError,
+} from './errors.ts';
+import type { FlagSpec } from './args.ts';
 import { SCANNER_VERSION } from './types.ts';
 import { NgramIndex } from './contamination/ngramIndex.ts';
 import { loadIndexFromBytes } from './contamination/browserScan.ts';
@@ -15,7 +24,7 @@ import { CONTAMINATION_CLAIM_SCOPE } from './contamination/types.ts';
 import type { ContaminationReport } from './contamination/types.ts';
 import type { BaselinePair, ScanReport } from './types.ts';
 
-const USAGE = `ingot ${SCANNER_VERSION}
+const USAGE = `${SCANNER_VERSION}
 Independent verification of the AI training data supply chain.
 
   ingot contaminate --index <benchmark|path> --corpus <corpus.jsonl> [options]
@@ -38,6 +47,7 @@ contaminate options
                          ordinary language, not evidence   (default 5)
   --out <path>           self-contained HTML report you can hand to a reviewer
   --json <path>          machine-readable report, including the receipt
+  --quiet                suppress the terminal summary
 
 scan options (experimental)
   --baselines <path>     reference distributions   (default data/baselines.json)
@@ -48,8 +58,54 @@ scan options (experimental)
   --json <path>          machine-readable report
   --quiet                suppress the terminal summary
 
+  ingot --version        print the scanner version and exit
+
 Ingot runs entirely on this machine. No network calls, no data retention.
 `;
+
+/**
+ * The flags each subcommand has. Anything else is refused rather than ignored — see args.ts
+ * for why an ignored flag is the worst failure mode this tool can have.
+ */
+const CONTAMINATE_FLAGS: FlagSpec = {
+  index: 'value',
+  corpus: 'value',
+  bench: 'value',
+  'text-field': 'value',
+  'id-field': 'value',
+  'max-doc-freq': 'value',
+  out: 'value',
+  json: 'value',
+  quiet: 'boolean',
+};
+
+const SCAN_FLAGS: FlagSpec = {
+  baselines: 'value',
+  'text-field': 'value',
+  'author-field': 'value',
+  'id-field': 'value',
+  out: 'value',
+  json: 'value',
+  quiet: 'boolean',
+};
+
+/**
+ * Writes an artifact, naming the path when the write fails.
+ *
+ * A scan that completes and then dies on `mkdir EEXIST` because the parent of --out is a
+ * regular file used to print a Node stack trace, having thrown away several minutes of
+ * work. The failure is the same; what the user is told about it is not.
+ */
+function writeArtifact(path: string, contents: string): string {
+  const full = resolve(path);
+  try {
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, contents, 'utf8');
+  } catch (err) {
+    throw new ReportWriteError(full, err instanceof Error ? err.message : String(err));
+  }
+  return full;
+}
 
 export function loadBaselines(path: string): BaselinePair {
   if (!existsSync(path)) throw new BaselineMissingError(path);
@@ -70,30 +126,6 @@ ${bodyHtml.slice(0, bodyHtml.indexOf('<div class="wrap">'))}
 ${bodyHtml.slice(bodyHtml.indexOf('<div class="wrap">'))}
 </body>
 </html>`;
-}
-
-function parseArgs(argv: string[]): { positional: string[]; flags: Map<string, string> } {
-  const flags = new Map<string, string>();
-  const positional: string[] = [];
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a.startsWith('--')) {
-      const key = a.slice(2);
-      if (key === 'quiet') flags.set(key, 'true');
-      else {
-        // A flag whose value is missing — end of argv, or the next token is another
-        // flag — must NOT eat that next token, and must not quietly become a value.
-        // `--max-doc-freq` with nothing after it used to parse as '' and Number('')
-        // is 0, which dropped every match as ordinary language: a green verdict
-        // manufactured by a typo. The empty value survives to the per-flag checks,
-        // which refuse it loudly.
-        const next = argv[i + 1];
-        if (next === undefined || next.startsWith('--')) flags.set(key, '');
-        else flags.set(key, argv[++i]);
-      }
-    } else positional.push(a);
-  }
-  return { positional, flags };
 }
 
 function terminalSummary(report: ScanReport): string {
@@ -119,7 +151,17 @@ function terminalSummary(report: ScanReport): string {
 }
 
 export function runScan(argv: string[]): number {
-  const { positional, flags } = parseArgs(argv);
+  const { positional, flags, errors } = parseArgs(argv, SCAN_FLAGS);
+  if (errors.length > 0) {
+    process.stderr.write(formatArgErrors(errors));
+    return 2;
+  }
+  if (positional.length > 1) {
+    process.stderr.write(
+      formatArgErrors([`scan takes one batch file, got ${positional.length}: ${positional.join(', ')}`]),
+    );
+    return 2;
+  }
   const batchPath = positional[0];
   if (!batchPath) {
     process.stdout.write(USAGE);
@@ -136,15 +178,13 @@ export function runScan(argv: string[]): number {
   const signals = runSignals(load.records);
   const report = scoreBatch(basename(batchPath), load.records, signals, pair, load);
 
-  const outPath = resolve(flags.get('out') ?? `reports/${basename(batchPath).replace(/\.jsonl?$/i, '')}.html`);
-  mkdirSync(dirname(outPath), { recursive: true });
-  writeFileSync(outPath, wrapDocument(renderReport(report)), 'utf8');
+  const outPath = writeArtifact(
+    flags.get('out') ?? `reports/${basename(batchPath).replace(/\.jsonl?$/i, '')}.html`,
+    wrapDocument(renderReport(report)),
+  );
 
   const jsonPath = flags.get('json');
-  if (jsonPath) {
-    mkdirSync(dirname(resolve(jsonPath)), { recursive: true });
-    writeFileSync(resolve(jsonPath), JSON.stringify(report, null, 2), 'utf8');
-  }
+  if (jsonPath) writeArtifact(jsonPath, JSON.stringify(report, null, 2));
 
   if (!flags.has('quiet')) {
     process.stdout.write(terminalSummary(report));
@@ -168,7 +208,14 @@ const BUNDLED_INDEX_DIR = resolve(import.meta.dirname, '../web/indexes');
  * requiring a path into node_modules would make the one-command promise a lie.
  */
 function resolveIndexPath(value: string): string {
-  if (existsSync(value)) return value;
+  // A directory that happens to share a benchmark's name used to reach readFileSync and
+  // exit on a raw EISDIR stack. An index is a file; anything else is not one.
+  if (existsSync(value)) {
+    if (statSync(value).isDirectory()) {
+      throw new IndexUnreadableError(value, 'it is a directory, not an index file');
+    }
+    return value;
+  }
 
   const bundled = resolve(BUNDLED_INDEX_DIR, `${value}.idx.bin.gz`);
   if (existsSync(bundled)) return bundled;
@@ -181,12 +228,50 @@ function resolveIndexPath(value: string): string {
   throw new IndexMissingError(value, available);
 }
 
-function loadIndexFile(path: string): Promise<NgramIndex> {
-  const bytes = readFileSync(path);
-  // The binary form is what ships; JSON stays supported because it is the specification
-  // and because someone will inevitably hand-build one.
-  if (path.endsWith('.json')) return Promise.resolve(NgramIndex.load(JSON.parse(bytes.toString('utf8'))));
-  return loadIndexFromBytes(bytes);
+/**
+ * Reads an index, turning every way that can fail into a sentence.
+ *
+ * A truncated .gz reached this as a bare `TypeError` carrying no message at all — thrown
+ * from inside Node's webstreams adapter, eight frames deep, with nothing naming the file or
+ * the problem. A partial download is the single likeliest thing to go wrong with a 5 MB
+ * artifact fetched over a flaky connection, so it is the last failure that should be
+ * undiagnosable. Errors that already know how to describe themselves pass through untouched.
+ */
+async function loadIndexFile(path: string): Promise<NgramIndex> {
+  let bytes: Buffer;
+  try {
+    bytes = readFileSync(path);
+  } catch (err) {
+    throw new IndexUnreadableError(path, err instanceof Error ? err.message : String(err));
+  }
+
+  // Whether the bytes even claim to be what they are named tells us which failure to
+  // describe. A gzip member that starts correctly and then fails to inflate is a cut-short
+  // download; that is by far the likeliest thing to go wrong with a 5 MB artifact, and it
+  // used to surface as a TypeError carrying no message at all.
+  const looksGzipped = bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
+
+  try {
+    // The binary form is what ships; JSON stays supported because it is the specification
+    // and because someone will inevitably hand-build one.
+    if (path.endsWith('.json')) return NgramIndex.load(JSON.parse(bytes.toString('utf8')));
+    return await loadIndexFromBytes(bytes);
+  } catch (err) {
+    // Re-issued around the real path: the codec runs in the browser too and cannot know
+    // what the file was called, so it names the reason and leaves the subject to us.
+    if (err instanceof IndexUnreadableError) throw new IndexUnreadableError(path, err.detail);
+    // Errors that already describe themselves completely — a truncated body, a version
+    // mismatch — pass through rather than being wrapped in a second sentence.
+    if (err instanceof IngotError) throw err;
+    throw new IndexUnreadableError(
+      path,
+      err instanceof Error && err.message
+        ? err.message
+        : looksGzipped
+          ? `the gzip data is corrupt or the download was cut short — ${bytes.length.toLocaleString('en-US')} bytes were read`
+          : 'the bytes could not be decoded',
+    );
+  }
 }
 
 function contaminationSummary(report: ContaminationReport, indexLabel: string): string {
@@ -226,6 +311,16 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
       `    ${report.uncheckableItemIds.length} item(s) produced no n-gram at n=${report.n}, so nothing`,
     );
     lines.push('    could ever match them. They are named in the JSON report.');
+    // Called out on its own line because it is the one case where "not checked" is a fact
+    // about Ingot rather than about the text. See reportHtml.
+    const unsegmented = report.unsegmentedItemIds?.length ?? 0;
+    if (unsegmented > 0) {
+      lines.push(
+        `    ${unsegmented} of those are written in a script this scanner cannot split into`,
+      );
+      lines.push('    words (Chinese, Japanese, Thai and the other unspaced scripts). For those,');
+      lines.push('    a clean result means we could not look, not that we looked and found nothing.');
+    }
   }
   if (exact.droppedGeneric) {
     lines.push(`    ${exact.droppedGeneric} match(es) dropped as ordinary language by corpus frequency`);
@@ -259,7 +354,18 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
 }
 
 export async function runContaminate(argv: string[]): Promise<number> {
-  const { flags } = parseArgs(argv);
+  const { positional, flags, errors } = parseArgs(argv, CONTAMINATE_FLAGS);
+  if (positional.length > 0) {
+    errors.push(
+      `contaminate takes no positional arguments, got ${positional.map((p) => `"${p}"`).join(', ')}` +
+        ` — the corpus goes after --corpus`,
+    );
+  }
+  if (errors.length > 0) {
+    process.stderr.write(formatArgErrors(errors));
+    return 2;
+  }
+
   const indexArg = flags.get('index');
   const corpusPath = flags.get('corpus');
 
@@ -322,16 +428,10 @@ export async function runContaminate(argv: string[]): Promise<number> {
   }
 
   const jsonPath = flags.get('json');
-  if (jsonPath) {
-    mkdirSync(dirname(resolve(jsonPath)), { recursive: true });
-    writeFileSync(resolve(jsonPath), JSON.stringify(report, null, 2), 'utf8');
-  }
+  if (jsonPath) writeArtifact(jsonPath, JSON.stringify(report, null, 2));
 
   const htmlPath = flags.get('out');
-  if (htmlPath) {
-    mkdirSync(dirname(resolve(htmlPath)), { recursive: true });
-    writeFileSync(resolve(htmlPath), renderContaminationReport(report), 'utf8');
-  }
+  if (htmlPath) writeArtifact(htmlPath, renderContaminationReport(report));
 
   if (!flags.has('quiet')) {
     // The argument, not the resolved path: an absolute path into node_modules is noise in
@@ -347,20 +447,23 @@ export async function runContaminate(argv: string[]): Promise<number> {
 
 export async function main(): Promise<void> {
   const argv = process.argv.slice(2);
-  const command = argv.find((a) => !a.startsWith('--')) ?? '';
+  // The subcommand is the first token, not the first token that happens not to be a flag.
+  // Scanning argv for it meant `--corpus contaminate` could nominate a flag's own value as
+  // the command, and the old `indexOf(command)` slice then cut argv in the wrong place.
+  const command = argv[0] ?? '';
 
-  if (!command || command === 'help') {
+  if (command === '' || command === 'help' || command === '--help' || command === '-h') {
     process.stdout.write(USAGE);
+    process.exit(0);
+  }
+  if (command === '--version' || command === '-v') {
+    process.stdout.write(`${SCANNER_VERSION}\n`);
     process.exit(0);
   }
 
   try {
-    if (command === 'scan') {
-      process.exit(runScan(argv.slice(argv.indexOf('scan') + 1)));
-    }
-    if (command === 'contaminate') {
-      process.exit(await runContaminate(argv.slice(argv.indexOf('contaminate') + 1)));
-    }
+    if (command === 'scan') process.exit(runScan(argv.slice(1)));
+    if (command === 'contaminate') process.exit(await runContaminate(argv.slice(1)));
     process.stderr.write(`unknown command "${command}"\n\n${USAGE}`);
     process.exit(2);
   } catch (err) {
@@ -368,6 +471,14 @@ export async function main(): Promise<void> {
       process.stderr.write(`\n  ${err.name}: ${err.userMessage}\n\n`);
       process.exit(1);
     }
+    // Anything reaching here is a bug in Ingot rather than a problem with the invocation,
+    // and it must read as one. A bare stack trace invites the user to believe they held it
+    // wrong; the trace is still printed, because a bug report without one is unactionable.
+    process.stderr.write(
+      `\n  Ingot hit an internal error and stopped. This is a bug in ${SCANNER_VERSION}, not\n` +
+        `  a problem with your command. Please report it with the trace below:\n` +
+        `  https://github.com/vaishak-v-nair/Ingot/issues\n\n`,
+    );
     throw err;
   }
 }

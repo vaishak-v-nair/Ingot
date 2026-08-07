@@ -105,7 +105,7 @@ yourself are used.
 From a clone, with no install step at all:
 
 ```bash
-node --test test/*.test.ts        # 96 tests; the defect log is docs/measurements.md
+node --test test/*.test.ts        # 120 tests; the defect log is docs/measurements.md
 
 node scripts/fetch-benchmarks.ts  # public benchmarks, normalised
 node scripts/build-web.ts         # browser bundle + publishable indexes
@@ -236,6 +236,8 @@ instead of trusting it. All are written up in `docs/measurements.md` and guarded
 
 ## Documentation
 
+- `docs/coverage.md` — every way a clean result can mean "we could not have looked" rather
+  than "we looked and found nothing", and what Ingot reports about each one
 - `docs/measurements.md` — every published number, how it was measured, and every wrong
   turn taken on the way
 - `docs/threat-model.md` — what leaves your machine, what the hashes do and do not protect,
