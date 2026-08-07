@@ -105,6 +105,57 @@
               color: var(--gold); text-decoration: underline; text-underline-offset: 3px;
               cursor: pointer; }
   .samplelink { margin: .65rem 0 0; font-size: .85rem; color: var(--dim); }
+
+  /* ── The exhibit, the claim, the offer (writer-first, 2026-08-07) ──────────────────
+     Direction C: evidence arrives before the pitch. Sized so the exhibit AND the offer
+     share the first viewport — an earlier draft set the specimen at 1.7rem and pushed the
+     CTA below 744px, which is the same burial defect this restructure exists to fix,
+     committed differently. Reading size, not poster size. */
+  .exhibit { padding: 1.6rem 0 0; }
+  .exhibit-label { display: flex; gap: .9rem; flex-wrap: wrap; align-items: baseline;
+                   font-family: var(--mono); font-size: .66rem; letter-spacing: .22em;
+                   text-transform: uppercase; color: var(--dim); margin: 0 0 1rem; }
+  .illus { color: var(--hot); border: 1px solid var(--line); padding: .15rem .45rem; }
+  .specimen { font-size: clamp(1.05rem, 1.55vw, 1.3rem); line-height: 1.5; max-width: 62ch;
+              letter-spacing: -.005em; margin: 0; }
+  /* An underline, never a fill: --hot is a signal and DESIGN.md says a signal is never a
+     fill. It also survives being printed in greyscale, which a highlight does not. */
+  .specimen mark { background: transparent; color: var(--ink);
+                   border-bottom: 2px solid var(--hot); padding-bottom: 2px; }
+  .found { font-family: var(--mono); font-size: .74rem; color: var(--dim); margin: .7rem 0 0;
+           padding-top: .6rem; border-top: 1px solid var(--line); }
+  .found b { color: var(--hot); font-weight: 400; }
+
+  .claim { padding: 1.6rem 0 2.4rem; margin-top: 1.2rem; border-top: 1px solid var(--line); }
+  .claim h1 { max-width: 17ch; }
+  .claim .says-what { max-width: 42ch; }
+  /* Amber, because a finding is what this button leads to. The one filled element on the
+     page: the primary action earns a fill the way nothing else does. */
+  .cta { display: inline-block; font-family: var(--display); font-weight: 600;
+         font-size: 1.15rem; letter-spacing: -.01em; color: var(--paper);
+         background: var(--hot); padding: .85rem 1.6rem; text-decoration: none;
+         min-height: 44px; }
+  .cta:hover { filter: brightness(1.08); }
+  .cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .cta-note, .cta-sent { font-size: .86rem; color: var(--dim); margin: 1rem 0 0; max-width: 44ch; }
+  .cta-sent .dot { margin-right: .45rem; }
+  .cta-sent code { font-family: var(--mono); color: var(--ink); font-size: .82rem; }
+  .expect { margin: 1.4rem 0 0; }
+  .expect summary { font-size: .86rem; color: var(--dim); cursor: pointer; }
+  .expect summary:hover { color: var(--ink); }
+  .expect dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .9rem;
+               margin: .9rem 0 0; font-size: .86rem; max-width: 52ch; }
+  .expect dt { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em;
+               text-transform: uppercase; color: var(--dim); padding-top: .18rem; }
+  .expect dd { margin: 0; }
+  .toolhead { padding: 1.2rem 0 .2rem; border-top: 1px solid var(--line); }
+  .toolhead h3 { margin: .5rem 0 .5rem; }
+
+  /* T6: two columns only where there is room for two. Unconditional, this grid crushed the
+     claim column at 390px. */
+  @media (min-width: 60rem) {
+    .claim { display: grid; grid-template-columns: 1.35fr 1fr; gap: 3.5rem; align-items: start; }
+  }
   /* The focus contract: the gold rule, drawn around whatever the keyboard is on. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .big { font-family: var(--mono); font-size: 2.6rem; line-height: 1; font-weight: 600; }
@@ -348,18 +399,79 @@
 <div class="page">
 <main class="col">
 
-<header class="wrap">
-  <h1>What's inside AI training data?</h1>
-  <!-- The h1 asks the question everyone shares; this line makes it personal and concrete
-       before the page says how anything works. Reframed 2026-08-01 (design doc): the
-       reader's own words are the front door, the benchmark question is the wing. -->
-  <p class="says-what">Ingot shows you which exact words — yours, or a benchmark's — are
-  inside the data an AI learned from. The words themselves, not a score.</p>
+<!-- THE EXHIBIT. The page opens mid-evidence: somebody's sentence with the taken words
+     marked, before any headline or pitch. Direction C, chosen 2026-08-07 — it performs the
+     differentiator instead of describing it, which is the one thing no competitor page can
+     copy without building the scanner. The h1 sits UNDER it as the caption. -->
+<section class="wrap exhibit">
+  <p class="exhibit-label">
+    <span class="illus">Illustration</span>
+    <span>What a finding looks like &middot; C4, the April 2019 crawl</span>
+  </p>
+  <!-- Labelled an illustration because it is one. Presenting composed prose as a real
+       finding would be the exact overclaim every gate in this repository exists to prevent,
+       and a trust product cannot spend its credibility on its own hero. -->
+  <p class="specimen">&hellip;Reprinted without permission:
+    <mark>My grandmother kept her recipes on index cards in a tin that had once held
+    shortbread. The handwriting changes across four decades, from a schoolgirl copperplate
+    to something looser and more urgent.</mark>&hellip;</p>
+  <p class="found"><b>32 words, verbatim.</b> A composed example. Real reports show your own sentences.</p>
+</section>
+
+<!-- THE CLAIM. Headline as caption to the exhibit, and the primary action beside it.
+     The offer shares the first viewport deliberately: the week-3 kill rule counts inbound
+     requests through this link, so burying it would measure the layout rather than the
+     demand. -->
+<section class="wrap claim">
+  <div>
+    <h1>What's inside AI training data?</h1>
+    <p class="says-what">Ingot searches public AI training datasets for your exact
+    sentences and shows you the ones it finds — or tells you plainly that it could not
+    have looked.</p>
+
+    <!-- The intake channel from the design doc: writers ask, the founder runs the check.
+         A mailto is deliberately the whole mechanism — no form, no backend, no promises.
+         CSP form-action 'none' enforces that at the header, so this cannot quietly become
+         a form without a deliberate change. -->
+    <a class="cta" id="check-mine"
+       href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Check my writing &rarr;</a>
+
+    <!-- A mailto has no states. Without these the click opens a mail client and the page
+         behind it says nothing: no confirmation, no expectation, and nothing at all for a
+         visitor whose browser has no mail handler. An undesigned success state suppresses
+         exactly the costly acts the five-writer bar measures. -->
+    <p class="cta-note" id="check-note">Send a link to anything you&rsquo;ve published.
+    Free, no signup, nothing installed, and nothing you send is kept.</p>
+    <p class="cta-sent" id="check-sent" hidden>
+      <span class="dot"></span>Your mail client should have opened. If it didn&rsquo;t, the
+      address is <code>vaishak.v.nair.dev@gmail.com</code> —
+      <button class="linklike" id="copy-mail" type="button">copy it</button>.
+    </p>
+
+    <details class="expect">
+      <summary>What happens after you send it</summary>
+      <dl>
+        <dt>what you send</dt><dd>a public link to something you wrote. Nothing unpublished.</dd>
+        <dt>what comes back</dt><dd>the matching text if there is any, the dataset it sits in, and the command to reproduce it yourself</dd>
+        <dt>how long</dt><dd>a few days. Every check is run by hand.</dd>
+        <dt>what is kept</dt><dd>nothing. The report is yours; no copy is published without your say-so.</dd>
+      </dl>
+      <p class="samplelink"><a href="sample-report.html" target="_blank" rel="noopener">See a sample report &rarr;</a> — the real thing, opened from disk with no network.</p>
+    </details>
+  </div>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; press F12 and watch the network stay empty</span></p>
-  <!-- The intake channel from the design doc: writers ask, the founder runs the check.
-       A mailto is deliberately the whole mechanism — no form, no backend, no promises. -->
-  <p class="samplelink" style="margin-top:.7rem">Write online? <a href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Ask for a free check of your own words</a> — send a link to your public writing, get back a report with the matching text and a receipt.</p>
-</header>
+</section>
+
+<!-- THE PROOF. The scanner was the primary control until 2026-08-07; it is now the
+     evidence for the offer above. It still runs itself on arrival, which is the point —
+     the argument for the mailto is a working instrument on the same page. -->
+<div class="wrap toolhead">
+  <p class="kicker">Proof</p>
+  <h3>The scanner is running on this page right now</h3>
+  <p class="sub">It read a corpus in this tab, on your CPU, and nothing left the machine.
+  The same engine runs your check. <strong>Evaluating a model instead?</strong> Drop your
+  own training data below — any size, it streams.</p>
+</div>
 
 <div class="wrap tool">
   <div class="row">
@@ -691,6 +803,61 @@ const INDEXES = [
 const SAMPLE_URL = './sample-corpus.jsonl';
 
 const $ = (id) => document.getElementById(id);
+
+/**
+ * The primary action's missing states.
+ *
+ * A mailto: has none — no loading, no success, no error. The click hands off to whatever
+ * the OS decides, and the page behind it says nothing. Two consequences, both bad for the
+ * one control the week-3 demand gate counts: a visitor cannot tell whether it worked, and
+ * a visitor whose browser has NO mail handler configured sees literally nothing happen and
+ * has no address to fall back on. Reading that as "writers don't want this" would be
+ * reading a broken control as a measurement.
+ *
+ * The page cannot know the mail was sent — only that the handoff happened and the tab came
+ * back. So it says exactly that, and hands over the address either way. Everything here is
+ * additive: with JS off the CTA is still a working mailto link and the note below it still
+ * explains the offer, which is DESIGN.md's rule that the no-JS page loses motion, never
+ * content.
+ */
+const MAILTO_ADDRESS = 'vaishak.v.nair.dev@gmail.com';
+const cta = $('check-mine');
+if (cta) {
+  let handedOff = false;
+  cta.addEventListener('click', () => {
+    handedOff = true;
+    // The tab regaining focus is the only signal available that the handoff completed and
+    // the visitor is back. visibilitychange fires on tab switch; focus covers the case
+    // where the mail client opened over the top without hiding the tab.
+    const confirm = () => {
+      if (!handedOff) return;
+      const note = $('check-note');
+      const sent = $('check-sent');
+      if (note) note.hidden = true;
+      if (sent) sent.hidden = false;
+    };
+    addEventListener('visibilitychange', () => { if (!document.hidden) confirm(); }, { once: true });
+    addEventListener('focus', confirm, { once: true });
+    // Nothing may have a mail handler at all, in which case neither event fires and the
+    // visitor is stranded. After a beat, show the address anyway — a fallback that only
+    // appears when something went wrong is a fallback nobody sees.
+    setTimeout(confirm, 2500);
+  });
+}
+
+const copyMail = $('copy-mail');
+if (copyMail) {
+  copyMail.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(MAILTO_ADDRESS);
+      copyMail.textContent = 'copied';
+    } catch {
+      // Clipboard access can be refused, and a button that silently does nothing is worse
+      // than one that admits it. The address is already on screen either way.
+      copyMail.textContent = 'select it above';
+    }
+  });
+}
 
 /**
  * Motion is additive. The reveal styles hide content only once this class lands, so a

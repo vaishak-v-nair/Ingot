@@ -30,6 +30,9 @@ const REQUIRED = [
   'web/index.html',
   'web/about.html',
   'web/registry.html',
+  // The sample a writer is shown before they spend an email. Generated from the real
+  // renderer, so it cannot drift into promising a document the tool does not produce.
+  'web/sample-report.html',
   // The shared design layer. Every page links it, so a missing or empty file unstyles the
   // whole site while every page still renders — exactly the "looks fine, is broken" case
   // this manifest exists to catch.
@@ -63,8 +66,18 @@ for (const f of REQUIRED) {
   else process.stdout.write(`  ok    ${f.padEnd(38)} ${size.toLocaleString().padStart(10)} bytes\n`);
 }
 
-/** The drop target is the product. A build that loses it produces a page that looks fine. */
+/**
+ * Two product surfaces, both guarded.
+ *
+ * The writer CTA is the primary action since 2026-08-07 — it is the control the week-3
+ * demand gate counts — and the drop target is the eval path and the live proof. This check
+ * used to guard only the dropzone, with a comment calling it "the product". That was true
+ * before the reframe and false after it, which left the promoted control with no
+ * build-time guard while the demoted one kept its.
+ */
 const index = readFileSync(resolve('web/index.html'), 'utf8');
+if (!index.includes('id="check-mine"')) fail('web/index.html has no id="check-mine" — the writer CTA is gone');
+else process.stdout.write('  ok    web/index.html carries the writer CTA\n');
 if (!index.includes('id="drop"')) fail('web/index.html has no id="drop" — the scanner UI is gone');
 else process.stdout.write('  ok    web/index.html carries the drop target\n');
 

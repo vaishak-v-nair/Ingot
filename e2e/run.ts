@@ -208,6 +208,58 @@ check(
 );
 check('S8 no console errors', browser.errors.length === 0, browser.errors.join(' | '));
 
+// ---- S9: the primary action ----
+// The writer CTA is what the week-3 demand gate counts. Until this scenario existed the
+// suite bound to three ids and all three belonged to the scanner, so the one control the
+// product decision rests on had no coverage at all. A CTA that is present but below the
+// fold, or that does nothing for a visitor with no mail handler, reads as "writers did not
+// want this" — a broken control misread as a measurement.
+const ctaHref = await browser.eval<string>(
+  `document.getElementById('check-mine')?.getAttribute('href') ?? ''`,
+);
+check('S9 the writer CTA exists and is a mailto link', ctaHref.startsWith('mailto:'), ctaHref.slice(0, 40));
+
+// Above the fold at both a laptop and a phone. 1366x768 is the narrow desktop case where
+// an earlier draft of this layout pushed the CTA off-screen; 390x844 is the phone.
+for (const [w, h] of [
+  [1366, 768],
+  [390, 844],
+] as const) {
+  await browser.send('Emulation.setDeviceMetricsOverride', {
+    width: w, height: h, deviceScaleFactor: 1, mobile: w < 500,
+  });
+  await browser.goto(`http://127.0.0.1:${server.port}/?noauto=1`);
+  const top = await browser.eval<number>(
+    `document.getElementById('check-mine').getBoundingClientRect().top`,
+  );
+  check(
+    `S9 the CTA is in the first viewport at ${w}x${h}`,
+    top >= 0 && top < h,
+    `top=${Math.round(top)} viewport=${h}`,
+  );
+}
+await browser.send('Emulation.clearDeviceMetricsOverride');
+await browser.goto(`http://127.0.0.1:${server.port}/?noauto=1`);
+
+// The fallback address is the only thing standing between a visitor with no mail handler
+// and a dead end. It ships in the markup rather than being injected, so it survives a
+// script that never runs.
+const fallback = await browser.eval<string>(
+  `document.getElementById('check-sent')?.textContent ?? ''`,
+);
+check(
+  'S9 a mail-handler fallback address is in the markup',
+  fallback.includes('@'),
+  fallback.trim().slice(0, 60),
+);
+
+// DESIGN.md: the no-JS page loses motion, never content. The CTA must work without the
+// script, which it does by being a plain link rather than a button with a handler.
+const ctaTag = await browser.eval<string>(`document.getElementById('check-mine').tagName`);
+check('S9 the CTA works without JavaScript (it is an anchor)', ctaTag === 'A', ctaTag);
+
+check('S9 no console errors', browser.errors.length === 0, browser.errors.join(' | '));
+
 browser.close();
 server.close();
 

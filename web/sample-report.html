@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ingot — your writing in c4-en (26 shards)</title>
+<style>
+  /* Cleanroom Instrument, as specified in DESIGN.md — the same tokens, radius and colour
+     semantics as the site. This document was left behind by the 2026-08-01 redesign and
+     kept the archived warm-paper-and-gold palette, 14px radii and card surfaces for two
+     releases, which meant the one artifact that actually leaves the building looked
+     nothing like the product that produced it.
+
+     Two deliberate departures, both forced by this file's older and stronger constraint —
+     it must open correctly from an email attachment, on a machine with no network, years
+     from now:
+
+       1. System faces, not Archivo/Public Sans/JetBrains Mono. Embedding three subsetted
+          woff2 files as data URIs would multiply a 6 KB report by fifty to carry the brand
+          into a document whose job is evidence. The stack below keeps the register —
+          neo-grotesque UI face, real mono for hashes — without a byte of payload.
+       2. No color-mix(). A report read in 2031 by whatever browser is to hand should not
+          depend on a 2023 colour function to render its evidence legibly. */
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    color-scheme: dark;
+    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31;
+    --brand: #9BA1A6; --sig: #F59E0B; --ok: #4ADE80; --bad: #F87171;
+    --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { color-scheme: light;
+            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA;
+            --brand: #43474B; --sig: #B45309; --ok: #15803D; --bad: #B91C1C; }
+  }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+  .wrap { max-width: 54rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  .brand { font-family: var(--mono); font-size: .74rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.15; margin: .5rem 0 .3rem;
+       letter-spacing: -.02em; font-weight: 600; }
+  .sub { color: var(--dim); margin: 0 0 2rem; font-size: .95rem; }
+  h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim);
+       margin: 2.4rem 0 .7rem; font-weight: 600; }
+  p { max-width: 62ch; }
+  /* Hairline rules, never a card. An instrument marks a reading; it does not frame it. */
+  .verdict { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.6rem 0; }
+  .verdict.refused { border-color: var(--bad); }
+  .big { font-family: var(--mono); font-size: 2.8rem; line-height: 1; font-weight: 600; }
+  /* Colour is testimony. Green is the only green and means verified-clean; amber means a
+     finding that has to be read; red is refusals and errors only, never a verdict. A count
+     of matches used to render red, which told the reader "error" about a measurement. */
+  .big.clean { color: var(--ok); } .big.dirty { color: var(--sig); } .big.refused { color: var(--bad); }
+  .label { color: var(--dim); font-size: .76rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .45rem; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .7rem
+           .5rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; white-space: nowrap; }
+  td { font-family: var(--mono); word-break: break-word; }
+  .hit { border-left: 2px solid var(--line); padding: .1rem 0 .1rem 1rem; margin: 0 0 1.1rem; }
+  .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
+  .quote { margin: .45rem 0 0; font-size: .93rem; }
+  /* An underline rather than a fill: --sig is a signal, and DESIGN.md says it is never a
+     fill. It also survives being printed in greyscale, which a highlight does not. */
+  mark { background: transparent; color: inherit; border-bottom: 2px solid var(--sig); }
+  pre { font-family: var(--mono); font-size: .76rem; border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line); padding: 1rem 0; overflow-x: auto;
+        white-space: pre-wrap; word-break: break-word; }
+  .note, .ids { color: var(--dim); font-size: .86rem; }
+  .ids { font-family: var(--mono); word-break: break-word; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .82rem; }
+  @media print {
+    :root { color-scheme: light; --paper: #fff; --ink: #000; --dim: #444; --line: #bbb;
+            --brand: #333; --sig: #8a5200; --ok: #0f5c26; --bad: #8f1515; }
+    body { font-size: 11pt; }
+    .hit, .verdict, pre { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Ingot &middot; sample</div>
+  <p style="font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sig);border:1px solid var(--line);padding:.35rem .6rem;display:inline-block;margin:.8rem 0 0">Illustration — not a real scan</p>
+  <h1>your writing in c4-en (26 shards)</h1>
+  <p class="sub">Contamination scan · 2026-08-07T09:00:00.000Z · ingot-0.1.5</p>
+
+  <div class="verdict">
+    <div class="big dirty">1</div>
+    <div class="label">of 3 pieces of writing appear in this corpus</div>
+    <p style="margin:.9rem 0 0">Read the matches below before concluding anything. Canonical text with one natural phrasing looks identical to leakage in any count, and only the words tell you which this is.</p>
+  </div>
+
+  <h2>What was checked</h2>
+  <div class="scroll"><table>
+    <tr><th>indexed</th><td>your writing, 3 pieces of writing at n=10</td></tr>
+    <tr><th>corpus</th><td>c4-en (26 shards) · 9,264,249 documents · 3,418,685,530 tokens</td></tr>
+    <tr><th>matches kept</th><td>1</td></tr>
+    <tr><th>dropped as ordinary language</th><td>0</td></tr>
+    <tr><th>could not be checked</th><td>0 pieces of writing</td></tr>
+    <tr><th>scan time</th><td>3067.0s</td></tr>
+    <tr><th>near-duplicate tier</th><td>needs the text of what was indexed; this run carried hashes only</td></tr>
+  </table></div>
+
+  <h2>Evidence — judge it yourself</h2>
+  <p>Every match below is verbatim. Some overlaps are canonical facts with one natural
+  phrasing rather than contamination, and the only way to tell is to read the text.</p>
+      <div class="hit">
+        <code>essay-2 &rarr; c4-train.00007 · doc 411,982</code>
+        <p class="quote">…Reprinted without permission: <mark>My grandmother kept her recipes on index cards in a tin that had once held shortbread. The handwriting changes across four decades, from a schoolgirl copperplate to something looser and more urgent.</mark> What a lovely piece.…</p>
+      </div>
+
+
+    <h2>What was not checked</h2>
+    <p>Nothing. Every piece of writing produced at least one 10-gram, so every one of them
+    was genuinely examined.</p>
+
+  <h2>Receipt — reproduce this without asking anyone</h2>
+  <pre>scanner        ingot-0.1.5, index format 3
+index          your writing · n=10 · stride 1 · 406 grams
+benchmark hash 89bee225be93a2c85b2597b7da32bada
+corpus         c4-en (26 shards) · 21,330,000,000 bytes · 9,264,249 docs
+corpus hash    fa98d595f8fdea47
+corpus sha256  56e0965c421d4d642a18aeba27af3bb6c69f6a56d553bce96ec803261170bf2b
+generated      2026-08-07T09:00:00.000Z
+
+node scripts/build-index.ts reports/writer.jsonl --name &quot;your writing&quot; --item-noun &quot;piece of writing|pieces of writing&quot; --out reports/writer.idx.bin.gz &amp;&amp; node src/cli.ts contaminate --index reports/writer.idx.bin.gz --corpus ../corpora/c4-en/ --out report.html</pre>
+  <p class="note">The corpus hash covers the first 64 lines, every thousandth line after that,
+  and the exact line and byte counts. The full SHA-256 above covers every line. Neither stops someone who edits their own corpus to pass a scan.</p>
+
+  <footer>
+    Exact-tier findings are verbatim n-gram matches you can reproduce from the same public files. Near and semantic tiers are reported separately and are not counted in the headline.<br><br>
+    Generated by Ingot, Apache-2.0. This file is self-contained: no scripts, no external
+    requests, nothing loaded from a network. Nothing about the scanned corpus was uploaded
+    anywhere to produce it.
+  </footer>
+</div>
+</body>
+</html>

@@ -8,13 +8,24 @@ directions after competitive research and an independent outside design voice.
 
 ## Product context
 
-- **What this is:** a benchmark-contamination scanner. Point it at a benchmark and a
-  training corpus and it shows the overlapping text verbatim, with a receipt.
-- **Who it's for:** ML engineers and eval teams — and, increasingly, the people who buy
-  model claims.
+- **What this is:** a scanner that finds exact text inside public AI training corpora and
+  shows the overlap verbatim, with a receipt. Two front doors onto one engine: a person
+  asking whether their own published writing is in there, and an eval team asking whether a
+  benchmark is.
+- **Who it's for:** **writers first** — someone who published online and wants to know
+  whether their sentences are inside the data an AI learned from. Eval teams and the people
+  who buy model claims are the institutional wing, served by the registry and the CLI.
+  <br>*Corrected 2026-08-07. This file said "ML engineers and eval teams" from the day it
+  was written — which was 2026-08-01, the same day the product reframed to lead with the
+  personal check. The site inherited the mismatch and kept it for six days: a writer's
+  headline sitting above an engineer's primary control, with the writer's own path a text
+  link two-thirds down the page. A design system specified for the audience the product no
+  longer leads with will keep producing correct-looking answers to the wrong question.*
 - **Space:** developer tooling / eval infrastructure. Peers measured 2026-08-01: Linear,
   Stripe, Semgrep, Raycast, Vercel (screenshots in the design consultation record).
-- **Project type:** static site, no backend. The working scanner **is** the front page.
+- **Project type:** static site, no backend. The working scanner is **on** the front page
+  and runs itself on arrival — it is the proof, not the ask. (It *was* the front page until
+  2026-08-07; see the amended category note.)
 
 **The one thing to remember:** *this is a live instrument, not a brochure — every
 coloured pixel is a measurement.*
@@ -26,9 +37,17 @@ coloured pixel is a measurement.*
   decoration that is not an instrument marking.
 - **Decoration level:** minimal. Rules, tabular numerals and one calibrated signal colour
   carry everything. No gradients, no glass, no glow, no icons, no photography, no cards.
-- **Category note (carried over, still true):** every peer leads with a marketing
-  headline; Ingot leads with the working tool. Do not "fix" this by adding a hero above
-  the scanner. A screenshot of the product would be absurd — the product is on the page.
+- **Category note, amended 2026-08-07:** every peer leads with a marketing headline. Ingot
+  leads with **evidence** — a real finding, marked, at reading size, before any pitch. The
+  working tool is still on the page and still runs itself on arrival, but it is now the
+  *proof of the offer* rather than the offer. **The working tool leads as evidence; the
+  offer leads as action.**
+  <br>The original form of this law — "Ingot leads with the working tool, do not add a hero
+  above the scanner" — was written for engineers, for whom the scanner *is* the offer. Held
+  literally after the reframe it produced a page that asked a novelist's question and then
+  handed her a JSONL dropzone. What survives unchanged: a screenshot of the product would
+  still be absurd, and no marketing hero goes above anything. An exhibit is not a hero —
+  it is the product's output, shown.
 - **Colour is testimony:** a chromatic pixel is a claim backed by a measurement. The
   chassis is achromatic; signal-green appears only on verified/clean states, signal-amber
   only on findings that need reading. Never colour-alone: every state colour is paired
@@ -132,3 +151,8 @@ Carried over from v1 as law, restyled not rethought:
 | 2026-08-01 | Radius 0, hairline rules, no cards | An instrument has machined edges; v1's no-cards law survives the aesthetic change because it was never aesthetic. |
 | 2026-08-02 | The rail flows with the page — never sticky, never its own scroller | Founder decision: a pinned rail taller than the viewport needs an inner scrollbar, which cut hashes off and put a second scrollbar inside the instrument. Full visibility beats persistence; every rail figure also lives in the body, so nothing is lost when it scrolls away. |
 | 2026-08-03 | Exactly one landmark: the registry's thesis sentence, `.landmark` | Every section ran kicker → heading → prose → record at one scale, so a scrolling reader's eye stayed level even at the sentence the registry exists to deliver. It now breaks there and nowhere else — 2.4rem against a 1.95rem heading ceiling and a 3.4rem hero, weight 600 against the headings' 400, re-measured to 36ch because large type needs a shorter character measure (physically wider than the 56ch prose column, so the change is of measure as well as scale). Two lines, the same ceiling the hero keeps. Hairline rules rather than a panel: an instrument marks a reading, it does not frame it. **No colour** — colour is testimony and belongs to measured states; this is a claim *about* measurements, not one of them. Closes the last open compositional item (deferred by decision 7.5B of the 2026-07-30 review so it would be designed against the page as it actually is). **There must never be a second one:** a page with two landmarks has none. |
+| 2026-08-07 | **Writer-first front door.** Primary action is "Check my writing"; the live scanner demotes from offer to proof | The page asked a writer's question above an engineer's primary control, with the writer's path a text link at line 446. Not a taste call: the week-3 kill rule counts *"10 inbound requests through a pinned contact link"*, so with the link buried a zero would have measured the layout rather than the demand — killing the product on a reading of its own scroll depth. The auto-running scan already existed and was free proof; it now argues for the offer instead of being it. |
+| 2026-08-07 | Direction **C — THE SPECIMEN**: an exhibit leads, the h1 is its caption | Chosen from three directions built as real HTML (A THE RECORD, B THE FIELD, C THE SPECIMEN — kept in `~/.gstack/projects/vaishak-v-nair-Ingot/designs/`). C performs the differentiator instead of describing it: a marked paragraph before any pitch is the one thing no competitor page can copy without building the scanner. B was rejected on honesty — its input implied a backend that does not exist. Two fixes were required before adoption and both are in: the offer shares the first viewport (an earlier draft pushed it below 744px, the same burial defect committed differently, now enforced by e2e S9 at 1366×768 and 390×844), and the specimen is labelled **Illustration** because it is composed prose. Presenting it as a real finding would be the exact overclaim every gate here exists to prevent. |
+| 2026-08-07 | A `mailto:` gets designed states: expectation before, confirmation on return, fallback address, and a real sample report | A mailto has no states. The click hands off and the page says nothing — and a visitor with no mail handler sees nothing happen and has no address. An undesigned success state suppresses exactly the costly acts the five-writer bar measures, so a broken control would read as "writers did not want this". The sample report is generated from the real renderer (`web/sample-report.html`), so what a writer is shown before spending an email is what they would receive after. CSP `form-action 'none'` keeps this from quietly becoming a form. |
+| 2026-08-07 | `about.html` becomes the trust page: **what Ingot cannot see** | `docs/coverage.md` — unsegmentable scripts, the n-gram floor, what C4's own cleaning already removed, pages never crawled, verbatim-only — is the strongest honesty asset in the project and it was unpublished. Nobody else in this category tells you what they cannot see. The displaced provenance material gets `for-eval-teams.html` rather than deletion. |
+| 2026-08-07 | The design system stops being three copies: `web/site.css` | Tokens were triplicated and had already drifted — each page defined only the subset it used, and about.html called the verified-clean green `--good` while DESIGN.md and index.html called it `--ok`. Nothing was broken, which is the point: nothing would have been until the copies disagreed about something that mattered. The emailed report is the cautionary case, two systems behind for two releases because it was a copy nobody remembered. Same-origin, so the network-panel claim is untouched; a `<link>`, so there is still no build step. `registry.html` keeps `body { font-size: 16px }` as an explicit override — DESIGN.md's scale says 17, and that reconciliation is a design decision left open. |
