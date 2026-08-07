@@ -224,6 +224,15 @@ footer { padding:var(--s6) 0 var(--s5); color:var(--dim); font-size:.92rem; bord
 footer .wrap { display:flex; flex-wrap:wrap; gap:var(--s2) var(--s4); align-items:baseline; }
 
 @media (pointer: coarse) { nav a { padding:.7rem 0; } }
+/* Seven links wrapped to three lines on a 390px phone, pushing the headline most of a
+   screen down. Tighter type and gap fits them in two without hiding anything: a nav that
+   hides links on mobile is a nav that decides for the visitor which pages matter. */
+@media (max-width: 34rem) {
+  nav { padding:var(--s3) 0 var(--s2); }
+  nav .wrap { gap:.4rem var(--s3); }
+  nav a { font-size:.88rem; padding:.35rem 0; }
+  .brand { width:100%; margin-bottom:.2rem; }
+}
 @media print {
   :root { --paper:#fff; --white:#fff; --ink:#000; --dim:#444; --wash:#f4f4f4; }
   .card, .tool, .drop, .guide-film, .chart-card { box-shadow:none; border:1px solid #ddd; }
