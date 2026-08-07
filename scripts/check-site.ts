@@ -9,7 +9,7 @@
  * Exit code 1 fails the build. That is the point: a page that references a CDN, or a
  * missing index, must not reach a URL.
  */
-import { statSync } from 'node:fs';
+import { readdirSync, statSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -30,6 +30,10 @@ const REQUIRED = [
   'web/index.html',
   'web/about.html',
   'web/registry.html',
+  // The shared design layer. Every page links it, so a missing or empty file unstyles the
+  // whole site while every page still renders — exactly the "looks fine, is broken" case
+  // this manifest exists to catch.
+  'web/site.css',
   'web/ingot.js',
   'web/scan.worker.js',
   'web/sample-corpus.jsonl',
@@ -70,7 +74,36 @@ else process.stdout.write('  ok    web/index.html carries the drop target\n');
  * silently — nothing about the rendered page would look wrong — so it is asserted instead
  * of trusted. github.com is allowed because those are prose links, not subresources.
  */
-const PAGES = ['web/index.html', 'web/about.html', 'web/registry.html'];
+/**
+ * Discovered, not listed. This used to be a second hardcoded copy of the page list, which
+ * meant adding a page required remembering two places — and forgetting the second one
+ * shipped a public page that the external-resource sweep never ran on, with the build
+ * green. A manifest and a sweep answer different questions: REQUIRED above asserts
+ * presence (a glob can never notice something missing), this asserts a property of
+ * whatever exists (so it must not have exceptions).
+ */
+const PAGES = readdirSync(resolve('web'))
+  .filter((f) => f.endsWith('.html'))
+  .sort()
+  .map((f) => `web/${f}`);
+
+/**
+ * A sweep that finds nothing reports nothing and passes. `for (const page of PAGES)` over
+ * an empty array records zero failures and prints "site ok, self-contained" — a gate that
+ * has become a no-op while still saying yes. That is the same shape as the CI failure
+ * where check-site demanded an index the build had been told to skip: the check was fine,
+ * its input was empty. The floor is the pages named in REQUIRED, so it rises on its own
+ * whenever a page is added there.
+ */
+const MIN_PAGES = REQUIRED.filter((f) => f.endsWith('.html')).length;
+if (PAGES.length < MIN_PAGES) {
+  fail(
+    `the page sweep found ${PAGES.length} page(s) in web/ but REQUIRED names ${MIN_PAGES} — ` +
+      `refusing to report a clean sweep over a set this small`,
+  );
+} else {
+  process.stdout.write(`  ok    page sweep found ${PAGES.length} page(s) in web/\n`);
+}
 // Four ways a page can name a remote resource, each with its own syntax. The attribute
 // pattern was the only one checked for a while, which left CSS url() — a webfont or
 // background fetched from a CDN inside the inline <style> blocks — invisible to the one

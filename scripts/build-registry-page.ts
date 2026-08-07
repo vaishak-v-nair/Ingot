@@ -404,72 +404,20 @@ const html = `<!doctype html>
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="site.css">
 <style>
-  /* Same two faces the rest of the site serves, from the same origin. This page is
-     generated, which is exactly why it was the page that never got them: nobody edits it,
-     so it drifted into system-sans headings while index.html moved to the serif. Fonts
-     live in web/fonts/ and are same-origin, so the CSP and the no-external-request
-     assertion both still hold. */
-  @font-face {
-    font-family: "Archivo"; font-style: normal; font-weight: 600;
-    font-display: swap; src: url("fonts/archivo-latin-600.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Public Sans"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/public-sans-latin-400.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
-  }
-  *, *::before, *::after { box-sizing: border-box; }
-  /* Cleanroom Instrument tokens (DESIGN.md 2026-08-01): dark graphite identity, designed
-     light inverse. Same values as index.html so the generated page cannot drift. */
-  :root {
-    color-scheme: dark;
-    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31; --card: #121415;
-    --gold: #9BA1A6; --hot: #F59E0B; --ok: #4ADE80;
-    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: "Public Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-    --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: light) {
-    :root { color-scheme: light;
-            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA; --card: #FFFFFF;
-            --gold: #43474B; --hot: #B45309; --ok: #15803D; }
-  }
-  html { -webkit-text-size-adjust: 100%; }
-  /* Scrollbars are chassis — dark via color-scheme, hairline via these. Same block as
-     index.html; the -webkit rules are the Safari fallback. */
-  html { scrollbar-color: var(--line) transparent; }
-  .scroll, pre { scrollbar-width: thin; }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-thumb { background: var(--line); }
-  ::-webkit-scrollbar-track { background: transparent; }
-  /* The same ultra-wide scale and shell rules as the rest of the site, so the nav sits at
-     identical coordinates on every page and the composition grows past 94rem instead of
-     drowning in margins. */
-  @media (min-width: 94rem) {
-    html { font-size: clamp(16px, calc(16px + (100vw - 1504px) / 96), 19.5px); }
-  }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); overflow-x: hidden; }
-  a { color: inherit; }
-  .wrap { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
+  /* Shared tokens, faces, chassis and nav come from site.css. Only this page's own
+     composition stays here.
+
+     The 16px body is a deliberate carry-over, NOT a shared value: DESIGN.md's scale
+     specifies 17 and the other two pages use it. Preserved verbatim so extracting the
+     shared layer changed nothing visible; reconciling it to 17 is a design decision and
+     belongs in the redesign, not in a refactor. */
+  body { font-size: 16px; }
+  /* The registry widens its nav and footer above the rail breakpoint the way index does. */
   @media (min-width: 78.5rem) {
     nav .wrap, footer .wrap { max-width: 76rem; }
   }
-  nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
-        background: var(--paper); }
-  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
-              padding-top: .75rem; padding-bottom: .75rem; }
-  .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-right: auto; }
-  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
-          position: relative; transition: color .15s; padding: .25rem 0; }
-  nav a:hover { color: var(--ink); }
-  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
-                 height: 1px; background: var(--gold); transition: right .18s ease; }
-  nav a:hover::after { right: 0; }
-  nav a[aria-current] { color: var(--ink); }
   header { padding: 3rem 0 1rem; }
   h1 { font-family: var(--display); font-weight: 600;
        font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.03em; }

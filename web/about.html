@@ -17,47 +17,12 @@
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="site.css">
 <style>
   /* Self-hosted, latin subset only. Same-origin so the network panel stays empty,
      which is the claim the sibling page makes. SIL OFL; see NOTICE. */
-  @font-face {
-    font-family: "Archivo"; font-style: normal; font-weight: 600;
-    font-display: swap; src: url("fonts/archivo-latin-600.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Public Sans"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/public-sans-latin-400.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
-    font-display: swap; src: url("fonts/jetbrains-mono-400.woff2") format("woff2");
-  }
 
   *, *::before, *::after { box-sizing: border-box; }
-  :root {
-    /* These are the DESIGN.md tokens, byte for byte (Cleanroom Instrument, 2026-08-01):
-       dark graphite is the identity, light is a designed inverse. Same tokens as
-       index.html so the site reads as one composition. */
-    color-scheme: dark;
-    --ink: #E8EAEC;
-    --paper: #0C0E0F;
-    --dim: #82878C;
-    --line: #2A2E31;
-    --gold: #9BA1A6;
-    --gold-hot: #F59E0B;
-    --ember: #F87171;
-    --good: #4ADE80;
-    --card: #121415;
-    --mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: "Public Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-    --display: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: light) {
-    :root {
-      color-scheme: light;
-      --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA;
-      --gold: #43474B; --gold-hot: #B45309; --ember: #B91C1C; --good: #15803D; --card: #FFFFFF;
-    }
   }
   html { -webkit-text-size-adjust: 100%; }
   /* Scrollbars are chassis — dark via color-scheme, hairline via these. Same block as
@@ -83,7 +48,6 @@
   }
   /* 54rem, the same shell as index.html and registry.html. It was 66rem, which put this
      page's left edge 92px further out than every other page at 1440. One site, one measure. */
-  .wrap { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
   /* Nav and footer join the front page's wide shell, so the one persistent element sits at
      the same coordinates on every page. Content stays a centered 54rem measure. */
   @media (min-width: 78.5rem) {
@@ -119,7 +83,7 @@
     font-family: var(--mono); font-size: .8rem; padding: .55rem .9rem;
     border: 1px solid var(--line); background: var(--card);
   }
-  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--good); }
+  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
 
   /* ---------- shared ---------- */
   section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
@@ -210,19 +174,6 @@
   footer { padding: 3.5rem 0 5rem; color: var(--dim); font-family: var(--mono); font-size: .8rem; }
   footer strong { color: var(--ink); }
 
-  nav { border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
-        background: var(--paper); }
-  nav .wrap { display: flex; align-items: center; gap: .35rem 1.25rem; flex-wrap: wrap;
-              padding-top: .75rem; padding-bottom: .75rem; }
-  nav .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
-               text-transform: uppercase; color: var(--gold); margin-right: auto; }
-  nav a { font-size: .85rem; color: var(--dim); text-decoration: none;
-          position: relative; transition: color .15s; padding: .25rem 0; }
-  nav a:hover { color: var(--ink); }
-  nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -3px;
-                 height: 1px; background: var(--gold); transition: right .18s ease; }
-  nav a:hover::after { right: 0; }
-  nav a[aria-current] { color: var(--ink); }
   .hero { padding-top: 4rem; }
 
   /* ---------- motion, same contract as the front page ---------- */
