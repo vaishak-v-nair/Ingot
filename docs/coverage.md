@@ -56,7 +56,45 @@ sentence cannot be matched by construction.
 This is reported as `uncheckableItemIds` and has been since the first release. It is the
 oldest entry in this document and the reason the section in the report exists.
 
-## 3. Grams filtered as boilerplate
+## 3. Short text whose quote style was changed
+
+Ingot keeps the ASCII apostrophe inside a word and treats the typographic one (U+2019) as a
+separator, so `don't` is one token spelled one way and two tokens — `don`, `t` — spelled the
+other. Both spellings are ordinary. Over 126,578 C4 documents:
+
+**39.1% use a word-internal curly apostrophe, 30.0% an ASCII one.**
+
+Normalising smart quotes is what every CMS, exporter and scraper does, so the two spellings
+of one sentence genuinely meet.
+
+It would be easy to assume this makes any re-quoted copy invisible. It does not, and the
+measurement is what says so — the ten-token window rolls, so a changed character damages
+only the windows containing it, and any run of ten consecutive apostrophe-free tokens still
+matches exactly. Length is the variable:
+
+| length of the copied text | verbatim copies still found after quote normalisation |
+|---|---|
+| 10–24 tokens | **68.0%** |
+| 25–49 tokens | 100% |
+| 50–99 tokens | 100% |
+| 100–299 tokens | 100% |
+| 300+ tokens | 100% |
+
+`scripts/quote-style-sensitivity.ts`, 500 real C4 documents, 100 per bucket, control run
+finds 500 of 500. Full figures in `results/quote-style-sensitivity.json`.
+
+**So the limit is real and it is small and it is bounded.** Below about 25 tokens — a
+caption, an aphorism, a few lines of verse — roughly a third of re-quoted copies are missed.
+Above it, nothing is. A short text is close to the n=10 floor anyway, which is section 2.
+
+**Why the tokenizer was not changed.** Folding U+2019 to ASCII would fix the 68% case and
+would also change every gram in every index, which changes every published figure in this
+repository. Buying a correction that only applies below 25 tokens at the price of making
+several thousand published numbers unreproducible is not obviously the right trade, and it
+is not a trade to make quietly. The number is measured, written down, and left as a decision
+rather than taken as one.
+
+## 4. Grams filtered as boilerplate
 
 A gram shared by more than `maxItemsPerGram` benchmark items is dropped at index time, and a
 gram appearing in more than `--max-doc-freq` corpus documents is dropped at scan time as
@@ -68,7 +106,7 @@ documents share a stock phrase. Both are tunable, and the discards are printed �
 ordinary language" is itself a judgement, so the report shows the discarded text and lets
 the reader check it.
 
-## 4. The corpus is not the crawl
+## 5. The corpus is not the crawl
 
 `scripts/c4-filter-sim.ts` answers a question the scanner cannot: **could this text have
 been in the corpus at all?**
@@ -91,7 +129,7 @@ deliberately in that direction — an over-estimate of survival makes a null loo
 meaningful than it is, which is the error worth refusing loudly rather than the one worth
 hiding.
 
-## 5. The crawl is not the web
+## 6. The crawl is not the web
 
 A page CommonCrawl never fetched cannot be in any corpus derived from it. `scripts/cdx-check.ts`
 screens URLs against the CommonCrawl index before anyone bothers scanning.
@@ -103,7 +141,7 @@ Two rules that cost three wrong versions to learn:
 - The index is sorted by URL, so sampling only the first page of results is biased toward
   whatever sorts first. Sample across the range.
 
-## 6. Verbatim only
+## 7. Verbatim only
 
 The exact tier finds verbatim overlap. A paraphrase, a translation, or a copy with edited
 punctuation is not verbatim and the exact tier will not see it. The near-duplicate tier
@@ -113,7 +151,7 @@ does not carry — so it reports *why* it is unavailable rather than reporting z
 Measured recall against edited copies is in `docs/measurements.md`. It is not 100%, and the
 number is published rather than described.
 
-## 7. The corpora Ingot has
+## 8. The corpora Ingot has
 
 A clean result covers the corpora that were actually scanned, on the crawl dates printed in
 the receipt. It says nothing about corpora nobody has scanned, private datasets, or

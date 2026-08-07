@@ -1,0 +1,64 @@
+{
+  "measuredBy": "scripts/quote-style-sensitivity.ts",
+  "scannerVersion": "ingot-0.1.4",
+  "shard": "../corpora/c4-en/c4-train.00000-of-01024.json.gz",
+  "n": 10,
+  "documents": 500,
+  "prevalence": {
+    "documentsRead": 126578,
+    "wordInternalCurly": 49506,
+    "wordInternalStraight": 37933,
+    "both": 7429,
+    "curlyShare": 0.3911,
+    "straightShare": 0.2997
+  },
+  "control": {
+    "found": 500,
+    "of": 500,
+    "complete": true
+  },
+  "quotesNormalised": {
+    "found": 468,
+    "of": 500
+  },
+  "documentsLost": 32,
+  "recallAfterQuoteNormalisation": 0.936,
+  "byLength": [
+    {
+      "bucket": "10-24 tokens",
+      "documents": 100,
+      "foundUnchanged": 100,
+      "foundAfterNormalisation": 68,
+      "recall": 0.68
+    },
+    {
+      "bucket": "25-49 tokens",
+      "documents": 100,
+      "foundUnchanged": 100,
+      "foundAfterNormalisation": 100,
+      "recall": 1
+    },
+    {
+      "bucket": "50-99 tokens",
+      "documents": 100,
+      "foundUnchanged": 100,
+      "foundAfterNormalisation": 100,
+      "recall": 1
+    },
+    {
+      "bucket": "100-299 tokens",
+      "documents": 100,
+      "foundUnchanged": 100,
+      "foundAfterNormalisation": 100,
+      "recall": 1
+    },
+    {
+      "bucket": "300+ tokens",
+      "documents": 100,
+      "foundUnchanged": 100,
+      "foundAfterNormalisation": 100,
+      "recall": 1
+    }
+  ],
+  "note": "The tokenizer keeps the ASCII apostrophe inside a word and treats U+2019 as a separator, so the same word written both ways produces different tokens. The damage is local to the windows containing the changed character, so length is the variable that matters: a long document still matches on any ten consecutive tokens that contain no apostrophe. This measures verbatim-copy recall when the ONLY change is quote style."
+}

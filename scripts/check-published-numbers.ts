@@ -358,6 +358,42 @@ if (existsSync(resolve('results/membership-size.json'))) {
   );
 }
 
+// Quote-style sensitivity needs a real C4 shard on disk, so like the canonicality run its
+// absence is not a failure and a mismatch is. The recall curve is the reason the tokenizer
+// was NOT changed, which makes it exactly the kind of figure that must not drift quietly:
+// a decision recorded against a number is only as good as the number staying true.
+if (existsSync(resolve('results/quote-style-sensitivity.json'))) {
+  const q = json<{
+    prevalence: { documentsRead: number; curlyShare: number; straightShare: number };
+    byLength: { bucket: string; recall: number | null }[];
+  }>('results/quote-style-sensitivity.json');
+  const COVERAGE = 'docs/coverage.md';
+  const shortBucket = q.byLength.find((b) => b.bucket === '10-24 tokens');
+
+  claims.push(
+    {
+      doc: COVERAGE,
+      label: 'documents read for quote prevalence',
+      expected: q.prevalence.documentsRead.toLocaleString('en-US'),
+    },
+    {
+      doc: COVERAGE,
+      label: 'quote-style prevalence',
+      // One line, because a load-bearing figure may never wrap: see DESIGN.md.
+      expected:
+        `**${(q.prevalence.curlyShare * 100).toFixed(1)}% use a word-internal curly apostrophe, ` +
+        `${(q.prevalence.straightShare * 100).toFixed(1)}% an ASCII one.**`,
+    },
+  );
+  if (shortBucket?.recall != null) {
+    claims.push({
+      doc: COVERAGE,
+      label: 'recall at 10-24 tokens after re-quoting',
+      expected: `**${(shortBucket.recall * 100).toFixed(1)}%**`,
+    });
+  }
+}
+
 // The canonicality run is optional: the report ships whether or not that scan has been run,
 // so the file's absence is not a failure, but a mismatch is.
 if (existsSync(resolve('results/canonicality.json'))) {
