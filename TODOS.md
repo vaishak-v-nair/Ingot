@@ -7,8 +7,19 @@ now understands the motivation. Each item came out of a review; none is a guess.
 
 - **What:** Parallelize CLI corpus scans across worker threads (shards are independent;
   the browser's scan.worker.js already proves the pattern), unify scan.ts's inline line
-  splitter with scripts/triage-rules.ts jsonlLines, dedupe the eight flag() copies, and
-  align canonicality-check.ts's reader the same way.
+  splitter with scripts/triage-rules.ts jsonlLines, and align canonicality-check.ts's
+  reader the same way.
+- **Partly done 2026-08-07, and it was not blocked after all.** The flag() duplication and
+  the *record* reader divergence were the two halves of this item that could be fixed
+  without touching the scan chain, and both are done: `src/args.ts` is now the one argument
+  parser for the CLI and the scripts (three more private copies had appeared in
+  build-index, cdx-check and fetch-crawl-slice, none of which refused an unrecognised
+  flag), and `src/fields.ts` is the one answer to "which field holds this record's text"
+  (loader.ts and scanSession.ts had ranked the candidates differently, so one record loaded
+  as two different documents depending which half of the tool read it). Measured inert on
+  the published corpus before shipping: shard 00000 has 356,317 documents, **zero**
+  whitespace-only and **zero** carrying more than one text field, so neither change moves a
+  published figure. What remains here is the worker pool and the *line* splitter.
 - **Why:** 7.0 MB/s single-threaded makes the full C4 redo a 5-6 hour run; at 10x corpora
   the registry cadence collapses. Eng review 2026-08-01, issues 5 and 7.
 - **Pros:** The full redo drops to under an hour on 8 cores; hosted corpus-scan runs get
@@ -23,7 +34,11 @@ now understands the motivation. Each item came out of a review; none is a guess.
 - **Context:** Deliberately NOT built during the 2026-08-01 review-fix pass because the C4
   fixed-reader redo was running: later commands in that chain load scan.ts fresh, and
   editing it mid-run would mix scanner versions inside one published result.
-- **Depends on / blocked by:** the C4 redo completing and reconciling.
+- **Depends on / blocked by:** the C4 redo completing and reconciling — the worker pool and
+  the line splitter still are. The two deduplication halves above were not, and treating
+  the whole item as blocked kept a live silent-failure class (an ignored flag) alive for
+  longer than it needed to be. Worth remembering when the next item is marked blocked:
+  check whether *all* of it is.
 
 ## Front-page caveat parity with the README
 
