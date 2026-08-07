@@ -254,9 +254,82 @@ Each one is now a guard in the code and a test under `test/`.
     invisible to every gate this repository has, and the only thing that catches it is
     someone reading the comment and disbelieving it.
 
+14. **An unrecognised flag was accepted and ignored.** `--maxdocfreq 1000`, a plausible
+    typo for `--max-doc-freq`, parsed as a flag nobody had heard of, was stored, and was
+    never read. The scan ran at the default threshold of 5 and exited 0 with a confident
+    report of a *different experiment* than the one that was asked for. Nothing said so.
+    The same parser turned `--out` at the end of a line into the empty string, which
+    `if (htmlPath)` read as falsy: the report was never written, exit 0, no complaint. Its
+    own comment claimed such values "survive to the per-flag checks, which refuse them
+    loudly", and exactly one flag had such a check. `src/args.ts` now refuses unknown
+    flags and names the near miss, refuses missing values, refuses a repeated flag rather
+    than taking the last, and reports every problem in one invocation at once. Found by
+    running the shipped CLI against the typos a real user makes, not by reading it.
+
+15. **Two readers of the same record disagreed about which field held its text.**
+    `loader.ts` ranked `answer` above `content`; `contamination/scanSession.ts` ranked
+    `content` above `answer`. A record carrying both loaded as two different documents
+    depending on which half of the tool read it, and no output anywhere compared them. The
+    same pair disagreed about whitespace-only records: the loader skipped them, the scanner
+    counted them as scanned documents contributing zero tokens, padding the denominator of
+    a clean result with rows nobody could have matched. One list in `src/fields.ts` now —
+    the same fix as the index and the scan sharing one tokenizer, and for the same reason.
+
+16. **Field detection condemned a whole file on its first record.** A JSONL whose first row
+    had an empty text field aborted the load with `no "text" field found. Fields present:
+    text` — a sentence that contradicts itself. Exports with a placeholder first row and
+    scrapes whose first page 404'd are ordinary. The first row is a sample, not a schema, so
+    detection walks forward until a record actually carries text and only reports a schema
+    error when none does. Found by a test written for the defect above.
+
+17. **Text in a script the tokenizer cannot segment was reported as text that was too
+    short.** Ingot matches word n-grams, and Chinese, Japanese, Thai and the other unspaced
+    scripts are not written with word boundaries: a several-hundred-character Japanese essay
+    tokenizes to ONE token, forms no 10-gram, and cannot be matched against anything. The
+    report called this "shorter than 10 tokens" — accurate about the token count and false
+    about the writing, presenting a limit of the scanner as a property of someone's prose.
+    The index now records that reason separately and carries it through the wire format, and
+    both surfaces say plainly that the scan could not look rather than that it looked and
+    found nothing. The same wording was wrong a second way: an item can be unmatchable
+    because every gram it had was filtered as boilerplate, which "too short" never covered.
+    `docs/coverage.md` is now the full list of ways a clean result can mean "we could not
+    have looked".
+
+18. **The delivered report was two design systems behind, and painted findings in the
+    refusal colour.** The 2026-08-01 redesign moved the site to the Cleanroom Instrument
+    system; the HTML report — the artifact actually posted to a writer, a reviewer or a
+    regulator — kept the archived warm-paper-and-gold palette, 14px radii and card surfaces
+    through two releases. Worse, the count of matches rendered in `--bad`, which DESIGN.md
+    reserves for refusals and errors: the measurement the whole scan exists to produce was
+    being coloured as a failure. Findings are amber now, red means refused, and the evidence
+    highlight is an underline rather than a fill because `--sig` is never a fill and an
+    underline survives greyscale printing. The report is now tested against the design
+    system rather than trusted to follow it.
+
+19. **`process.exit()` during async module evaluation aborted the crawl screen.**
+    `cdx-check.ts` was a top-level program with a top-level `await`, which makes its module
+    evaluation a promise; calling `process.exit()` from inside that evaluation raced libuv's
+    handle teardown on Windows and killed the process outright —
+    `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), src\win\async.c` — returning
+    127 instead of 2 on *every* argument-error path. Anything reading that exit code could
+    not tell a refused invocation from a crash. It runs inside `main()` and returns a code
+    now, which also gives an exhausted network retry somewhere to land: it used to surface
+    as an unhandled rejection, and for a screen whose entire purpose is to avoid reporting a
+    false null, that is the worst available ending.
+
+20. **A truncated index arrived as a `TypeError` with no message.** Thrown eight frames deep
+    inside Node's webstreams adapter, naming neither the file nor the problem, for the single
+    likeliest thing to go wrong with a 5 MB download over a flaky connection. A directory
+    passed to `--index` exited on a raw `EISDIR`; an `--out` path under a regular-file parent
+    threw away a finished scan on a raw `EEXIST mkdir`. All three are named errors now, and
+    the gzip case says what a cut-short download looks like. The bytes are checked for the
+    gzip magic first, so the message describes the failure that actually happened.
+
 Also fixed along the way: a TypeScript parameter property unsupported by Node's strip-only
 mode; a CLI arg parser that swallowed the batch path as a command; a test asserting a
-variance message on signals that had no baseline at all.
+variance message on signals that had no baseline at all; three more private copies of the
+flag parser in the scripts run by hand against real writers' work, none of which refused a
+flag it did not recognise.
 
 ## Provenance: the honest floor
 
