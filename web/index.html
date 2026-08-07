@@ -19,9 +19,8 @@
 <!-- Declared before any CSS parses, so the first paint already uses dark browser chrome.
      Without this the page is dark but the scrollbar is the browser's light default —
      17px of white on Windows, over a graphite bench. -->
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FBFAF8">
 <!-- The three faces above the fold. Preloaded so the hero never flashes fallback type;
      same-origin, so the network panel claim is untouched. -->
 <link rel="preload" href="fonts/archivo-latin-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -29,114 +28,7 @@
 <link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site.css">
 <style>
-  /* One shell in two states. Below the rail breakpoint .page and .wrap are the same 54rem
-     column the page has always been. Above it the shell widens by exactly the width of the
-     margin — the text column stays 54.5rem, so the reading measure never changes and nav,
-     column and footer keep a single left edge at both sizes. Base .wrap is in site.css. */
-  .page { max-width: 54rem; margin: 0 auto; padding: 0 1.25rem; }
-  /* Sections still carry the .wrap they had before the rail existed. Inside the column the
-     column is the shell, so that inner shell must not indent a second time. */
-  .col .wrap { max-width: none; padding: 0; }
 
-
-  /* 4rem: the founder read the hero as crowded against the nav — the question needs a
-     clear breath of graphite above it before anything else registers. */
-  header { padding: 4rem 0 0; }
-  /* Etched, not molten: Archivo 600, tight tracking, plain ink. Two lines maximum. */
-  h1 { font-family: var(--display); font-weight: 600;
-       font-size: clamp(2.1rem, 5.2vw, 3.4rem); line-height: 1.02; margin: 0 0 .6rem; letter-spacing: -.03em; }
-  h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.01em; }
-  /* The sentence that says what this is. Full ink and a size above body copy, because it
-     is the definition rather than supporting text: set in --dim at body size it reads as a
-     caption under the headline and the eye skips it, which defeats the point of adding it. */
-  .says-what { font-size: clamp(1.12rem, 2.4vw, 1.34rem); line-height: 1.45; max-width: 47ch;
-               margin: 0 0 .9rem; color: var(--ink); }
-  .lede { color: var(--dim); max-width: 54ch; margin: 0 0 .95rem; font-size: 1.05rem; }
-  /* A readout, not a pill: machined corners like everything else on the bench. */
-  .promise { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .76rem;
-             border: 1px solid var(--line); padding: .42rem .8rem; background: var(--card); }
-  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
-
-  /* ---------- the tool ---------- */
-  .tool { padding-bottom: 2.6rem; }
-  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: 1.4rem 0 1rem; }
-  .muted { color: var(--dim); font-size: .86rem; }
-  select { font: inherit; font-size: .92rem; padding: .45rem .6rem; border-radius: 0; border: 1px solid var(--line);
-           background: var(--card); color: var(--ink); }
-  /* The press bed: a solid-ruled instrument panel, not a dashed placeholder. */
-  .drop { border: 1px solid var(--line); padding: 3rem 1.5rem;
-          text-align: center; background: var(--card); transition: border-color .15s, background .15s; }
-  .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--hot) 8%, var(--card)); }
-  .drop:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
-  .drop p { margin: .4rem 0; color: var(--dim); font-size: .9rem; }
-  .drop strong { font-size: 1.05rem; color: var(--ink); }
-  input[type=file] { display: none; }
-  .btns { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
-  .btn { border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-         border-radius: 0; padding: .55rem 1.1rem; cursor: pointer; font: inherit; font-size: .92rem;
-         transition: border-color .15s, background .15s, color .15s, transform .12s ease; }
-  .btn:hover { border-color: var(--gold); transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); }
-  .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .btn.primary:hover { background: var(--gold); border-color: var(--gold); color: var(--paper); }
-
-  /* A measurement thread. Amber is the colour of a figure still changing (the rail uses
-     the same rule), so the running scan is amber until it settles. */
-  progress { width: 100%; height: 3px; margin-top: 1rem; appearance: none;
-             border: 0; background: var(--line); }
-  progress::-webkit-progress-bar { background: var(--line); }
-  progress::-webkit-progress-value { background: var(--hot); }
-  progress::-moz-progress-bar { background: var(--hot); }
-  #status { font-family: var(--mono); font-size: .8rem; color: var(--dim); min-height: 1.4em; margin-top: .5rem; }
-
-  /* The verdict is a ruled stamp, not a card: the record opens with 4px of ink the way
-     the assay does, and the number sits on the rule. The last boxes died here. */
-  .verdict { border: 0; border-radius: 0; background: none; border-top: 4px solid var(--ink);
-             border-bottom: 1px solid var(--line); padding: 1.3rem 0 1.35rem; margin: 1.5rem 0; }
-  /* Refusals are designed, not dumped: an ember rule, the cause in plain words, one
-     action. For a tool whose brand is disciplined refusal, these are the most on-brand
-     screens it owns. */
-  .refusal { border-top: 4px solid var(--ember); border-bottom: 1px solid var(--line);
-             padding: 1.2rem 0 1.3rem; margin: 1.25rem 0; }
-  .refusal b { display: block; font-size: 1.05rem; margin-bottom: .4rem; }
-  .refusal p { margin: 0; color: var(--dim); max-width: 56ch; }
-  .refusal .linklike { margin-top: .7rem; }
-  .linklike { background: none; border: 0; padding: 0; font: inherit; font-size: .88rem;
-              color: var(--gold); text-decoration: underline; text-underline-offset: 3px;
-              cursor: pointer; }
-  .samplelink { margin: .65rem 0 0; font-size: .85rem; color: var(--dim); }
-
-  /* ── The exhibit, the claim, the offer (writer-first, 2026-08-07) ──────────────────
-     Direction C: evidence arrives before the pitch. Sized so the exhibit AND the offer
-     share the first viewport — an earlier draft set the specimen at 1.7rem and pushed the
-     CTA below 744px, which is the same burial defect this restructure exists to fix,
-     committed differently. Reading size, not poster size. */
-  .exhibit { padding: 1.6rem 0 0; }
-  .exhibit-label { display: flex; gap: .9rem; flex-wrap: wrap; align-items: baseline;
-                   font-family: var(--mono); font-size: .66rem; letter-spacing: .22em;
-                   text-transform: uppercase; color: var(--dim); margin: 0 0 1rem; }
-  .illus { color: var(--hot); border: 1px solid var(--line); padding: .15rem .45rem; }
-  .specimen { font-size: clamp(1.05rem, 1.55vw, 1.3rem); line-height: 1.5; max-width: 62ch;
-              letter-spacing: -.005em; margin: 0; }
-  /* An underline, never a fill: --hot is a signal and DESIGN.md says a signal is never a
-     fill. It also survives being printed in greyscale, which a highlight does not. */
-  .specimen mark { background: transparent; color: var(--ink);
-                   border-bottom: 2px solid var(--hot); padding-bottom: 2px; }
-  .found { font-family: var(--mono); font-size: .74rem; color: var(--dim); margin: .7rem 0 0;
-           padding-top: .6rem; border-top: 1px solid var(--line); }
-  .found b { color: var(--hot); font-weight: 400; }
-
-  .claim { padding: 1.6rem 0 2.4rem; margin-top: 1.2rem; border-top: 1px solid var(--line); }
-  .claim h1 { max-width: 17ch; }
-  .claim .says-what { max-width: 42ch; }
-  /* Amber, because a finding is what this button leads to. The one filled element on the
-     page: the primary action earns a fill the way nothing else does. */
-  .cta { display: inline-block; font-family: var(--display); font-weight: 600;
-         font-size: 1.15rem; letter-spacing: -.01em; color: var(--paper);
-         background: var(--hot); padding: .85rem 1.6rem; text-decoration: none;
-         min-height: 44px; }
-  .cta:hover { filter: brightness(1.08); }
-  .cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .cta-note, .cta-sent { font-size: .86rem; color: var(--dim); margin: 1rem 0 0; max-width: 44ch; }
   .cta-sent .dot { margin-right: .45rem; }
   .cta-sent code { font-family: var(--mono); color: var(--ink); font-size: .82rem; }
@@ -148,13 +40,30 @@
   .expect dt { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em;
                text-transform: uppercase; color: var(--dim); padding-top: .18rem; }
   .expect dd { margin: 0; }
-  .toolhead { padding: 1.2rem 0 .2rem; border-top: 1px solid var(--line); }
+  .toolhead { padding: 1.2rem 0 .2rem;  }
   .toolhead h3 { margin: .5rem 0 .5rem; }
 
-  /* T6: two columns only where there is room for two. Unconditional, this grid crushed the
-     claim column at 390px. */
-  @media (min-width: 60rem) {
-    .claim { display: grid; grid-template-columns: 1.35fr 1fr; gap: 3.5rem; align-items: start; }
+  /* THE OPENING — evidence and offer share the first screen.
+     Stacked, they did not fit: at 1366x768 the CTA landed at y=1014, which e2e S9 caught
+     and refused. The fix is composition, not smaller type — on a wide screen there is a
+     whole empty column beside the exhibit, and putting the ask in it means a visitor sees
+     the evidence AND what to do about it without scrolling. Below 68rem they stack, and
+     the offer goes first: on a phone the ask matters more than the exhibit. */
+  /* Flex at every size so `order` actually applies: as a plain block it does nothing, and
+     the exhibit stayed above the offer on a phone — 898px, still past the fold. */
+  .opening { display: flex; flex-direction: column; padding: var(--s3) 0 var(--s5); }
+  .opening .exhibit, .opening .claim { padding: 0; margin: 0; border: 0; }
+  .opening .claim { order: -1; }
+  .opening .exhibit { margin-top: var(--s4); }
+  @media (min-width: 68rem) {
+    .opening { display: grid; grid-template-columns: 1.05fr .95fr; gap: var(--s6);
+               align-items: center; }
+    .opening .exhibit { margin-top: 0; }
+    .opening .exhibit { background: var(--white); border-radius: var(--r);
+                        box-shadow: var(--shadow); padding: var(--s4); }
+    .opening h1 { font-size: clamp(2.4rem, 4vw, 3.5rem); }
+    .opening .specimen { font-size: 1.06rem; }
+    .opening .promise { margin-top: var(--s3); }
   }
   /* The focus contract: the gold rule, drawn around whatever the keyboard is on. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
@@ -163,19 +72,17 @@
      Red belongs to refusals — the machine declining to answer, not the answer. */
   .big.clean { color: var(--ok); } .big.dirty { color: var(--hot); }
   .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
-  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin: 1.7rem 0 .6rem; font-weight: 600; }
   /* Findings are a ruled record, not a stack of cards. A border around each match adds no
      information and makes the most important content on the site look like a template. */
-  .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
+  .hit { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm); margin-bottom: var(--s2); padding: .95rem 0; }
   .hit code { font-family: var(--mono); font-size: .72rem; color: var(--dim); letter-spacing: .04em; }
-  .quote { margin-top: .45rem; font-size: .92rem; }
 
   /* The first match is the specimen. The product's whole claim is that it shows you the
      words, and until now the words were 15px inside a bordered box while the percentage
      above them was 42px. That is the claim stated in copy and contradicted by the layout.
      The lead match is set at display scale; every match after it stays compact, because a
      record of forty matches at this size is not a record, it is a scroll. */
-  .hit--lead { border-bottom: 2px solid var(--ink); padding: 0 0 1.6rem; margin-bottom: .2rem; }
+  .hit--lead {  padding: 0 0 1.6rem; margin-bottom: .2rem; }
   .hit--lead .meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
                      font-family: var(--mono); font-size: .68rem; letter-spacing: .16em;
                      text-transform: uppercase; color: var(--dim); margin-bottom: 1.1rem; }
@@ -188,39 +95,31 @@
   /* box-decoration-break keeps the highlight intact when a match wraps. Without it the
      span is drawn once across the whole run and the second line gets a stray tail. */
   mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit;
-         padding: .05rem .15rem; border-radius: 0;
+         padding: .05rem .15rem; border-radius: var(--r);
          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   /* The assay strip. Four ruled cells, no box: the rules do the dividing, the way columns
      are divided in a printed record rather than fenced into cards. Rule above is 2px ink so
      the strip reads as a stamped header and not another table. */
   .assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-           border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+           
            margin: 0 0 1.6rem; gap: 0; }
   .assay > div { padding: 1.05rem 1.2rem 1rem 0; }
-  .assay > div + div { border-left: 1px solid var(--line); padding-left: 1.2rem; }
+  .assay > div + div {  padding-left: 1.2rem; }
   .assay dt { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
               text-transform: uppercase; color: var(--gold); margin-bottom: .5rem; }
   .assay dd { margin: 0; font-family: var(--mono); font-size: 1.02rem; letter-spacing: -.02em; }
   .assay dd small { display: block; font-family: var(--sans); font-size: .78rem;
                     color: var(--dim); letter-spacing: 0; margin-top: .3rem; }
-  .scroll { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
-  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
-  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; }
   td.num, th.num { font-family: var(--mono); }
 
   /* ---------- evidence sections ---------- */
   /* 3.4rem, down from 4.8: the founder read the page as a stranger and called the gaps
      what they were. Air between sections is not evidence of anything. */
-  section { padding: 3.4rem 0; border-top: 1px solid var(--line); }
+  section { padding: 3.4rem 0;  }
   /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
      for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
      being drawn and then tightened on top of it. */
   section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
-  .kicker { font-family: var(--mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
-            color: var(--gold); display: flex; align-items: center; gap: .7rem; }
-  .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
-  .sub { color: var(--dim); max-width: 56ch; margin: 0 0 1.5rem; }
   /* The single permitted break in the section metronome — see the comment at its only use.
      Sized between a section heading (1.95rem ceiling) and the page title (3.4rem), so it
      reads as the loudest sentence on the page without competing with the title. Hairline
@@ -228,15 +127,15 @@
   .landmark { font-family: var(--display); font-weight: 600; color: var(--ink);
               font-size: clamp(1.5rem, 3.8vw, 2.4rem); line-height: 1.16; letter-spacing: -.02em;
               max-width: 36ch; margin: 2.2rem 0 1.5rem; padding: 1.5rem 0 1.6rem;
-              border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+               }
   /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
      row is the single most recognisable generated-page layout there is, and these three
      were the page's clearest example of it. The rules do the dividing; the boxes were only
      ever decoration around content that already had structure. */
-  .cards { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-           border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
-  .card { padding: 1.15rem 1.3rem 1.15rem 0; }
-  .card + .card { border-left: 1px solid var(--line); padding-left: 1.3rem; }
+  .cards { display: grid; gap: var(--s3); margin-top: var(--s4); border: 0;
+           grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+  .card { padding: var(--s3); }
+  .card + .card { border: 0; padding-left: var(--s3); }
   .card b { display: block; font-family: var(--mono); font-size: 1.6rem; letter-spacing: -.03em; line-height: 1.1; }
   .card span { display: block; margin-top: .55rem; font-size: .85rem; color: var(--dim); line-height: 1.5; }
   /* The refusals as a numbered record. Four uniform bordered boxes were the one generic
@@ -245,26 +144,22 @@
      border doing that work, and the counter makes the list read as a standard rather than
      as four floating assertions. */
   ul.plain { list-style: none; padding: 0; margin: 0; counter-reset: refusal;
-             border-top: 2px solid var(--ink); }
+              }
   ul.plain li { counter-increment: refusal; position: relative;
-                padding: 1.1rem 0 1.1rem 2.9rem; border-bottom: 1px solid var(--line);
+                padding: 1.1rem 0 1.1rem 2.9rem; 
                 font-size: .92rem; color: var(--dim); }
   ul.plain li::before { content: counter(refusal, decimal-leading-zero);
                         position: absolute; left: 0; top: 1.18rem;
                         font-family: var(--mono); font-size: .78rem; color: var(--ember); }
   ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
-  pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
-        border-radius: 0; padding: 1rem; overflow-x: auto; margin: 1rem 0 0; }
   /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
      ink rule opens it, a hairline closes it, and the caption reads like a plate caption. */
-  .guide-film { margin: 1.8rem 0; border-top: 2px solid var(--ink);
-                border-bottom: 1px solid var(--line); padding: 1.2rem 0 1rem; }
-  .guide-film video { display: block; width: 100%; height: auto; background: var(--paper); }
-  .guide-film figcaption { margin-top: .8rem; font-family: var(--mono); font-size: .74rem;
-                           letter-spacing: .04em; color: var(--dim); }
+  .guide-film { margin: var(--s4) 0 0; border: 0; border-radius: var(--r);
+               overflow: hidden; box-shadow: var(--shadow); }
+  
   /* Deep prose folds behind a ruled disclosure: the expert layer is preceded, never deleted.
      A hairline and a mono summary — not a widget box. */
-  details.more { margin: 1.5rem 0 0; border-top: 1px solid var(--line); }
+  details.more { margin: 1.5rem 0 0;  }
   details.more summary { cursor: pointer; list-style: none; display: flex; align-items: center;
                          gap: .6rem; font-family: var(--mono); font-size: .72rem;
                          letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
@@ -291,11 +186,15 @@
      second scrollbar inside the instrument. The rail now flows with the page — scroll the
      page, see all of it. */
   .rail { display: none; }
+  /* The rail needs a column to sit in. .page carries the two-track grid above the rail
+     breakpoint; below it the rail is hidden and every figure it holds also lives in the
+     body, so nothing is lost. Space divides the two tracks — the old left border was one
+     more line doing a job that a gap does better. */
   @media (min-width: 78.5rem) {
-    .wrap, .page { max-width: 76rem; }
-    .page { display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
-            gap: 0 3.5rem; align-items: start; }
-    .rail { display: block; border-left: 1px solid var(--line); padding: .3rem 0 2rem 1.5rem; }
+    .page { display: grid; grid-template-columns: minmax(0, 1fr) 20rem;
+            gap: 0 var(--s5); align-items: start; }
+    .rail { display: block; padding: 0; background: var(--white); border-radius: var(--r);
+            box-shadow: var(--shadow-sm); padding: var(--s3); }
   }
   .rail h4 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
              text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 0 0 .9rem; }
@@ -311,7 +210,7 @@
   .rail dt.wide { grid-column: 1 / -1; margin-top: .3rem; }
   .rail dd.hash { grid-column: 1 / -1; text-align: left; margin-top: -.15rem;
                   font-size: .7rem; letter-spacing: -.012em; }
-  .rail .note { margin: 0; padding-top: 1rem; border-top: 1px solid var(--line);
+  .rail .note { margin: 0; padding-top: 1rem; 
                 font-size: .78rem; line-height: 1.55; color: var(--dim); }
   .rail .note b { color: var(--ink); font-weight: 400; }
   /* Mid-scan the rail holds the only moving numbers on the page. Ember marks the figures
@@ -345,7 +244,6 @@
                                         color-mix(in srgb, var(--hot) 35%, transparent));
       background-repeat: no-repeat; background-size: 100% 100%;
       animation: sweep .55s ease-out .5s backwards; }
-    .dot { animation: breathe 2.6s ease-in-out infinite; }
   }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
   @keyframes sweep { from { background-size: 0 100%; } }
@@ -359,13 +257,13 @@
      is absolute in the document, so it scrolls with the page; the dimming is its own
      box-shadow, so there is no overlay intercepting clicks. */
   .tour-ring { position: absolute; z-index: 50; pointer-events: none;
-               border: 2px solid var(--gold); border-radius: 0;
+               border: 2px solid var(--gold); border-radius: var(--r);
                box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--paper) 62%, transparent); }
   /* A ruled annotation, not a popover: paper ground, ink rule, no radius, no shadow —
      the page's own dialect. The ring and the dimming carry the focus. */
   .tour-card { position: absolute; z-index: 51; width: min(24rem, calc(100vw - 2rem));
-               background: var(--paper); border: 0; border-radius: 0;
-               border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
+               background: var(--paper); border: 0; border-radius: var(--r);
+                border-bottom: 1px solid var(--line);
                padding: .9rem 1.15rem 1rem; }
   .tour-card .esc { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em;
                     color: var(--dim); margin-left: auto; align-self: center; }
@@ -378,8 +276,6 @@
                              width .45s ease, height .45s ease; }
   }
 
-  footer { padding: 2rem 0 3rem; border-top: 1px solid var(--line); color: var(--dim);
-           font-family: var(--mono); font-size: .78rem; }
 </style>
 </head>
 <body>
@@ -400,11 +296,12 @@
 <div class="page">
 <main class="col">
 
+<div class="opening wrap">
 <!-- THE EXHIBIT. The page opens mid-evidence: somebody's sentence with the taken words
      marked, before any headline or pitch. Direction C, chosen 2026-08-07 — it performs the
      differentiator instead of describing it, which is the one thing no competitor page can
      copy without building the scanner. The h1 sits UNDER it as the caption. -->
-<section class="wrap exhibit">
+<section class="exhibit">
   <p class="exhibit-label">
     <span class="illus">Illustration</span>
     <span>What a finding looks like &middot; C4, the April 2019 crawl</span>
@@ -423,7 +320,7 @@
      The offer shares the first viewport deliberately: the week-3 kill rule counts inbound
      requests through this link, so burying it would measure the layout rather than the
      demand. -->
-<section class="wrap claim">
+<section class="claim">
   <div>
     <h1>What's inside AI training data?</h1>
     <p class="says-what">Ingot searches public AI training datasets for your exact
@@ -461,6 +358,24 @@
     </details>
   </div>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; press F12 and watch the network stay empty</span></p>
+</section>
+</div>
+
+
+
+<section class="film">
+  <div class="wrap">
+    <span class="kicker">Watch</span>
+    <h2>Thirty-seven seconds on what this is.</h2>
+    <p class="sub">Voiced, and nothing plays or downloads until you press play &mdash; the
+    network panel stays empty on load, which is the whole claim this site makes.</p>
+    <figure class="guide-film">
+      <video controls preload="none" playsinline
+             poster="media/intro-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-intro.mp4" type="video/mp4">
+      </video>
+    </figure>
+  </div>
 </section>
 
 <!-- THE PROOF. The scanner was the primary control until 2026-08-07; it is now the
@@ -521,18 +436,6 @@
     <p class="sub" style="margin-top:1.4rem">The scan that ran when you arrived was real — the
     built-in sample, read in this tab. <strong>Watch it work</strong> replays it step by step,
     or press play for the film.</p>
-    <!-- The introduction film, in the site's own design system (the previous guide film
-         still wore the archived cream-and-serif v1 look — a page from a retired site
-         playing inside this one). Click-to-play from a poster, so it costs zero bytes
-         until asked — the network panel stays empty on load, which is this page's claim.
-         Self-hosted, same-origin; the CSP's default-src 'self' already covers it. -->
-    <figure class="guide-film">
-      <video controls preload="none" playsinline
-             poster="media/intro-poster.jpg" width="1920" height="1080">
-        <source src="media/ingot-intro.mp4" type="video/mp4">
-      </video>
-      <figcaption>37 seconds, voiced. Nothing plays or downloads until you press play.</figcaption>
-    </figure>
     <!-- Folded on the founder's tune pass 2026-08-02: open, the table read as one more
          block of documentation to a stranger. The decoder ring survives — one click in,
          under a summary that says exactly what it holds. -->

@@ -14,164 +14,59 @@
 <meta name="twitter:card" content="summary_large_image">
 <!-- Dark browser chrome from the first paint; without this the scrollbar is the
      browser's light default over the graphite. Same rule as index.html. -->
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FBFAF8">
 <link rel="stylesheet" href="site.css">
 <style>
-  /* Faces, tokens, the root scale, the chassis and the nav all come from site.css.
-     Only this page's own composition is below. */
-  /* 1.0625rem is the 17px this page has always set, expressed against the root so the
-     ultra-wide scale reaches it. A px value here would opt the body text out of the scale
-     and shrink it relative to everything else. */
-  body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font-family: var(--sans); font-size: 1.0625rem; line-height: 1.6;
-    overflow-x: hidden;
-  }
-  /* 54rem, the same shell as index.html and registry.html. It was 66rem, which put this
-     page's left edge 92px further out than every other page at 1440. One site, one measure. */
-  /* Nav and footer join the front page's wide shell, so the one persistent element sits at
-     the same coordinates on every page. Content stays a centered 54rem measure. */
-  @media (min-width: 78.5rem) {
-    nav .wrap, footer .wrap { max-width: 76rem; }
-  }
-  a { color: inherit; }
+  /* Page composition only. Faces, tokens, type, nav, buttons, grids and surfaces are all
+     in site.css — see the note at the top of that file for why. */
 
-  /* ---------- hero ---------- */
-  .hero {
-    position: relative; padding: 6.5rem 0 5rem; overflow: hidden;
-    border-bottom: 1px solid var(--line);
-  }
-  /* No washes: an instrument's ground is flat (Cleanroom, 2026-08-01). The crucible
-     treatment is archived with the old system. */
-  .eyebrow {
-    font-family: var(--mono); font-size: .74rem; letter-spacing: .22em;
-    text-transform: uppercase; color: var(--gold);
-  }
-  h1 {
-    font-size: clamp(2.4rem, 6.4vw, 4.6rem); line-height: 1.0; margin: 1rem 0 0;
-    font-family: var(--display); font-weight: 600; letter-spacing: -.03em; max-width: 30ch;
-  }
-  /* The molten treatment died with the old system; the span in the markup now reads in
-     plain ink, which is the point — this page argues, the type does not perform. */
-  .lede { font-size: clamp(1.05rem, 2.3vw, 1.35rem); max-width: 46ch; margin: 1rem 0 0; color: var(--dim); }
-  /* The focus contract, same token as the front page. */
-  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  /* The plain register, above the expert lede — never instead of it. */
-  .says { font-size: clamp(1.1rem, 2.4vw, 1.4rem); max-width: 44ch; margin: 1.6rem 0 0;
-          color: var(--ink); line-height: 1.45; }
-  .stamp {
-    display: inline-flex; align-items: center; gap: .6rem; margin-top: 2.2rem;
-    font-family: var(--mono); font-size: .8rem; padding: .55rem .9rem;
-    border: 1px solid var(--line); background: var(--card);
-  }
-  .dot { width: .5rem; height: .5rem; border-radius: 999px; background: var(--ok); }
+  .hero { padding: var(--s5) 0 var(--s4); }
+  .hero h1 { max-width: 18ch; }
 
-  /* ---------- shared ---------- */
-  section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
-  /* Section headings in the display grotesque, real 600 weight (Archivo ships it —
-     no synthetic bold), tight but not closed. */
-  h2 {
-    font-family: var(--display); font-weight: 600;
-    font-size: clamp(1.5rem, 3.6vw, 2.3rem); letter-spacing: -.01em;
-    margin: 0 0 .6rem; max-width: 32ch;
+  /* Records that used to be fenced with 2px rules and left borders. Under PAPER they are
+     surfaces separated by space: the fence was the thing that made the old pages feel
+     airless, and there were five of these grids on this page alone. */
+  .facts, .flow, .honest, .acts {
+    display: grid; gap: var(--s3); margin-top: var(--s4); border: 0;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   }
-  .kicker {
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .2em;
-    text-transform: uppercase; color: var(--gold); margin-bottom: 1.1rem;
-    display: flex; align-items: center; gap: .7rem;
+  .fact, .step, .honest > div, .act {
+    background: var(--white); border: 0; border-radius: var(--r);
+    box-shadow: var(--shadow-sm); padding: var(--s3);
   }
-  .kicker::before { content: ""; height: 1px; width: 1.9rem; background: var(--gold); flex: none; }
-  .sub { color: var(--dim); max-width: 54ch; margin: 0 0 2.2rem; }
+  .fact + .fact, .step + .step, .honest > div + div, .act + .act { border: 0; padding-left: var(--s3); }
+  .honest b { font-family: var(--mono); color: var(--accent); font-weight: 400; }
+  .honest p, .act p { margin: .4rem 0 0; font-size: .92rem; color: var(--dim); }
 
-  /* ---------- ruled records, not cards ----------
-     DESIGN.md: three bordered boxes in a row is the most recognisable generated-page
-     layout there is, and this page had five such grids while the front page had none.
-     Same fix as there: dividing rules instead of fences. A 2px ink rule opens the record,
-     a hairline closes it, and cells divide with left rules. */
-  .facts, .flow { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-                  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
-  .flow { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-  .fact, .step { padding: 1.25rem 1.3rem 1.25rem 0; }
-  .fact + .fact, .step + .step { border-left: 1px solid var(--line); padding-left: 1.3rem; }
-  .fact b { display: block; font-family: var(--mono); font-size: 2rem; letter-spacing: -.04em; line-height: 1.1; }
-  .fact span { display: block; margin-top: .5rem; font-size: .9rem; color: var(--dim); }
+  .act .badge { display: inline-block; font-family: var(--mono); font-size: .68rem;
+                letter-spacing: .14em; text-transform: uppercase; color: var(--paper);
+                background: var(--ink); padding: .25rem .6rem; border-radius: var(--r-pill); }
+  .act.now .badge { background: var(--accent); color: #fff; }
+  .act h3 { margin: var(--s2) 0 .3rem; }
 
-  /* The emphatic statement is a stamped pull quote, not a warning box. Set in the display
-     face between its own rules, because a sentence this load-bearing earns the face. */
-  .punch {
-    margin-top: 2.5rem; padding: 1.5rem 0;
-    border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line);
-    font-family: var(--display); font-weight: 600;
-    font-size: clamp(1.3rem, 2.9vw, 1.75rem); line-height: 1.35; letter-spacing: -.01em;
-  }
+  /* The numbered refusals. Numbers in the accent, no bottom rule per row — the space
+     between rows does that job now. */
+  ul.refuse { padding: 0; margin: var(--s4) 0 0; list-style: none; counter-reset: refusal;
+              border: 0; display: grid; gap: var(--s2); }
+  .refuse li { counter-increment: refusal; position: relative; border: 0;
+               background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm);
+               padding: var(--s3) var(--s3) var(--s3) 3.4rem; font-size: .96rem; color: var(--dim); }
+  .refuse li::before { content: counter(refusal, decimal-leading-zero);
+                       position: absolute; left: var(--s3); top: var(--s3);
+                       font-family: var(--mono); font-size: .76rem; color: var(--accent); }
+  .refuse b { color: var(--ink); font-weight: 500; }
 
-  .step .n {
-    font-family: var(--mono); font-size: .72rem; color: var(--gold); letter-spacing: .12em;
-  }
-  .step h3 { margin: .5rem 0 .4rem; font-size: 1.05rem; font-weight: 600; }
-  .step p { margin: 0; font-size: .92rem; color: var(--dim); }
-
-  /* ---------- chart ---------- */
-  /* A border around a figure is functional, like the front page's pre blocks — but it
-     shares their 10px radius, not a larger one of its own. */
-  .chart-card { border: 1px solid var(--line); background: var(--card); padding: 1.6rem; }
+  /* The figure. A surface, not a bordered box. */
+  .chart-card { background: var(--white); border: 0; border-radius: var(--r);
+                box-shadow: var(--shadow); padding: clamp(1.25rem, 3vw, var(--s4)); }
   .chart-scroll { overflow-x: auto; }
   svg { display: block; max-width: 100%; height: auto; }
-  .legend { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.1rem; font-size: .84rem; color: var(--dim); font-family: var(--mono); }
+  .legend { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s3);
+            font-size: .84rem; color: var(--dim); font-family: var(--mono); }
   .swatch { display: inline-block; width: .8rem; height: .8rem; vertical-align: -1px; margin-right: .4rem; }
 
-  /* The colored-left-border card is on the blacklist by name. Same ruled record. */
-  .honest { margin-top: 2rem; display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-            border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
-  .honest div { padding: 1.1rem 1.2rem 1.1rem 0; }
-  .honest div + div { border-left: 1px solid var(--line); padding-left: 1.2rem; }
-  .honest b { font-family: var(--mono); color: var(--gold); }
-  .honest p { margin: .3rem 0 0; font-size: .9rem; color: var(--dim); }
-
-  /* ---------- refusals: the numbered record, as on the front page ---------- */
-  ul.refuse { padding: 0; margin: 0; list-style: none; counter-reset: refusal;
-              border-top: 2px solid var(--ink); }
-  .refuse li { counter-increment: refusal; position: relative;
-               padding: 1.1rem 0 1.1rem 2.9rem; border-bottom: 1px solid var(--line);
-               font-size: .95rem; color: var(--dim); }
-  .refuse li::before { content: counter(refusal, decimal-leading-zero);
-                       position: absolute; left: 0; top: 1.18rem;
-                       font-family: var(--mono); font-size: .78rem; color: var(--ember); }
-  .refuse b { color: var(--ink); }
-
-  /* ---------- acts: a ruled timeline, not three boxes ---------- */
-  .acts { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-          border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
-  .act { padding: 1.4rem 1.4rem 1.4rem 0; }
-  .act + .act { border-left: 1px solid var(--line); padding-left: 1.4rem; }
-  .act .badge {
-    font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
-    color: var(--paper); background: var(--ink); padding: .2rem .5rem;
-  }
-  .act.now .badge { background: var(--gold); color: #17150d; }
-  .act h3 { margin: .9rem 0 .4rem; font-size: 1.1rem; }
-  .act p { margin: 0; color: var(--dim); font-size: .92rem; }
-
-  footer { padding: 3.5rem 0 5rem; color: var(--dim); font-family: var(--mono); font-size: .8rem; }
   footer strong { color: var(--ink); }
-
-  .hero { padding-top: 4rem; }
-
-  /* ---------- motion, same contract as the front page ---------- */
-  /* screen-scoped: print rendering never scrolls, so a reveal print can see leaves
-     every below-fold section as blank paper. */
-  @media screen and (prefers-reduced-motion: no-preference) {
-    .js section > .wrap, .js footer > .wrap {
-      opacity: 0; transform: translateY(14px);
-      transition: opacity .65s ease-out, transform .65s ease-out; }
-    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
-    .js section > .wrap .kicker::before { width: 0; transition: width .6s ease .25s; }
-    .js section > .wrap.in .kicker::before { width: 1.9rem; }
-    .dot { animation: breathe 2.6s ease-in-out infinite; }
-  }
-  @keyframes breathe { 50% { opacity: .4; } }
 </style>
 </head>
 <body>

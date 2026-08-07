@@ -401,9 +401,8 @@ const html = `<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <!-- Dark browser chrome from the first paint; without this the scrollbar is the
      browser's light default over the graphite. Same rule as index.html. -->
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#0C0E0F" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F4F5F4" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FBFAF8">
 <link rel="stylesheet" href="site.css">
 <style>
   /* Shared tokens, faces, chassis and nav come from site.css. Only this page's own
@@ -424,7 +423,7 @@ const html = `<!doctype html>
   .lede { color: var(--dim); max-width: 52ch; margin: 0 0 1rem; }
   /* The focus contract, same token as the front page. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  section { padding: 2.5rem 0; border-top: 1px solid var(--line); }
+  section { padding: 2.5rem 0;  }
   h2 { font-family: var(--display); font-weight: 600;
        font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: -.01em; }
   h4 { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
@@ -433,7 +432,7 @@ const html = `<!doctype html>
   p.plain { color: var(--ink); }
   .scroll { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .88rem; margin-bottom: .5rem; }
-  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
+  th, td { text-align: left; padding: .5rem .7rem;  }
   th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; }
   td.num, th.num { font-family: var(--mono); }
   /* The corpus facts, stamped before the results — the same assay strip the front page
@@ -441,7 +440,7 @@ const html = `<!doctype html>
      paragraph. */
   dl.assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
              gap: .9rem 1.4rem; margin: 1.2rem 0 1.4rem; padding: .9rem 0;
-             border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+              }
   dl.assay div { display: grid; gap: .15rem; align-content: start; }
   dl.assay dt { font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
                 letter-spacing: .08em; color: var(--dim); }
@@ -450,7 +449,7 @@ const html = `<!doctype html>
   dl.assay dd.hash { font-family: var(--mono); font-size: .78rem; word-break: break-all; }
   /* Findings are a ruled record, exactly as on the front page. A border around each match
      adds no information and makes the most important content on the site look templated. */
-  .hit { border-bottom: 1px solid var(--line); padding: .95rem 0; }
+  .hit { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm); margin-bottom: var(--s2); padding: .95rem 0; }
   .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
   .hit .meta { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem;
                font-family: var(--mono); font-size: .74rem; color: var(--dim); }
@@ -459,7 +458,7 @@ const html = `<!doctype html>
   mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 0;
          -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   /* Depth folds, it does not delete — the same ruled disclosure as the front page. */
-  details.more { border-top: 1px solid var(--line); margin-top: 1.2rem; }
+  details.more {  margin-top: 1.2rem; }
   details.more summary { cursor: pointer; list-style: none; font-family: var(--mono);
     font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--dim);
     padding: .7rem 0; }
@@ -475,10 +474,10 @@ const html = `<!doctype html>
       transition: opacity .65s ease-out, transform .65s ease-out; }
     .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
   }
-  pre { font-family: var(--mono); font-size: .78rem; background: var(--card); border: 1px solid var(--line);
+  pre { font-family: var(--mono); font-size: .78rem; background: var(--card); 
         border-radius: 0; padding: 1rem; overflow-x: auto; }
   ul { color: var(--dim); }
-  footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--line); color: var(--dim); font-family: var(--mono); font-size: .78rem; }
+  footer { padding: 2.5rem 0 4rem;  color: var(--dim); font-family: var(--mono); font-size: .78rem; }
 </style>
 </head>
 <body>
