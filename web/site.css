@@ -130,3 +130,23 @@ nav a:hover::after { right: 0; }
 /* Both selectors, because the pages disagreed about which one they used. */
 .brand, nav .brand { font-family: var(--mono); font-size: .78rem; letter-spacing: .22em;
                      text-transform: uppercase; color: var(--gold); margin-right: auto; }
+
+/* ── Touch targets and focus ─────────────────────────────────────────────────────────
+   Not one interactive control on this site met the 44px minimum before 2026-08-07. The
+   site is dense and mono-labelled by design, which makes small hit areas easy to ship and
+   easy to miss on a desktop with a mouse.
+
+   Applied by padding rather than by height so nothing moves: a nav link that reads at
+   .85rem keeps its type and its rule position, and grows its tappable box around them.
+   The inline-size guard on nav links is deliberately absent — they sit in a wrapping flex
+   row and a min-width would force the seven of them to a third line on a phone. */
+@media (pointer: coarse) {
+  nav a { padding-top: .7rem; padding-bottom: .7rem; }
+}
+button, .btn, .linklike, select, summary, label[for] { min-height: 44px; }
+.linklike { display: inline-flex; align-items: center; }
+
+/* One focus contract for the whole site. Radius 0 everywhere except here: DESIGN.md's
+   single stated exception is the focus ring, and an outline that traces a machined edge
+   is harder to see than one that does not. */
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }

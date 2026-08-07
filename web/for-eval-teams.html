@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ingot — why this exists</title>
+<title>Ingot for eval teams — provenance, floors and where this goes</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M14 22h36l8 20H6z' fill='%239BA1A6'/%3E%3C/svg%3E">
-<meta name="description" content="Independent verification of the AI training data supply chain: what Ingot checks, what it refuses to claim, and where it goes next.">
+<meta name="description" content="The measured detection floor, the six provenance signals, and what Ingot is building next. Written for eval teams and the people who buy model claims.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="About Ingot — what it verifies, and what it refuses to claim">
 <meta property="og:description" content="Independent verification of the AI training data supply chain: what Ingot checks, what it refuses to claim, and where it goes next.">
@@ -21,7 +21,6 @@
 <style>
   /* Faces, tokens, the root scale, the chassis and the nav all come from site.css.
      Only this page's own composition is below. */
-
   /* 1.0625rem is the 17px this page has always set, expressed against the root so the
      ultra-wide scale reaches it. A px value here would opt the body text out of the scale
      and shrink it relative to everything else. */
@@ -177,9 +176,6 @@
 </head>
 <body>
 
-<!-- The same navigation as every other page, in the same order. This page used to carry
-     its own three-link dialect, which failed the trunk test: nothing told you the site had
-     a Method or a Start-here, and the links sat in different places page to page. -->
 <nav>
   <div class="wrap">
     <span class="brand">Ingot</span>
@@ -188,135 +184,146 @@
     <a href="index.html#method">Method</a>
     <a href="registry.html">Registry</a>
     <a href="for-eval-teams.html">For eval teams</a>
-    <a href="about.html" aria-current="page">About</a>
+    <a href="for-eval-teams.html" aria-current="page" data-self >About</a>
     <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
   </div>
 </nav>
 
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow">Why this exists</div>
-    <h1>What Ingot can see,<br><span class="molten">and what it cannot.</span></h1>
-    <p class="says">A tool that reports &ldquo;no match&rdquo; has said one of two very
-    different things. <strong>We looked for your words and did not find them.</strong> Or:
-    <strong>we could not have found your words.</strong></p>
-    <p class="lede">Both are true sentences. Only the first is a result. This page is the
-    list of every way the second one can happen, because a tool that blurs them is more
-    dangerous than one that finds nothing at all — it turns a limit of the software into a
-    reassurance about the world.</p>
-    <div class="stamp"><span class="dot"></span>runs on your machine · no upload · no retention · no API key</div>
-  </div>
+<main>
+
+<header class="wrap">
+  <div class="kicker">For eval teams</div>
+  <h1>The floor, the signals,<br>and where this goes.</h1>
+  <p class="lede">Ingot's front door is a writer asking whether her sentences are inside a
+  training corpus. This page is the other half: the measured limits of the provenance
+  scanner, and the record the registry is building. Nothing here is a claim without a
+  number behind it.</p>
+  <p class="lede"><a href="registry.html">The public registry &rarr;</a> is the findings
+  themselves &mdash; three benchmarks against 21.33 GB of C4, and every match inspected.</p>
 </header>
 
 <section>
   <div class="wrap">
-    <div class="kicker">The product today</div>
-    <h2>Contamination leads because it is not an inference</h2>
-    <p class="sub">A shared 10-gram — ten identical words in a row — between a benchmark and a corpus
-    is a fact you can display side by side. Authorship is a statistical claim about a distribution.
-    Both are worth building; only one of them can be handed to a skeptic who then agrees.</p>
+    <div class="kicker">The hole</div>
+    <h2>Nine figures of spend, certified by the seller</h2>
+    <p class="sub">Every number here is public. None of it depends on anyone's résumé.</p>
+    <!-- Every figure carries its public source by name, print-style — this site's own
+         constitution is that numbers trace, and marketing numbers are not exempt. The
+         "2–3 yrs" estimate that used to sit here had no nameable source, so it is gone. -->
+    <div class="facts">
+      <div class="fact"><b>$1B+</b><span>discussed by a single lab for RL environments in one year — The Information, September 2025</span></div>
+      <div class="fact"><b>$85–200<small>/hr</small></b><span>the going rate for credentialed expert data — Mercor's published expert rates</span></div>
+      <div class="fact"><b>Aug 2026</b><span>the EU AI Act's high-risk obligations, documented provenance included, begin applying — Regulation (EU) 2024/1689</span></div>
+    </div>
+    <p class="punch">Quality and neutrality now outrank price when labs choose a vendor. So vendors began publishing provenance paperwork —
+    <em>about their own labour</em>. Self-certification survives exactly as long as nobody's money is at risk.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">How the provenance scanner works</div>
+    <h2>Six signals, none of them a vibe check</h2>
+    <p class="sub">In plain words: does delivered data read like it was written by the humans it was
+    billed as? Structural statistics measured against two named reference corpora, one human-authored
+    and one machine-generated. No model call, no network, deterministic and reproducible. This is the
+    second product, and the numbers below are the honest limits of what it can do today.</p>
     <div class="flow">
-      <div class="step"><div class="n">SHIPPED</div><h3>Contamination scanning</h3><p>Index the benchmark, stream the corpus once, show every match with its surrounding text. 7.0 MB/sec end to end on real gzipped corpus shards, in the browser or on the command line.</p></div>
-      <div class="step"><div class="n">SHIPPED · LIMITED</div><h3>Batch provenance</h3><p>Human-authored or machine-generated, measured against named reference corpora. Honest detection floor is 50% contamination, and the four reasons are known.</p></div>
-      <div class="step"><div class="n">NEXT</div><h3>The public registry</h3><p>Which benchmarks appear in which public corpora, reproducible from the same files, growing more discriminating with every corpus added.</p></div>
+      <div class="step"><div class="n">01 · LOAD</div><h3>Refuse, don't guess</h3><p>Schema mismatches, unparseable lines and zero-variance batches are reported, never silently dropped.</p></div>
+      <div class="step"><div class="n">02 · MEASURE</div><h3>Burstiness &amp; scaffolding</h3><p>Sentence-length variation, reused openings and closings, cluster tightness, duplicate rate, author fingerprints.</p></div>
+      <div class="step"><div class="n">03 · COMPARE</div><h3>Against distributions</h3><p>Each signal is weighted by its measured signal-to-noise, and declines when it sits outside its calibrated range.</p></div>
+      <div class="step"><div class="n">04 · REPORT</div><h3>Evidence, not a verdict</h3><p>A purity mark, per-signal contribution, flagged records, and every input stamped so the result can be reproduced.</p></div>
     </div>
-  </div>
-</section>
-
-
-
-
-<section>
-  <div class="wrap">
-    <div class="kicker">Coverage</div>
-    <h2>Six ways a clean result can mean &ldquo;we could not look&rdquo;</h2>
-    <p class="sub">Every one of these is a limit Ingot knows about and reports. The failure
-    this project actually fears is the limit nobody wrote down. Full detail, with the
-    measurements, in <code>docs/coverage.md</code>.</p>
-
-    <div class="steps">
-      <div class="step">
-        <div class="n">1 &middot; SCRIPT</div>
-        <h3>Languages written without spaces</h3>
-        <p>Ingot matches word n-grams, and finding a word means knowing where it ends.
-        Chinese, Japanese, Thai, Lao, Khmer, Burmese and Tibetan are written without spaces
-        between words, so that rule does not apply to them. The consequence is not degraded
-        accuracy, it is total: a several-hundred-character Japanese essay tokenizes to
-        <b>one token</b>, produces no 10-gram, and cannot be matched against anything.
-        Reports name these items separately from short ones, and say the scan could not
-        look rather than that it looked and found nothing. Korean is not affected — modern
-        Korean puts spaces between words.</p>
-      </div>
-      <div class="step">
-        <div class="n">2 &middot; LENGTH</div>
-        <h3>Anything shorter than ten words</h3>
-        <p>A text shorter than <code>n</code> tokens produces no n-gram at all. At the
-        default n=10, a nine-word sentence cannot be matched by construction. Every report
-        names these items rather than counting them as checked.</p>
-      </div>
-      <div class="step">
-        <div class="n">3 &middot; QUOTE STYLE</div>
-        <h3>Short text whose apostrophes were changed</h3>
-        <p>The tokenizer keeps the ASCII apostrophe inside a word and treats the
-        typographic one as a separator, and over 126,578 C4 documents,
-        <b>39.1% use a word-internal curly apostrophe, 30.0% an ASCII one.</b> Normalising
-        smart quotes is what every CMS and scraper does. The damage is local, so length
-        decides it: verbatim copies still found after re-quoting are <b>68.0%</b> at 10–24
-        tokens and 100% above 25.</p>
-      </div>
-      <div class="step">
-        <div class="n">4 &middot; THE CORPUS</div>
-        <h3>What the dataset's own cleaning already removed</h3>
-        <p>C4 is not the April 2019 web crawl. It is what survived a documented cleaning
-        pass over it — a blocklist, a rule discarding any page containing a curly brace as
-        code, a terminal-punctuation requirement, a five-line minimum. Text that was
-        crawled and then discarded is absent for reasons that have nothing to do with who
-        trained on it, and a report that stayed quiet about that would be lying with a true
-        sentence.</p>
-      </div>
-      <div class="step">
-        <div class="n">5 &middot; THE CRAWL</div>
-        <h3>Pages the crawler never fetched</h3>
-        <p>A page CommonCrawl never collected cannot be in any corpus derived from it. Two
-        rules learned the hard way: a domain check can rule a platform out but can never
-        clear a person, because a crawled host is not a crawled writer. And the index is
-        sorted by URL, so sampling only its first page is biased toward whatever sorts
-        first.</p>
-      </div>
-      <div class="step">
-        <div class="n">6 &middot; VERBATIM</div>
-        <h3>Paraphrase, translation, heavy editing</h3>
-        <p>The exact tier finds verbatim overlap. A paraphrase is not verbatim and it will
-        not be found. A second tier exists for edited copies, needs the source text, and
-        reports <em>why</em> it is unavailable rather than reporting zero. Its measured
-        recall is published, and it is not 100%.</p>
-      </div>
-    </div>
-
-    <p class="sub" style="margin-top:1.6rem"><strong>The rule this exists to enforce:</strong>
-    before any report goes out, its null results have to survive one question — could this
-    scan have found the thing it says it did not find? If the answer is no, the report says
-    so in the same place and the same size as the result. A caveat in a footnote under a
-    green checkmark is a way of being technically honest and practically misleading.</p>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="kicker">Discipline</div>
-    <h2>What Ingot refuses to do</h2>
-    <p class="sub">Each of these was a bug first, caught by running the experiment and reading the output instead of trusting it.</p>
-    <ul class="refuse">
-      <li><b>No per-record verdicts.</b> Batch-level evidence against named references. The per-sample detector arms race is one Ingot doesn't enter.</li>
-      <li><b>No extrapolation.</b> A batch outside the range the references span is unlike <em>both</em>. Clamping it once put a clean human batch at 34/100.</li>
-      <li><b>No absolute thresholds.</b> Missing reference file means no score, not a fallback guess.</li>
-      <li><b>No comparing across batch sizes.</b> Duplicate rate and type-token ratio move with size regardless of provenance.</li>
-      <li><b>No zero-variance division.</b> A pinned statistic isn't a perfect discriminator. Treating it as one produced NaN.</li>
-      <li><b>No silent zero.</b> Non-finite scores raise. Unparseable lines are counted and listed.</li>
-    </ul>
+    <div class="kicker">Measured, not promised</div>
+    <h2>What it detects today — including what it can't</h2>
+    <p class="sub">Human-authored corpus contaminated with machine-generated records at known ratios. Batch size 1,200. Five draws per level. References calibrated on one random half, every scored record from the held-out half.</p>
+
+    <div class="chart-card">
+      <div class="chart-scroll">
+        <svg viewBox="0 0 720 340" role="img" aria-label="Purity falls as machine contamination rises: 88 at 0%, 90 at 5%, 88 at 10%, 81 at 25%, 56 at 50%. Clean human control band sits at 89.9 plus or minus 4.7.">
+          <defs>
+            <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff9d1f"/><stop offset="100%" stop-color="#d2451e"/>
+            </linearGradient>
+          </defs>
+          <!-- axes -->
+          <line x1="70" y1="20" x2="70" y2="280" stroke="currentColor" stroke-opacity=".25"/>
+          <line x1="70" y1="280" x2="690" y2="280" stroke="currentColor" stroke-opacity=".25"/>
+          <!-- y ticks: purity 0..100 mapped to y 280..20 -->
+          <g font-family="ui-monospace, monospace" font-size="11" fill="currentColor" fill-opacity=".55">
+            <text x="46" y="24">100</text><text x="52" y="154">50</text><text x="58" y="284">0</text>
+            <text x="360" y="322" text-anchor="middle" fill-opacity=".7">machine contamination</text>
+            <text x="20" y="150" transform="rotate(-90 20 150)" text-anchor="middle" fill-opacity=".7">purity</text>
+          </g>
+          <!-- clean control band: 89.9 ± 4.7  => y = 280 - p*2.6 -->
+          <rect x="70" y="34.04" width="620" height="24.44" fill="#2f6b34" fill-opacity=".14"/>
+          <line x1="70" y1="46.26" x2="690" y2="46.26" stroke="#2f6b34" stroke-opacity=".5" stroke-dasharray="5 4"/>
+          <text x="678" y="40" font-family="ui-monospace, monospace" font-size="11" fill="#2f6b34" text-anchor="end">clean human control 89.9 ± 4.7</text>
+          <!-- data: x positions for 0,5,10,25,50 -->
+          <!-- purity: 88.0, 90.2, 87.6, 81.2, 56.4  => y = 280 - p*2.6 -->
+          <polyline fill="none" stroke="url(#ink)" stroke-width="3"
+            points="110,51.2 235,45.5 360,52.2 485,68.9 610,133.4"/>
+          <g stroke="url(#ink)" stroke-width="2">
+            <line x1="110" y1="39.0" x2="110" y2="63.4"/>
+            <line x1="235" y1="28.3" x2="235" y2="62.8"/>
+            <line x1="360" y1="25.7" x2="360" y2="78.7"/>
+            <line x1="485" y1="55.9" x2="485" y2="81.9"/>
+            <line x1="610" y1="113.4" x2="610" y2="153.4"/>
+          </g>
+          <g fill="url(#ink)">
+            <circle cx="110" cy="51.2" r="5"/><circle cx="235" cy="45.5" r="5"/>
+            <circle cx="360" cy="52.2" r="5"/><circle cx="485" cy="68.9" r="5"/>
+            <circle cx="610" cy="133.4" r="7"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12" fill="currentColor" text-anchor="middle">
+            <text x="110" y="300" fill-opacity=".7">0%</text>
+            <text x="235" y="300" fill-opacity=".7">5%</text>
+            <text x="360" y="300" fill-opacity=".7">10%</text>
+            <text x="485" y="300" fill-opacity=".7">25%</text>
+            <text x="610" y="300" fill-opacity=".7">50%</text>
+            <text x="110" y="86" fill-opacity=".85">88.0</text>
+            <text x="235" y="82" fill-opacity=".85">90.2</text>
+            <text x="360" y="98" fill-opacity=".85">87.6</text>
+            <text x="485" y="102" fill-opacity=".85">81.2</text>
+            <text x="610" y="175" fill-opacity=".95">56.4</text>
+          </g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><span class="swatch" style="background:linear-gradient(120deg,#ff9d1f,#d2451e)"></span>spiked batches, mean ± sd</span>
+        <span><span class="swatch" style="background:#2f6b34;opacity:.5"></span>clean human control band</span>
+      </div>
+    </div>
+
+    <div class="honest">
+      <div><b>Detection floor: 50%</b><p>First level landing more than two control standard deviations below clean. 25% is marginal at about 1.8σ.</p></div>
+      <div><b>False positives: 13%</b><p>One of eight clean human batches would be flagged at the operating threshold. Reported, not buried.</p></div>
+      <div><b>5% and 10%: not detectable</b><p>Inside the noise on this corpus pair. Claiming otherwise would be the one unrecoverable error.</p></div>
+      <div><b>Why, and what's next</b><p>The reference pair isn't prompt-matched and the machine side is 2023-era. Regenerating identical prompts with a current model removes both problems, and that's the next run.</p></div>
+    </div>
   </div>
 </section>
 
+<section>
+  <div class="wrap">
+    <div class="kicker">Where this goes</div>
+    <h2>One company, three acts</h2>
+    <div class="acts">
+      <div class="act now"><span class="badge">Now · built</span><h3>Contamination &amp; provenance</h3><p>Is the benchmark inside the corpus, and was the delivered data produced by the human it was billed as. Run either before payment, or before training.</p></div>
+      <div class="act"><span class="badge">Act II</span><h3>Reward-signal integrity</h3><p>Red-team a reward function or rubric — the scoring rules a model is trained against — to find what scores high while failing the task. Same disease, one layer up.</p></div>
+      <div class="act"><span class="badge">Act III</span><h3>Provenance of record</h3><p>Third-party AI Act documentation a regulator accepts precisely because it isn't self-issued.</p></div>
+    </div>
+    <p class="punch" style="margin-top:2.5rem">Mercor will not certify Mercor. Anthropic will not ship a product that audits Anthropic's own training data.
+    The referee cannot play for a team — which is exactly why this is a company and not a feature.</p>
+  </div>
+</section>
+
+</main>
 
 <footer>
   <div class="wrap">
@@ -327,20 +334,5 @@
     <a href="index.html">&larr; Back to the scanner</a>
   </div>
 </footer>
-
-<script type="module">
-// The same settle-in reveal as the front page, under the same contract: keyed on a .js
-// class this script adds, so a script that never runs costs the motion and not the page.
-const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
-if (MOTION) {
-  document.documentElement.classList.add('js');
-  const io = new IntersectionObserver((entries) => {
-    for (const en of entries) {
-      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-    }
-  }, { rootMargin: '0px 0px -10% 0px' });
-  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
-}
-</script>
 </body>
 </html>
