@@ -2,7 +2,7 @@
 
 Numbers quoted here trace to `results/`; defect write-ups live in `docs/measurements.md`.
 
-## 0.1.4 — August 2026
+## 0.1.5 — August 2026
 
 One scan-behaviour change and a pass of failure-mode fixes. Nothing here moves a published
 number, and each part was checked separately: the validation harness reproduces identically,
@@ -24,7 +24,7 @@ break an existing invocation — an invocation it was already answering wrongly.
   gram that is common when seen can never become the one that saves the run.
 - Every discard still names the frequency that condemned it, including when no gram
   survived long enough to supply one.
-- Receipts stamp `ingot-0.1.4`. The 0.1.3 tarball shipped indexes built by `ingot-0.1.0`
+- Receipts stamp `ingot-0.1.5`. The 0.1.3 tarball shipped indexes built by `ingot-0.1.0`
   because nothing compared the committed indexes to a rebuild; `scripts/check-index-parity.ts`
   now does, in CI, before every merge.
 - Benchmarks are pinned: GSM8K and HumanEval to upstream commits, and all three asserted
@@ -77,6 +77,13 @@ above 25 — so folding the two together would change every gram in every index,
 several thousand published figures unreproducible, to fix a case already near the n=10 floor.
 `results/quote-style-sensitivity.json`, and the figures are gated so the decision cannot go
 stale quietly.
+
+## 0.1.4 — never published
+
+Tagged and never released. The tag was cut for the frequency-filter change alone; by the
+time the release was made, the seven fixes above were in and it was better to publish them
+together than to ship a build that still ignored a mistyped flag. The `v0.1.4` tag stays
+where it is rather than being rewritten. Nothing was ever installed under this number.
 
 ## 0.1.3 — August 2026
 
