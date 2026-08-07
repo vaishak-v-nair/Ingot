@@ -14,7 +14,8 @@ import {
   STOPLIST_MIN_ITEMS,
   STOPLIST_SIZE,
 } from './types.ts';
-import type { BenchmarkItem, IndexStats, NgramIndexData } from './types.ts';
+import { DEFAULT_ITEM_NOUN } from './types.ts';
+import type { BenchmarkItem, IndexStats, ItemNoun, NgramIndexData } from './types.ts';
 
 /**
  * Two independent polynomial rolling hashes mod 2^32, composed into one 53-bit key.
@@ -123,6 +124,8 @@ export type BuildOptions = {
   /** Disable the discriminative filter, for the ablation in the validation harness. */
   disableDiscriminativeFilter?: boolean;
   disableStoplist?: boolean;
+  /** What to call these items in a report. See NgramIndexData.itemNoun. */
+  itemNoun?: ItemNoun;
 };
 
 export class NgramIndex {
@@ -136,6 +139,8 @@ export class NgramIndex {
   readonly uncheckableItemIds: string[];
   /** Of those, the ones the tokenizer could not segment. See NgramIndexData. */
   readonly unsegmentedItemIds: string[];
+  /** What the indexed items are called in a report. See NgramIndexData.itemNoun. */
+  readonly itemNoun: ItemNoun;
   private readonly map: Map<number, number[]>;
 
   private constructor(
@@ -148,7 +153,9 @@ export class NgramIndex {
     stats: IndexStats,
     uncheckableItemIds: string[] = [],
     unsegmentedItemIds: string[] = [],
+    itemNoun: ItemNoun = DEFAULT_ITEM_NOUN,
   ) {
+    this.itemNoun = itemNoun;
     this.uncheckableItemIds = uncheckableItemIds;
     this.unsegmentedItemIds = unsegmentedItemIds;
     this.n = n;
@@ -299,6 +306,7 @@ export class NgramIndex {
       // called a Japanese essay "shorter than 10 tokens" would be describing the tokenizer
       // while appearing to describe the writing.
       uncheckableIdx.filter((i) => isUnsegmentedScript(items[i].text)).map((i) => items[i].id),
+      options.itemNoun,
     );
     return built;
   }
@@ -335,6 +343,8 @@ export class NgramIndex {
       // an English benchmark should not carry an empty array in every published artifact
       // just because the field exists.
       unsegmentedItemIds: this.unsegmentedItemIds.length > 0 ? this.unsegmentedItemIds : undefined,
+      // Omitted when it is the default, so an index of a real benchmark is unchanged.
+      itemNoun: this.itemNoun === DEFAULT_ITEM_NOUN ? undefined : this.itemNoun,
       stats: this.stats,
       scannerVersion: SCANNER_VERSION,
     };
@@ -356,6 +366,7 @@ export class NgramIndex {
       data.stats,
       data.uncheckableItemIds ?? [],
       data.unsegmentedItemIds ?? [],
+      data.itemNoun ?? DEFAULT_ITEM_NOUN,
     );
     return loaded;
   }

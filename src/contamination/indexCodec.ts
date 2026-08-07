@@ -163,6 +163,7 @@ export function encodeIndex(data: NgramIndexData): Uint8Array {
     // JSON.stringify drops an undefined value, so an index with nothing to report encodes
     // byte-for-byte as it did before this field existed.
     unsegmentedItemIds: data.unsegmentedItemIds,
+    itemNoun: data.itemNoun,
     stats: data.stats,
     scannerVersion: data.scannerVersion,
   };

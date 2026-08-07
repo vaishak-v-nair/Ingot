@@ -20,7 +20,7 @@ import { NgramIndex } from './contamination/ngramIndex.ts';
 import { loadIndexFromBytes } from './contamination/browserScan.ts';
 import { scanCorpus } from './contamination/scan.ts';
 import { renderContaminationReport } from './contamination/reportHtml.ts';
-import { CONTAMINATION_CLAIM_SCOPE } from './contamination/types.ts';
+import { CONTAMINATION_CLAIM_SCOPE, DEFAULT_ITEM_NOUN } from './contamination/types.ts';
 import type { ContaminationReport } from './contamination/types.ts';
 import type { BaselinePair, ScanReport } from './types.ts';
 
@@ -278,13 +278,16 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
   const exact = report.tiers.find((t) => t.tier === 'exact')!;
   const near = report.tiers.find((t) => t.tier === 'near')!;
   const r = report.receipt;
+  // See reportHtml: one renderer serves the registry and the personal check.
+  const nouns = report.itemNoun ?? DEFAULT_ITEM_NOUN;
+  const noun = exact.itemsTotal === 1 ? nouns.one : nouns.many;
   const lines: string[] = [];
 
   lines.push('');
   lines.push(`  INGOT CONTAMINATION — ${r.benchmark} in ${r.corpus}`);
   lines.push(`  ${'─'.repeat(64)}`);
   lines.push(
-    `  ${exact.itemsHit} of ${exact.itemsTotal.toLocaleString()} benchmark items appear in this corpus` +
+    `  ${exact.itemsHit} of ${exact.itemsTotal.toLocaleString()} ${noun} appear in this corpus` +
       ` (${(exact.rate * 100).toFixed(2)}%)`,
   );
   lines.push(
@@ -305,10 +308,10 @@ function contaminationSummary(report: ContaminationReport, indexLabel: string): 
 
   lines.push('  WHAT WAS NOT CHECKED');
   if (report.uncheckableItemIds.length === 0) {
-    lines.push('    nothing: every benchmark item produced at least one n-gram');
+    lines.push(`    nothing: every ${nouns.one} produced at least one n-gram`);
   } else {
     lines.push(
-      `    ${report.uncheckableItemIds.length} item(s) produced no n-gram at n=${report.n}, so nothing`,
+      `    ${report.uncheckableItemIds.length} ${nouns.many} produced no n-gram at n=${report.n}, so nothing`,
     );
     lines.push('    could ever match them. They are named in the JSON report.');
     // Called out on its own line because it is the one case where "not checked" is a fact

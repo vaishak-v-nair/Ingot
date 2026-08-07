@@ -439,6 +439,7 @@ export class ScanSession {
       uncheckableItemIds: this.index.uncheckableItemIds,
       unsegmentedItemIds:
         this.index.unsegmentedItemIds.length > 0 ? this.index.unsegmentedItemIds : undefined,
+      itemNoun: this.index.itemNoun,
       elapsedMs,
       scannerVersion: SCANNER_VERSION,
       generatedAt,

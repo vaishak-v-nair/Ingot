@@ -111,6 +111,17 @@ export type NgramIndexData = {
    * still load. See text.ts.
    */
   unsegmentedItemIds?: string[];
+  /**
+   * What the indexed items are called in a report. Defaults to "benchmark item".
+   *
+   * The renderer is shared between the registry — where the items genuinely are benchmark
+   * items — and the personal check, where they are somebody's essays. Telling a novelist
+   * that "1 of 3 benchmark items appear in this corpus" is the registry's vocabulary
+   * arriving in a document written for a person, and it reads as though their work were
+   * being processed rather than read. Optional, so an index built before this existed still
+   * loads and still says "benchmark item".
+   */
+  itemNoun?: ItemNoun;
   stats: IndexStats;
   /**
    * No build timestamp, deliberately. An index is a pure function of its benchmark and its
@@ -120,6 +131,11 @@ export type NgramIndexData = {
    */
   scannerVersion: string;
 };
+
+/** Singular and plural, because "piece of writings" is not a word. */
+export type ItemNoun = { one: string; many: string };
+
+export const DEFAULT_ITEM_NOUN: ItemNoun = { one: 'benchmark item', many: 'benchmark items' };
 
 export type IndexStats = {
   itemCount: number;
@@ -262,6 +278,8 @@ export type ContaminationReport = {
   uncheckableItemIds: string[];
   /** Of those, the ones written in a script the tokenizer cannot segment. See NgramIndexData. */
   unsegmentedItemIds?: string[];
+  /** What to call the indexed items in this report. See NgramIndexData.itemNoun. */
+  itemNoun?: ItemNoun;
   /** How the corpus read went. A scan that skipped every line must never present as a
       clean result — zero readable documents is a refusal, not an absence of overlap. */
   load?: { totalLines: number; skipped: number };

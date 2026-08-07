@@ -1,4 +1,4 @@
-import { CONTAMINATION_CLAIM_SCOPE } from './types.ts';
+import { CONTAMINATION_CLAIM_SCOPE, DEFAULT_ITEM_NOUN } from './types.ts';
 import type { ContaminationReport } from './types.ts';
 
 /**
@@ -32,6 +32,10 @@ export function renderContaminationReport(report: ContaminationReport): string {
   const near = report.tiers.find((t) => t.tier === 'near');
   const r = report.receipt;
   const clean = exact.itemsHit === 0;
+  // The registry indexes benchmark items; the personal check indexes somebody’s essays.
+  // One renderer serves both, so the noun travels with the index rather than being wired in.
+  const noun = report.itemNoun ?? DEFAULT_ITEM_NOUN;
+  const nounFor = (count: number): string => (count === 1 ? noun.one : noun.many);
   const uncheckable = report.uncheckableItemIds.length;
 
   const evidence =
@@ -96,7 +100,7 @@ ${exact.droppedSamples
   const notChecked =
     uncheckable === 0
       ? `    <h2>What was not checked</h2>
-    <p>Nothing. Every benchmark item produced at least one ${report.n}-gram, so every one of them
+    <p>Nothing. Every ${esc(noun.one)} produced at least one ${report.n}-gram, so every one of them
     was genuinely examined.</p>`
       : `    <h2>What was not checked</h2>${
           unsegmentedIds.length > 0
@@ -133,45 +137,74 @@ ${idList(shortIds)}`
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot — ${esc(report.benchmark)} in ${esc(report.corpus)}</title>
 <style>
+  /* Cleanroom Instrument, as specified in DESIGN.md — the same tokens, radius and colour
+     semantics as the site. This document was left behind by the 2026-08-01 redesign and
+     kept the archived warm-paper-and-gold palette, 14px radii and card surfaces for two
+     releases, which meant the one artifact that actually leaves the building looked
+     nothing like the product that produced it.
+
+     Two deliberate departures, both forced by this file's older and stronger constraint —
+     it must open correctly from an email attachment, on a machine with no network, years
+     from now:
+
+       1. System faces, not Archivo/Public Sans/JetBrains Mono. Embedding three subsetted
+          woff2 files as data URIs would multiply a 6 KB report by fifty to carry the brand
+          into a document whose job is evidence. The stack below keeps the register —
+          neo-grotesque UI face, real mono for hashes — without a byte of payload.
+       2. No color-mix(). A report read in 2031 by whatever browser is to hand should not
+          depend on a 2023 colour function to render its evidence legibly. */
   *, *::before, *::after { box-sizing: border-box; }
   :root {
-    --ink: #16150f; --paper: #fbfaf7; --dim: #6d6a5c; --line: #ddd9cc; --card: #fff;
-    --gold: #9a6a00; --hot: #ff9d1f; --ok: #2f6b34; --bad: #8f2f22;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31;
+    --brand: #9BA1A6; --sig: #F59E0B; --ok: #4ADE80; --bad: #F87171;
+    --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --ink: #f2efe4; --paper: #0e0d09; --dim: #9a968a; --line: #2b281f; --card: #16150f;
-            --gold: #e0aa3e; --ok: #7fbf85; --bad: #e2887a; }
+  @media (prefers-color-scheme: light) {
+    :root { color-scheme: light;
+            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA;
+            --brand: #43474B; --sig: #B45309; --ok: #15803D; --bad: #B91C1C; }
   }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
-  .wrap { max-width: 50rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  .brand { font-family: var(--mono); font-size: .74rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
-  h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.15; margin: .5rem 0 .3rem; letter-spacing: -.02em; }
+  .wrap { max-width: 54rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+  .brand { font-family: var(--mono); font-size: .74rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.15; margin: .5rem 0 .3rem;
+       letter-spacing: -.02em; font-weight: 600; }
   .sub { color: var(--dim); margin: 0 0 2rem; font-size: .95rem; }
   h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim);
        margin: 2.4rem 0 .7rem; font-weight: 600; }
   p { max-width: 62ch; }
-  .verdict { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 1.6rem; }
+  /* Hairline rules, never a card. An instrument marks a reading; it does not frame it. */
+  .verdict { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.6rem 0; }
+  .verdict.refused { border-color: var(--bad); }
   .big { font-family: var(--mono); font-size: 2.8rem; line-height: 1; font-weight: 600; }
-  .big.clean { color: var(--ok); } .big.dirty { color: var(--bad); }
+  /* Colour is testimony. Green is the only green and means verified-clean; amber means a
+     finding that has to be read; red is refusals and errors only, never a verdict. A count
+     of matches used to render red, which told the reader "error" about a measurement. */
+  .big.clean { color: var(--ok); } .big.dirty { color: var(--sig); } .big.refused { color: var(--bad); }
   .label { color: var(--dim); font-size: .76rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .45rem; }
   .scroll { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .88rem; }
-  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th, td { text-align: left; padding: .5rem .7rem
+           .5rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; white-space: nowrap; }
   td { font-family: var(--mono); word-break: break-word; }
-  .hit { border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; margin-bottom: .6rem; background: var(--card); }
+  .hit { border-left: 2px solid var(--line); padding: .1rem 0 .1rem 1rem; margin: 0 0 1.1rem; }
   .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
   .quote { margin: .45rem 0 0; font-size: .93rem; }
-  mark { background: color-mix(in srgb, var(--hot) 35%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 3px; }
-  pre { font-family: var(--mono); font-size: .76rem; background: var(--card); border: 1px solid var(--line);
-        border-radius: 10px; padding: 1rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  /* An underline rather than a fill: --sig is a signal, and DESIGN.md says it is never a
+     fill. It also survives being printed in greyscale, which a highlight does not. */
+  mark { background: transparent; color: inherit; border-bottom: 2px solid var(--sig); }
+  pre { font-family: var(--mono); font-size: .76rem; border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line); padding: 1rem 0; overflow-x: auto;
+        white-space: pre-wrap; word-break: break-word; }
   .note, .ids { color: var(--dim); font-size: .86rem; }
   .ids { font-family: var(--mono); word-break: break-word; }
   footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .82rem; }
   @media print {
-    :root { --paper: #fff; --card: #fff; --ink: #000; }
+    :root { color-scheme: light; --paper: #fff; --ink: #000; --dim: #444; --line: #bbb;
+            --brand: #333; --sig: #8a5200; --ok: #0f5c26; --bad: #8f1515; }
     body { font-size: 11pt; }
     .hit, .verdict, pre { break-inside: avoid; }
   }
@@ -185,8 +218,8 @@ ${idList(shortIds)}`
 
   ${
     report.corpusDocs === 0
-      ? `<div class="verdict" style="border-color: var(--bad)">
-    <div class="big dirty">refused</div>
+      ? `<div class="verdict refused">
+    <div class="big refused">refused</div>
     <div class="label">this corpus was not scanned</div>
     <p style="margin:.9rem 0 0">${
       (report.load?.totalLines ?? 0) === 0
@@ -197,7 +230,7 @@ ${idList(shortIds)}`
   </div>`
       : `<div class="verdict">
     <div class="big ${clean ? 'clean' : 'dirty'}">${num(exact.itemsHit)}</div>
-    <div class="label">of ${num(exact.itemsTotal)} benchmark items appear in this corpus</div>
+    <div class="label">of ${num(exact.itemsTotal)} ${esc(nounFor(exact.itemsTotal))} appear in this corpus</div>
     <p style="margin:.9rem 0 0">${
       clean
         ? 'No verbatim overlap was found. That is a result rather than the absence of one: every item that could be checked was checked, and the ones that could not are named below.'
@@ -208,11 +241,11 @@ ${idList(shortIds)}`
 
   <h2>What was checked</h2>
   <div class="scroll"><table>
-    <tr><th>benchmark</th><td>${esc(report.benchmark)}, ${num(exact.itemsTotal)} items at n=${report.n}</td></tr>
+    <tr><th>indexed</th><td>${esc(report.benchmark)}, ${num(exact.itemsTotal)} ${esc(nounFor(exact.itemsTotal))} at n=${report.n}</td></tr>
     <tr><th>corpus</th><td>${esc(report.corpus)} · ${num(report.corpusDocs)} documents · ${num(report.corpusTokens)} tokens</td></tr>
     <tr><th>matches kept</th><td>${num(exact.totalHits)}</td></tr>
     <tr><th>dropped as ordinary language</th><td>${num(exact.droppedGeneric ?? 0)}</td></tr>
-    <tr><th>could not be checked</th><td>${num(uncheckable)} item${uncheckable === 1 ? '' : 's'}${
+    <tr><th>could not be checked</th><td>${num(uncheckable)} ${esc(nounFor(uncheckable))}${
       unsegmentedIds.length > 0
         ? ` &middot; ${num(unsegmentedIds.length)} of them in a script this scanner cannot segment`
         : ''

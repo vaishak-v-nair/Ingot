@@ -25,30 +25,49 @@ import { encodeIndex, gzipBytes } from '../src/contamination/indexCodec.ts';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
 import { DEFAULT_N, MAX_N, MIN_N } from '../src/contamination/types.ts';
 import { loadBatch } from '../src/loader.ts';
+import { parseScriptArgs } from './cli-flags.ts';
 
-const argv = process.argv.slice(2);
-function flag(name: string, fallback: string): string {
-  const i = argv.indexOf(`--${name}`);
-  if (i === -1) return fallback;
-  const v = argv[i + 1];
-  if (v === undefined || v.startsWith('--')) {
-    process.stderr.write(`\n  --${name} needs a value\n\n`);
-    process.exit(2);
-  }
-  return v;
-}
+const USAGE =
+  'node scripts/build-index.ts <input.jsonl> [--name n] [--n 10] [--out path] [--item-noun "essay|essays"]';
+const { positional, flags } = parseScriptArgs(
+  { name: 'value', n: 'value', out: 'value', 'item-noun': 'value' },
+  USAGE,
+);
 
-const input = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
-if (!input) {
-  process.stderr.write('\n  usage: node scripts/build-index.ts <input.jsonl> [--name n] [--n 10] [--out path]\n\n');
+const input = positional[0];
+if (!input || positional.length > 1) {
+  process.stderr.write(`\n  usage: ${USAGE}\n\n`);
   process.exit(2);
 }
+
+const flag = (name: string, fallback: string): string => flags.get(name) ?? fallback;
 
 const n = Number(flag('n', String(DEFAULT_N)));
 if (!Number.isInteger(n) || n < MIN_N || n > MAX_N) {
   process.stderr.write(`\n  --n must be an integer between ${MIN_N} and ${MAX_N}\n\n`);
   process.exit(2);
 }
+
+/**
+ * What the report should call these items.
+ *
+ * The renderer is shared with the benchmark registry, whose items genuinely are benchmark
+ * items. Telling a novelist that "1 of 3 benchmark items appear in this corpus" is the
+ * registry's vocabulary turning up in a document written for a person. Written
+ * `--item-noun "essay|essays"`; the plural defaults to the singular plus "s", which is
+ * wrong often enough to be worth being able to override.
+ */
+const itemNounRaw = flags.get('item-noun');
+const itemNoun = itemNounRaw
+  ? (() => {
+      const [one, many] = itemNounRaw.split('|');
+      if (!one.trim()) {
+        process.stderr.write('\n  --item-noun needs a singular, e.g. --item-noun "essay|essays"\n\n');
+        process.exit(2);
+      }
+      return { one: one.trim(), many: (many ?? `${one.trim()}s`).trim() };
+    })()
+  : undefined;
 
 const name = flag('name', input.replace(/^.*[/\\]/, '').replace(/\.jsonl$/i, ''));
 const outPath = flag('out', `reports/${name}.idx.bin.gz`);
@@ -60,7 +79,7 @@ if (records.length === 0) {
   process.exit(1);
 }
 
-const index = NgramIndex.build(name, records.map((r) => ({ id: r.id, text: r.text })), { n });
+const index = NgramIndex.build(name, records.map((r) => ({ id: r.id, text: r.text })), { n, itemNoun });
 
 mkdirSync(dirname(resolve(outPath)), { recursive: true });
 writeFileSync(resolve(outPath), await gzipBytes(encodeIndex(index.serialize())));

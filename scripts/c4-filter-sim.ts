@@ -38,14 +38,17 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadBatch } from '../src/loader.ts';
+import { parseScriptArgs } from './cli-flags.ts';
 
 const LIST_URL =
   'https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en';
 const LIST_PATH = resolve('data/c4-badwords.txt');
 
-const input = process.argv[2];
-if (!input) {
-  process.stderr.write('\n  usage: node scripts/c4-filter-sim.ts <corpus.jsonl>\n\n');
+const USAGE = 'node scripts/c4-filter-sim.ts <corpus.jsonl>';
+const { positional } = parseScriptArgs({}, USAGE);
+const input = positional[0];
+if (!input || positional.length > 1) {
+  process.stderr.write(`\n  usage: ${USAGE}\n\n`);
   process.exit(2);
 }
 

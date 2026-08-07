@@ -32,26 +32,18 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { type Capture, isContent } from './cdx-rules.ts';
+import { parseScriptArgs } from './cli-flags.ts';
 
-const argv = process.argv.slice(2);
-function flag(name: string, fallback: string): string {
-  const i = argv.indexOf(`--${name}`);
-  if (i === -1) return fallback;
-  const v = argv[i + 1];
-  if (v === undefined || v.startsWith('--')) {
-    process.stderr.write(`\n  --${name} needs a value\n\n`);
-    process.exit(2);
-  }
-  return v;
-}
+const USAGE = 'node scripts/fetch-crawl-slice.ts <cdx-check output.json> [--out path] [--max n]';
+const { positional, flags } = parseScriptArgs({ out: 'value', max: 'value' }, USAGE);
 
-const inputPath = argv.find((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
-if (!inputPath) {
-  process.stderr.write('\n  usage: node scripts/fetch-crawl-slice.ts <cdx-check output.json> [--out path] [--max n]\n\n');
+const inputPath = positional[0];
+if (!inputPath || positional.length > 1) {
+  process.stderr.write(`\n  usage: ${USAGE}\n\n`);
   process.exit(2);
 }
-const outPath = flag('out', 'reports/crawl-slice.jsonl');
-const max = Number(flag('max', '200'));
+const outPath = flags.get('out') ?? 'reports/crawl-slice.jsonl';
+const max = Number(flags.get('max') ?? '200');
 if (!Number.isInteger(max) || max <= 0) {
   process.stderr.write('\n  --max must be a positive integer\n\n');
   process.exit(2);
