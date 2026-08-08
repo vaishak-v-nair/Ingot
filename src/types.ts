@@ -1,6 +1,6 @@
 // Kept equal to package.json's version by check-published-numbers.ts: releases 0.1.1
 // through 0.1.3 shipped receipts stamped ingot-0.1.0 because nothing tied these together.
-export const SCANNER_VERSION = 'ingot-0.1.5';
+export const SCANNER_VERSION = 'ingot-0.1.6';
 
 /** Minimum records before any batch-level statistic is reported. */
 export const MIN_BATCH_RECORDS = 30;

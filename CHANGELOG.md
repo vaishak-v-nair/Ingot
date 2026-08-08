@@ -2,6 +2,38 @@
 
 Numbers quoted here trace to `results/`; defect write-ups live in `docs/measurements.md`.
 
+## 0.1.6 — August 2026
+
+**One user-facing change and one bug, both in the HTML report** — the artifact `--out`
+produces, which is the thing you hand to a reviewer. No scanning behaviour changed, no
+published number moved, and the validation harness reproduces identically.
+
+- **The report was rewritten onto the site's current design system.** It had been left
+  behind by two consecutive redesigns — warm-paper-and-gold while the site was graphite,
+  then graphite while the site turned to paper — so the one document that leaves the
+  building looked unrelated to the product that produced it. It now shares the site's
+  ground, ink, accent, spacing scale, radius and highlight, and its section headings are
+  headings rather than 12px grey labels, which had made the section holding the evidence
+  quieter than the evidence's own filenames.
+- **Fixed: every match rendered highlighter yellow.** `<mark>` carries a yellow user-agent
+  `background-color`, and a rule setting only `background-image` leaves it showing through
+  the highlight's transparent top. The explicit `background-color: transparent` is now
+  asserted by a test.
+- **Print is designed rather than shrunk.** These reports get printed. The wash highlight
+  becomes a 2px rule on paper, because a 12% tint prints as an indistinguishable grey and
+  takes the evidence with it. Cards get borders, shadows go, and matches, verdicts, tables
+  and the receipt all avoid breaking across pages.
+- **Accessibility.** The accent used for findings was 3.96:1 against the report's ground —
+  WCAG AA for large type only, while it was carrying small labels. Accent-coloured text
+  below 24px now uses a darkened variant at 5.20:1.
+- `test/report.test.ts` **reads `web/site.css`** and fails if the report names different
+  values for any of ten design tokens. It previously asserted literal hex, which is how
+  the same drift happened twice under a green suite.
+
+Two departures from the site remain deliberate, both forced by a constraint the site does
+not have — this file must open from an email attachment, on a machine with no network,
+years from now: system font stacks rather than embedded faces, and no `color-mix()`.
+
 ## 0.1.5 — August 2026
 
 One scan-behaviour change and a pass of failure-mode fixes. Nothing here moves a published

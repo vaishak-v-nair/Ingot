@@ -58,3 +58,14 @@ video/ingot-guide/renders/
 # the docs cite. A partial run sitting in there reads as a published measurement, which is
 # the one thing this directory may never contain.
 results/pretraining-c4-redo-*.json
+
+# Coding-agent scaffolding. These configure whichever assistant is being used to work on
+# the repo; they are instructions to a tool, not documentation of the product, and they do
+# not belong in a public tree. They stay on disk and keep working locally.
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.cursorrules
+.claude/
+.cursor/
+**/.hyperframes/
