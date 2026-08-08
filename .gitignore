@@ -52,3 +52,9 @@ video/ingot-guide/out/
 video/ingot-guide/snapshots/
 video/ingot-guide/.hyperframes/
 video/ingot-guide/renders/
+
+# Salvage from the parked C4 fixed-reader redo — partial, stamped ingot-0.1.0, superseded.
+# results/ is otherwise the published record and every file in it is a figure the site or
+# the docs cite. A partial run sitting in there reads as a published measurement, which is
+# the one thing this directory may never contain.
+results/pretraining-c4-redo-*.json
