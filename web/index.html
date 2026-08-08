@@ -40,8 +40,58 @@
   .expect dt { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em;
                text-transform: uppercase; color: var(--dim); padding-top: .18rem; }
   .expect dd { margin: 0; }
-  .toolhead { padding: 1.2rem 0 .2rem;  }
-  .toolhead h3 { margin: .5rem 0 .5rem; }
+  /* ---------- the scanner ---------- */
+  .scan-head { max-width: 58ch; margin-bottom: var(--s4); }
+  .scan-head h3 { font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -.025em;
+                  margin: .55rem 0 0; }
+  /* stretch, not start: the receipt is naturally taller than the controls, and aligned to
+     the top it left two hundred pixels of nothing under the instrument. The panel grows to
+     meet it and the dropzone takes the slack. */
+  .scan-grid { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr);
+               align-items: stretch; }
+  .tool { display: flex; flex-direction: column; }
+  /* The readout sits at the foot of the instrument, so the height the panel inherits from
+     the receipt beside it is spent on the reading rather than on an empty dashed box —
+     which is what growing the dropzone into it produced. */
+  #status { margin-top: auto; padding-top: var(--s3); }
+  /* The rail needs a real margin to be a margin. Below this it is hidden, and nothing is
+     lost: every figure in it also appears in the body of the page. */
+  .rail { display: none; }
+  @media (min-width: 64rem) {
+    .scan-grid { grid-template-columns: minmax(0, 1.7fr) 20rem; gap: var(--s4); }
+    .rail { display: block; }
+  }
+  .tool-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem var(--s2); }
+  .tool-row label { font-family: var(--mono); font-size: .7rem; letter-spacing: .16em;
+                    text-transform: uppercase; color: var(--dim); }
+  /* On its own line, at its own size, and allowed to break. Inline beside the select it
+     was a 60-character string competing for the same row and spilling out of the panel. */
+  .benchmeta { font-family: var(--mono); font-size: .74rem; line-height: 1.6;
+               color: var(--dim); margin: var(--s2) 0 var(--s3);
+               overflow-wrap: anywhere; }
+  .benchmeta:empty { margin: 0 0 var(--s3); }
+  .drop input[type="file"]:focus-visible ~ .btns label.btn {
+    outline: 2px solid var(--accent); outline-offset: 3px; }
+  #status { font-family: var(--mono); font-size: .78rem; color: var(--dim); line-height: 1.6; }
+
+  /* ---------- the report ---------- */
+  /* Everything the scanner renders. It lands as a document under the instrument: h2s with
+     room above them, a reading measure, matches on their own surfaces. Inside the panel
+     with no padding, these headings collided with the paragraph above them and every line
+     ran off the right edge. */
+  #out { margin-top: var(--s5); }
+  #out:empty { margin-top: 0; }
+  #out > .wrap { width: 100%; }
+  #out h2 { font-family: var(--display); font-weight: 600; letter-spacing: -.028em;
+            font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.15; max-width: 26ch;
+            margin: var(--s5) 0 var(--s2); }
+  #out h2:first-child { margin-top: 0; }
+  #out p { max-width: 62ch; color: var(--dim); }
+  #out p.note { font-size: .86rem; }
+  #out .verdict { margin: 0 0 var(--s4); }
+  #out .scroll { margin: 0 0 var(--s2); }
+  #out pre { max-width: none; }
+  #out .btns { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
 
   /* THE OPENING — evidence and offer share the first screen.
      Stacked, they did not fit: at 1366x768 the CTA landed at y=1014, which e2e S9 caught
@@ -67,14 +117,32 @@
   }
   /* The focus contract: the gold rule, drawn around whatever the keyboard is on. */
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .big { font-family: var(--mono); font-size: 2.6rem; line-height: 1; font-weight: 600; }
+  /* The verdict is the answer to the question the visitor came with. It reads at answer
+     scale, on its own surface: the figure at the left, what it means beside it, so the
+     card is filled by its content rather than by a number and a lot of white. */
+  #out .verdict { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm);
+                  padding: clamp(1.5rem, 3.5vw, var(--s4)); display: grid; gap: .3rem var(--s4);
+                  grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  #out .verdict .big { grid-row: span 2; align-self: center; }
+  #out .verdict .label { margin: 0; align-self: end; }
+  #out .verdict p { margin: 0; max-width: 58ch; }
+  @media (max-width: 40rem) {
+    #out .verdict { grid-template-columns: minmax(0, 1fr); }
+    #out .verdict .big { grid-row: auto; }
+  }
+  .samplenote { font-size: .92rem; color: var(--dim); max-width: 60ch;
+                margin: 0 0 var(--s3); }
+  .samplenote strong { color: var(--ink); }
+  .big { font-family: var(--mono); font-size: clamp(2.8rem, 6vw, 4rem); line-height: .95;
+         font-weight: 400; letter-spacing: -.045em; }
   /* Verdicts never use red: green is verified-clean, amber is findings that need reading.
      Red belongs to refusals — the machine declining to answer, not the answer. */
   .big.clean { color: var(--ok); } .big.dirty { color: var(--hot); }
   .label { color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .4rem; }
   /* Findings are a ruled record, not a stack of cards. A border around each match adds no
      information and makes the most important content on the site look like a template. */
-  .hit { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm); margin-bottom: var(--s2); padding: .95rem 0; }
+  .hit { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm);
+         margin-bottom: var(--s2); padding: var(--s3); }
   .hit code { font-family: var(--mono); font-size: .72rem; color: var(--dim); letter-spacing: .04em; }
 
   /* The first match is the specimen. The product's whole claim is that it shows you the
@@ -82,21 +150,25 @@
      above them was 42px. That is the claim stated in copy and contradicted by the layout.
      The lead match is set at display scale; every match after it stays compact, because a
      record of forty matches at this size is not a record, it is a scroll. */
-  .hit--lead {  padding: 0 0 1.6rem; margin-bottom: .2rem; }
+  .hit--lead { padding: var(--s4); margin-bottom: var(--s2); }
   .hit--lead .meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
                      font-family: var(--mono); font-size: .68rem; letter-spacing: .16em;
                      text-transform: uppercase; color: var(--dim); margin-bottom: 1.1rem; }
   .hit--lead .meta b { color: var(--gold); font-weight: 400; }
-  .hit--lead .quote { font-family: var(--mono); font-size: clamp(1.15rem, 2.9vw, 1.85rem);
-                      line-height: 1.5; letter-spacing: -.03em; color: var(--dim);
-                      max-width: 34ch; margin: 0; }
+  /* 44ch and a lower ceiling: at 34ch inside a full-width card the specimen wrapped every
+     five words and left half the surface empty, which reads as a layout accident rather
+     than as the emphasis it is meant to be. */
+  .hit--lead .quote { font-family: var(--mono); font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+                      line-height: 1.55; letter-spacing: -.03em; color: var(--dim);
+                      max-width: 44ch; margin: 0; }
   .hit--lead .quote mark { color: var(--ink); }
 
-  /* box-decoration-break keeps the highlight intact when a match wraps. Without it the
-     span is drawn once across the whole run and the second line gets a stray tail. */
-  mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit;
-         padding: .05rem .15rem; border-radius: var(--r);
-         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* There is no `mark` rule here on purpose. There was one, left over from the system
+     before this: a flat rounded fill, which beat site.css's highlight everywhere the
+     selector was a bare `mark` and lost to it wherever site.css named a parent. So the
+     exhibit at the top of the page and the evidence three screens below it — the same
+     gesture, the product's only gesture — were drawn two different ways on one page.
+     One highlight, defined once, in site.css. */
   /* The assay strip. Four ruled cells, no box: the rules do the dividing, the way columns
      are divided in a printed record rather than fenced into cards. Rule above is 2px ink so
      the strip reads as a stamped header and not another table. */
@@ -148,9 +220,11 @@
   ul.plain li { counter-increment: refusal; position: relative;
                 padding: 1.1rem 0 1.1rem 2.9rem; 
                 font-size: .92rem; color: var(--dim); }
+  /* The numeral is dim, not red. --ember is the refusal colour and these four entries are
+     Ingot's own standards, not the machine declining to answer. */
   ul.plain li::before { content: counter(refusal, decimal-leading-zero);
                         position: absolute; left: 0; top: 1.18rem;
-                        font-family: var(--mono); font-size: .78rem; color: var(--ember); }
+                        font-family: var(--mono); font-size: .78rem; color: var(--dim); }
   ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
   /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
      ink rule opens it, a hairline closes it, and the caption reads like a plate caption. */
@@ -185,17 +259,8 @@
      taller than the viewport needs an inner scrollbar, which cut the hashes off and put a
      second scrollbar inside the instrument. The rail now flows with the page — scroll the
      page, see all of it. */
-  .rail { display: none; }
-  /* The rail needs a column to sit in. .page carries the two-track grid above the rail
-     breakpoint; below it the rail is hidden and every figure it holds also lives in the
-     body, so nothing is lost. Space divides the two tracks — the old left border was one
-     more line doing a job that a gap does better. */
-  @media (min-width: 78.5rem) {
-    .page { display: grid; grid-template-columns: minmax(0, 1fr) 20rem;
-            gap: 0 var(--s5); align-items: start; }
-    .rail { display: block; padding: 0; background: var(--white); border-radius: var(--r);
-            box-shadow: var(--shadow-sm); padding: var(--s3); }
-  }
+  .rail { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm);
+          padding: var(--s3); }
   .rail h4 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
              text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 0 0 .9rem; }
   /* A ledger: label left, figure right, so the numbers form a column the eye can run down
@@ -224,30 +289,35 @@
      dot, and it is a status light. All of it sits behind prefers-reduced-motion, and the
      hidden pre-reveal state is keyed on a .js class the script adds, so a script that
      never runs costs the settling and not the content. */
-  /* screen-scoped: print rendering never scrolls, so an IntersectionObserver reveal
-     that print can see leaves every below-fold section as blank paper. */
+  /* The reveal, the strike and the stagger all live in site.css so every page shares them.
+     What is page-local is the opening's entrance — the one orchestrated moment on the site,
+     played once on load rather than on scroll, in the order the page wants to be read:
+     the label, then the specimen, then the words are struck, then the headline lands and
+     the offer arrives under it. Everything is `backwards`-filled so nothing flashes at its
+     final position before its turn. */
   @media screen and (prefers-reduced-motion: no-preference) {
-    .js section > .wrap, .js footer > .wrap {
-      opacity: 0; transform: translateY(14px);
-      transition: opacity .65s ease-out, transform .65s ease-out; }
-    .js section > .wrap.in, .js footer > .wrap.in { opacity: 1; transform: none; }
-    /* The kicker's gold rule draws in a beat after its section lands. */
-    .js section > .wrap .kicker::before { width: 0; transition: width .6s ease .25s; }
-    .js section > .wrap.in .kicker::before { width: 1.9rem; }
+    .js .opening .exhibit-label { animation: rise .5s ease-out backwards .05s; }
+    .js .opening .specimen     { animation: rise .6s ease-out backwards .18s; }
+    .js .opening .found        { animation: rise .5s ease-out backwards .75s; }
+    .js .opening h1            { animation: rise .65s cubic-bezier(.2,.7,.3,1) backwards .3s; }
+    .js .opening .says-what    { animation: rise .6s ease-out backwards .42s; }
+    .js .opening .cta          { animation: rise .55s ease-out backwards .54s; }
+    .js .opening .cta-note,
+    .js .opening .expect,
+    .js .opening .promise      { animation: rise .55s ease-out backwards .66s; }
 
+    /* The specimen's words are struck after they have been read into place — the beat the
+       whole page is built around, performed once, on the exhibit. */
+    .js .opening .specimen mark {
+      background-image: linear-gradient(transparent 60%, var(--accent-wash) 60%);
+      background-repeat: no-repeat; background-size: 0 100%;
+      transition: background-size .75s cubic-bezier(.3,.8,.3,1); }
+    .js.ready .opening .specimen mark { background-size: 100% 100%; transition-delay: .6s; }
+
+    /* The report settles a row at a time as it is written into the page. */
     #out > * { animation: rise .45s ease-out backwards; }
-    /* The words appear, then the stamp strikes: the highlight is drawn as a background
-       image so its width can sweep on, and it ends at the exact state the static rule
-       gives reduced-motion readers from the start. */
-    #out mark { background: none;
-      background-image: linear-gradient(color-mix(in srgb, var(--hot) 35%, transparent),
-                                        color-mix(in srgb, var(--hot) 35%, transparent));
-      background-repeat: no-repeat; background-size: 100% 100%;
-      animation: sweep .55s ease-out .5s backwards; }
   }
-  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-  @keyframes sweep { from { background-size: 0 100%; } }
-  @keyframes breathe { 50% { opacity: .4; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
 
   /* ---------- the guided demo ---------- */
   /* Not a video. A recording would rot the moment the page changed, weigh megabytes
@@ -280,16 +350,18 @@
 </head>
 <body>
 
-<nav>
+<nav id="nav">
   <div class="wrap">
-    <span class="brand">Ingot</span>
+    <!-- The wordmark is the product's own gesture turned on its own name: Ingot, marked
+         the way a match is marked. It is the one place the identity is stated, so it is
+         stated at size — it was 1.05rem in a corner, which is a filename, not a mark. -->
+    <a class="brand" href="./"><span>Ingot</span></a>
+    <a href="#scan">The scanner</a>
     <a href="#plain">What is this?</a>
-    <a href="#trust">Privacy</a>
     <a href="#method">Method</a>
     <a href="registry.html">Registry</a>
-    <a href="for-eval-teams.html">For eval teams</a>
     <a href="about.html">About</a>
-    <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
+    <a class="cta" href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Check my writing</a>
   </div>
 </nav>
 
@@ -361,58 +433,84 @@
 <div class="page">
 <main class="col">
 
-
-
-
-<section class="film">
+<!-- THE PROOF, and the first thing under the offer. The scanner was buried under the film
+     for a day: a visitor met a black video plate before they met the working instrument,
+     which is the one thing on this page no competitor can copy without building it.
+     Three parts, and they are three parts on purpose — the panel is the instrument, the
+     rail beside it is the receipt, and the report below is a document. Until now all
+     three were one unpadded white slab two and a half thousand pixels tall. -->
+<section id="scan">
   <div class="wrap">
-    <span class="kicker">Watch</span>
-    <h2>Thirty-seven seconds on what this is.</h2>
-    <p class="sub">Voiced, and nothing plays or downloads until you press play &mdash; the
-    network panel stays empty on load, which is the whole claim this site makes.</p>
-    <figure class="guide-film">
-      <video controls preload="none" playsinline
-             poster="media/intro-poster.jpg" width="1920" height="1080">
-        <source src="media/ingot-intro.mp4" type="video/mp4">
-      </video>
-    </figure>
+    <div class="scan-head reveal">
+      <p class="kicker">Proof</p>
+      <h3>The scanner is running on this page right now</h3>
+      <p class="sub">It read a corpus in this tab, on your CPU, and nothing left the machine.
+      The same engine runs your check. <strong>Evaluating a model instead?</strong> Drop your
+      own training data below — any size, it streams.</p>
+    </div>
+
+    <div class="scan-grid">
+      <div class="tool">
+        <div class="tool-row">
+          <label for="bench">Check against</label>
+          <span class="field"><select id="bench"></select></span>
+        </div>
+        <p class="benchmeta" id="benchmeta"></p>
+
+        <div class="drop" id="drop">
+          <strong>Drop training data here</strong>
+          <p>JSONL — one <code>{"text": …}</code> record per line. Plain or gzipped —
+          any size, it streams.</p>
+          <!-- Before the buttons so a keyboard focus on the input can ring its label.
+               .vh rather than display:none: hidden that way it stops being focusable, and
+               the only way to reach the picker becomes a mouse. -->
+          <input type="file" id="file" class="vh" accept=".jsonl,.json,.gz">
+          <div class="btns">
+            <button class="btn primary" id="tour" type="button">Watch it work</button>
+            <label class="btn" for="file">Choose a file</label>
+          </div>
+          <p class="samplelink"><button class="linklike" id="try" type="button">or scan the sample corpus directly</button></p>
+        </div>
+
+        <progress id="bar" max="100" value="0" hidden></progress>
+        <button class="linklike" id="cancel" type="button" hidden>cancel the scan</button>
+        <div id="status"></div>
+      </div>
+
+      <!-- The receipt, beside the instrument that produces it. It used to be a page-tall
+           margin column: it filled for the first 900px and then left an empty 20rem track
+           running the remaining eight thousand, which is what made the page read as
+           unorganised more than any single element on it. -->
+      <aside class="rail" id="rail" aria-label="Receipt">
+        <div id="rail-live"></div>
+        <h4>Registry &middot; C4</h4>
+        <dl>
+          <dt>corpus</dt><dd>c4-en, 26 shards</dd>
+          <dt>size</dt><dd>21.33 GB</dd>
+          <dt>documents</dt><dd>9,264,249</dd>
+          <dt>tokens</dt><dd>3,418,685,530</dd>
+          <dt>n</dt><dd>10</dd>
+          <dt>scanner</dt><dd>ingot-0.1.0</dd>
+          <dt class="wide">corpus hash</dt><dd class="hash">c046ce3c890918b4d68094c438c05321</dd>
+        </dl>
+        <h4>Flagged</h4>
+        <dl>
+          <dt>mmlu</dt><dd>342 / 14042</dd>
+          <dt>humaneval</dt><dd>6 / 164</dd>
+          <dt>gsm8k</dt><dd>2 / 1319</dd>
+        </dl>
+        <p class="note">Of those 342 MMLU items, <b>67</b> are confirmed canonical against a corpus of
+        different provenance and 275 are undetermined — not leaked. A control of nine unmistakably
+        canonical items scored <b>1 of 9</b> against that same reference, so absence from it carries no
+        information. Presence is evidence; absence is a lead.</p>
+      </aside>
+    </div>
+
+    <!-- The report is a document, not panel contents. Out of the white box, on paper, at a
+         reading measure, with room above every heading. -->
+    <div id="out"></div>
   </div>
 </section>
-
-<!-- THE PROOF. The scanner was the primary control until 2026-08-07; it is now the
-     evidence for the offer above. It still runs itself on arrival, which is the point —
-     the argument for the mailto is a working instrument on the same page. -->
-<div class="wrap toolhead">
-  <p class="kicker">Proof</p>
-  <h3>The scanner is running on this page right now</h3>
-  <p class="sub">It read a corpus in this tab, on your CPU, and nothing left the machine.
-  The same engine runs your check. <strong>Evaluating a model instead?</strong> Drop your
-  own training data below — any size, it streams.</p>
-</div>
-
-<div class="wrap tool">
-  <div class="row">
-    <label for="bench" class="muted">Check against</label>
-    <select id="bench"></select>
-    <span class="muted" id="benchmeta"></span>
-  </div>
-  <div class="drop" id="drop">
-    <strong>Drop training data here</strong>
-    <p>JSONL — one <code>{"text": …}</code> record per line. Plain or gzipped — any size,
-    it streams.</p>
-    <div class="btns">
-      <button class="btn primary" id="tour" type="button">Watch it work — no file needed</button>
-      <label class="btn" for="file">Choose a file</label>
-    </div>
-    <p class="samplelink"><button class="linklike" id="try" type="button">or scan the sample corpus directly</button></p>
-    <input type="file" id="file" accept=".jsonl,.json,.gz">
-  </div>
-
-  <progress id="bar" max="100" value="0" hidden></progress>
-  <button class="linklike" id="cancel" type="button" hidden>cancel the scan</button>
-  <div id="status"></div>
-  <div id="out"></div>
-</div>
 
 <!-- The plain-words register. Everything below this section was written for a reader who
      already knows what a benchmark is; this section is for everyone else, sitting directly
@@ -454,6 +552,26 @@
         </table>
       </div>
     </details>
+  </div>
+</section>
+
+<!-- The film sits here, after the instrument and its plain-words decode, because a black
+     video plate is the wrong thing to meet before you have met the working scanner. It is
+     a band rather than a section: the ground changes, so the page has one place where you
+     stop reading and watch. -->
+<section class="film band">
+  <div class="wrap reveal">
+    <span class="kicker">Watch</span>
+    <h2>Thirty-seven seconds on what this is.</h2>
+    <p class="sub">Voiced, and nothing plays or downloads until you press play &mdash; the
+    network panel stays empty on load, which is the whole claim this site makes.</p>
+    <figure class="guide-film">
+      <video controls preload="none" playsinline
+             poster="media/intro-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-intro.mp4" type="video/mp4">
+      </video>
+      <figcaption>Ingot &middot; 0:37 &middot; sound on</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -641,48 +759,35 @@
 </section>
 
 </main>
-
-<!-- The receipt, in the margin. Before a scan it holds the published C4 run, so the numbers
-     the argument cites stay in view while you read the argument. During a scan it ticks. After
-     one it holds your own receipt, which is the only version of this page that is about your
-     corpus rather than ours. Everything here is duplicated in the body of the page on purpose:
-     the rail is an annotation, and an annotation that carries the only copy of a fact is not
-     an annotation, it is a load-bearing column that happens to vanish on a laptop. -->
-<aside class="rail" id="rail" aria-label="Receipt">
-  <div id="rail-live"></div>
-  <h4>Registry &middot; C4</h4>
-  <dl>
-    <dt>corpus</dt><dd>c4-en, 26 shards</dd>
-    <dt>size</dt><dd>21.33 GB</dd>
-    <dt>documents</dt><dd>9,264,249</dd>
-    <dt>tokens</dt><dd>3,418,685,530</dd>
-    <dt>n</dt><dd>10</dd>
-    <dt>scanner</dt><dd>ingot-0.1.0</dd>
-    <dt class="wide">corpus hash</dt><dd class="hash">c046ce3c890918b4d68094c438c05321</dd>
-  </dl>
-  <h4>Flagged</h4>
-  <dl>
-    <dt>mmlu</dt><dd>342 / 14042</dd>
-    <dt>humaneval</dt><dd>6 / 164</dd>
-    <dt>gsm8k</dt><dd>2 / 1319</dd>
-  </dl>
-  <p class="note">Of those 342 MMLU items, <b>67</b> are confirmed canonical against a corpus of
-  different provenance and 275 are undetermined — not leaked. A control of nine unmistakably
-  canonical items scored <b>1 of 9</b> against that same reference, so absence from it carries no
-  information. Presence is evidence; absence is a lead.</p>
-</aside>
 </div>
 
 <footer>
-  <div class="wrap">
-    Ingot · <a href="https://github.com/vaishak-v-nair/Ingot">source</a> · Apache-2.0 ·
-    zero runtime dependencies, Node 24 runs the TypeScript directly<br>
-    Numbers on this page come from <strong>results/</strong> and reproduce with
-    <strong>node scripts/contamination-validate.ts</strong>,
-    <strong>node scripts/pretraining-scan.ts</strong> and
-    <strong>node scripts/canonicality-check.ts</strong>.<br>
-    Corpora: C4 en (ODC-BY), The Pile uncopyrighted with web-crawl subsets removed,
-    databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0, calibration only).
+  <div class="wrap reveal">
+    <div>
+      <p class="foot-brand">Ingot</p>
+      <p>What&rsquo;s inside AI training data?</p>
+      <p>Apache-2.0 &middot; zero runtime dependencies &middot; Node 24 runs the
+      TypeScript directly.</p>
+    </div>
+    <div>
+      <h5>Pages</h5>
+      <ul>
+        <li><a href="registry.html">Registry — every published run</a></li>
+        <li><a href="for-eval-teams.html">For eval teams</a></li>
+        <li><a href="about.html">What Ingot cannot see</a></li>
+        <li><a href="sample-report.html">A sample report</a></li>
+        <li><a href="https://github.com/vaishak-v-nair/Ingot">Source on GitHub</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Provenance</h5>
+      <p>Every number on this page comes from <code>results/</code> and reproduces with
+      <code>node scripts/contamination-validate.ts</code>,
+      <code>node scripts/pretraining-scan.ts</code> and
+      <code>node scripts/canonicality-check.ts</code>.</p>
+      <p>Corpora: C4 en (ODC-BY), The Pile uncopyrighted with web-crawl subsets removed,
+      databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca (CC-BY-NC-4.0, calibration only).</p>
+    </div>
   </div>
 </footer>
 
@@ -770,14 +875,53 @@ if (copyMail) {
  * rather than a blank one. Rules stay put; the content settles in beneath them.
  */
 const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+let strike = () => {};
 if (MOTION) {
   document.documentElement.classList.add('js');
+  // Two frames, so the brand's strike is a transition the reader watches rather than the
+  // state the page was already in when it painted.
+  requestAnimationFrame(() => requestAnimationFrame(
+    () => document.documentElement.classList.add('ready')));
+
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) {
       if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     }
-  }, { rootMargin: '0px 0px -10% 0px' });
-  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+  }, { rootMargin: '0px 0px -12% 0px' });
+  // #scan is excluded deliberately: it holds the live instrument and the report it writes,
+  // and a container that starts at opacity 0 is a container that can hide a working tool
+  // if its observer never fires.
+  for (const el of document.querySelectorAll('section:not(#scan) > .wrap, footer > .wrap, .scan-head')) {
+    el.classList.add('reveal');
+    io.observe(el);
+  }
+
+  // Matches the scanner writes into the page strike as they scroll into view, the same
+  // gesture the exhibit performs at the top. One observer, re-armed after every render.
+  const marks = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (en.isIntersecting) { en.target.classList.add('struck'); marks.unobserve(en.target); }
+    }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  strike = (root) => {
+    for (const el of root.querySelectorAll('.quote, .specimen')) {
+      if (el.classList.contains('strike')) continue;
+      el.classList.add('strike');
+      marks.observe(el);
+    }
+  };
+}
+
+// The bar casts a shadow and reveals its action only once the opening — and the CTA in it
+// — has gone past. At rest the page starts on plain paper with no chrome bar over it.
+const navEl = $('nav');
+const opening = document.querySelector('.opening');
+if (navEl && opening && 'IntersectionObserver' in window) {
+  navEl.classList.add('at-top');
+  new IntersectionObserver(([en]) => {
+    navEl.classList.toggle('at-top', en.isIntersecting);
+    navEl.classList.toggle('stuck', !en.isIntersecting);
+  }, { threshold: 0 }).observe(opening);
 }
 
 const benchSel = $('bench');
@@ -1224,11 +1368,11 @@ function render(report, file, isSample) {
   let html = '';
 
   if (isSample) {
-    html += `<div class="verdict" style="border-color:var(--gold)">
-      <strong>This is the sample corpus.</strong>
-      <p class="muted" style="margin:.5rem 0 0">Five ordinary documents, none of them copied from
-      HumanEval. It still produces matches — and reading them is the point.</p>
-    </div>`;
+    // Its own class, not .verdict: it is a caption on what was scanned, and wearing the
+    // verdict's surface it read as a second answer stacked above the answer.
+    html += `<p class="samplenote"><strong>This is the sample corpus.</strong> Five ordinary
+      documents, none of them copied from HumanEval. It still produces matches — and reading
+      them is the point.</p>`;
   }
 
   html += `
@@ -1345,6 +1489,8 @@ ${esc(r.command)}</pre>
     // block rather than a minute of theatre.
     [...$('out').children].forEach((el, i) => { el.style.animationDelay = `${Math.min(i * 35, 300)}ms`; });
     if (hitCount > 0) countUp($('out').querySelector('.big'), hitCount);
+    // Every match the scan just wrote strikes its highlight as it scrolls into view.
+    strike($('out'));
   }
 
   // Wired after the HTML lands, since innerHTML replaces the nodes each render.
@@ -1361,6 +1507,7 @@ ${esc(r.command)}</pre>
         const more = $('more-out');
         if (!more) return;
         more.insertAdjacentHTML('beforeend', rest.slice(at, at + 40).map(hitRow).join(''));
+        strike(more);
         at += 40;
         if (at < rest.length) requestAnimationFrame(chunk);
         else $('more-row')?.remove();

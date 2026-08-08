@@ -455,8 +455,9 @@ const html = `<!doctype html>
                font-family: var(--mono); font-size: .74rem; color: var(--dim); }
   .hit .meta b { color: var(--ink); font-weight: 600; }
   .quote { margin-top: .45rem; font-size: .92rem; color: var(--ink); }
-  mark { background: color-mix(in srgb, var(--hot) 30%, transparent); color: inherit; padding: .05rem .15rem; border-radius: 0;
-         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* No local mark rule: site.css owns the highlight for every page. The copy that used to
+     live here drew a flat fill while the front page drew a struck line — the same gesture,
+     rendered two ways, on two pages of one product. */
   /* Depth folds, it does not delete — the same ruled disclosure as the front page. */
   details.more {  margin-top: 1.2rem; }
   details.more summary { cursor: pointer; list-style: none; font-family: var(--mono);
@@ -482,15 +483,15 @@ const html = `<!doctype html>
 </head>
 <body>
 
-<nav>
+<nav id="nav">
   <div class="wrap">
-    <span class="brand">Ingot</span>
-    <a href="index.html#plain">What is this?</a>
-    <a href="index.html#trust">Privacy</a>
+    <a class="brand" href="index.html"><span>Ingot</span></a>
+    <a href="index.html#scan">The scanner</a>
     <a href="index.html#method">Method</a>
     <a href="registry.html" aria-current="page">Registry</a>
+    <a href="for-eval-teams.html">For eval teams</a>
     <a href="about.html">About</a>
-    <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
+    <a class="cta" href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Check my writing</a>
   </div>
 </nav>
 
@@ -596,26 +597,52 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
 </section>
 
 <footer>
-  <div class="wrap">
-    Ingot · ${esc(registry.scanner)} · Apache-2.0<br>
-    Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ', results/canonicality.json' : ''}${sft ? ', results/sft-slimorca.json and its triage and train-check companions' : ''}.
-    Do not edit this page by hand — rebuild it with
-    <strong>node scripts/build-registry-page.ts</strong>.
+  <div class="wrap reveal">
+    <div>
+      <p class="foot-brand">Ingot</p>
+      <p>Independent verification for AI training data.</p>
+      <p>${esc(registry.scanner)} &middot; Apache-2.0</p>
+    </div>
+    <div>
+      <h5>Pages</h5>
+      <ul>
+        <li><a href="index.html">The scanner</a></li>
+        <li><a href="for-eval-teams.html">For eval teams</a></li>
+        <li><a href="about.html">What Ingot cannot see</a></li>
+        <li><a href="https://github.com/vaishak-v-nair/Ingot">Source on GitHub</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Provenance</h5>
+      <p>Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ', results/canonicality.json' : ''}${sft ? ', results/sft-slimorca.json and its triage and train-check companions' : ''}.</p>
+      <p>Do not edit this page by hand — rebuild it with
+      <code>node scripts/build-registry-page.ts</code>.</p>
+    </div>
   </div>
 </footer>
 
 <script type="module">
 // The same settle-in reveal as the rest of the site: keyed on a .js class this script
 // adds, so a script that never runs costs the motion and not the page.
-const MOTION = matchMedia('(prefers-reduced-motion: no-preference)').matches;
-if (MOTION) {
+const nav = document.getElementById('nav');
+if (nav) {
+  const shadow = () => nav.classList.toggle('stuck', scrollY > 8);
+  addEventListener('scroll', shadow, { passive: true });
+  shadow();
+}
+if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
   document.documentElement.classList.add('js');
+  requestAnimationFrame(() => requestAnimationFrame(
+    () => document.documentElement.classList.add('ready')));
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) {
       if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     }
-  }, { rootMargin: '0px 0px -10% 0px' });
-  for (const el of document.querySelectorAll('section > .wrap, footer > .wrap')) io.observe(el);
+  }, { rootMargin: '0px 0px -12% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, header > .wrap, footer > .wrap')) {
+    el.classList.add('reveal');
+    io.observe(el);
+  }
 }
 </script>
 </body>

@@ -29,7 +29,7 @@
      airless, and there were five of these grids on this page alone. */
   .facts, .flow, .honest, .acts {
     display: grid; gap: var(--s3); margin-top: var(--s4); border: 0;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   }
   .fact, .step, .honest > div, .act {
     background: var(--white); border: 0; border-radius: var(--r);
@@ -74,16 +74,15 @@
 <!-- The same navigation as every other page, in the same order. This page used to carry
      its own three-link dialect, which failed the trunk test: nothing told you the site had
      a Method or a Start-here, and the links sat in different places page to page. -->
-<nav>
+<nav id="nav">
   <div class="wrap">
-    <span class="brand">Ingot</span>
+    <a class="brand" href="index.html"><span>Ingot</span></a>
+    <a href="index.html#scan">The scanner</a>
     <a href="index.html#plain">What is this?</a>
-    <a href="index.html#trust">Privacy</a>
     <a href="index.html#method">Method</a>
     <a href="registry.html">Registry</a>
-    <a href="for-eval-teams.html">For eval teams</a>
     <a href="about.html" aria-current="page">About</a>
-    <a href="https://github.com/vaishak-v-nair/Ingot">Source</a>
+    <a class="cta" href="mailto:vaishak.v.nair.dev@gmail.com?subject=Check%20my%20writing%20against%20AI%20training%20data">Check my writing</a>
   </div>
 </nav>
 
@@ -213,14 +212,53 @@
 
 
 <footer>
-  <div class="wrap">
-    <strong>Ingot</strong> · independent verification for AI training data · Apache-2.0 · Bangalore<br>
-    Numbers on this page come from <strong>results/spike.json</strong> and are reproducible with
-    <strong>node scripts/spike.ts</strong>. Reference corpora: databricks-dolly-15k (CC-BY-SA-3.0),
-    stanford_alpaca (CC-BY-NC-4.0, calibration and research only).<br>
-    <a href="index.html">&larr; Back to the scanner</a>
+  <div class="wrap reveal">
+    <div>
+      <p class="foot-brand">Ingot</p>
+      <p>Independent verification for AI training data.</p>
+      <p>Apache-2.0 &middot; Bangalore</p>
+    </div>
+    <div>
+      <h5>Pages</h5>
+      <ul>
+        <li><a href="index.html">The scanner</a></li>
+        <li><a href="registry.html">Registry — every published run</a></li>
+        <li><a href="for-eval-teams.html">For eval teams</a></li>
+        <li><a href="https://github.com/vaishak-v-nair/Ingot">Source on GitHub</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Provenance</h5>
+      <p>Numbers on this page come from <code>results/spike.json</code> and are reproducible
+      with <code>node scripts/spike.ts</code>.</p>
+      <p>Reference corpora: databricks-dolly-15k (CC-BY-SA-3.0), stanford_alpaca
+      (CC-BY-NC-4.0, calibration and research only).</p>
+    </div>
   </div>
 </footer>
+
+<!-- Motion, and nothing else. Every reveal is additive and gated behind the reader's own
+     reduced-motion setting; a page whose script never runs shows the finished state. -->
+<script type="module">
+const nav = document.getElementById('nav');
+if (nav) {
+  const shadow = () => nav.classList.toggle('stuck', scrollY > 8);
+  addEventListener('scroll', shadow, { passive: true });
+  shadow();
+}
+if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+  document.documentElement.classList.add('js');
+  requestAnimationFrame(() => requestAnimationFrame(
+    () => document.documentElement.classList.add('ready')));
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -12% 0px' });
+  for (const el of document.querySelectorAll('section > .wrap, header > .wrap, footer > .wrap')) {
+    el.classList.add('reveal');
+    io.observe(el);
+  }
+}
+</script>
 
 <script type="module">
 // The same settle-in reveal as the front page, under the same contract: keyed on a .js

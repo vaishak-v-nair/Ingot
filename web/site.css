@@ -77,19 +77,56 @@ body { margin:0; background:var(--paper); color:var(--ink);
 a { color:inherit; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
 
-/* ── shell ─────────────────────────────────────────────────────────────────────────── */
-.wrap, .page { width:min(1180px, 100% - 3rem); margin-inline:auto; }
-.col .wrap { width:100%; }
-@media (max-width: 40rem) { .wrap, .page { width:min(1180px, 100% - 2rem); } }
+/* hidden has to mean hidden. `.linklike` and `.btn` set display, and a class selector
+   beats the user-agent's `[hidden] { display:none }` — so the scanner's cancel link was
+   on screen at all times, next to a progress bar that was not running. */
+[hidden] { display:none !important; }
 
-/* ── nav: no border, no sticky. It is a signature, not a chrome bar. ───────────────── */
-nav { padding:var(--s4) 0; }
-nav .wrap { display:flex; align-items:center; gap:var(--s3) var(--s4); flex-wrap:wrap; }
-.brand { font-family:var(--display); font-weight:600; font-size:1.05rem;
-         letter-spacing:-.02em; color:var(--ink); text-transform:none; margin-right:auto; }
-nav a { font-size:.95rem; color:var(--dim); text-decoration:none; padding:.4rem 0;
-        transition:color .15s; }
-nav a:hover, nav a[aria-current] { color:var(--ink); }
+/* Screen-reader-only. The file input is operated through its <label class="btn">; leaving
+   the native control visible put "Choose File / No file chosen" — unstyled Windows chrome
+   — in the middle of the page's most important panel. */
+.vh { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+      overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+
+/* ── shell ─────────────────────────────────────────────────────────────────────────── */
+/* One measure for the whole site. 1180 was set when a 20rem rail lived beside the text;
+   without it, prose ran to 1180px and read like a terms-of-service page. */
+/* .wrap centres; .page does not. A band that changes the ground has to reach both edges of
+   the window, and while .page carried the shell width every band stopped short of it and
+   read as a grey rectangle sitting in the page rather than a change of ground. */
+.wrap { width:min(72rem, 100% - 3rem); margin-inline:auto; }
+@media (max-width: 40rem) { .wrap { width:min(72rem, 100% - 1.75rem); } }
+
+/* ── nav ───────────────────────────────────────────────────────────────────────────── */
+/* Sticky, because the page is long and the one action lives at the top. It has no border:
+   the shadow appears only once you have scrolled past the opening, so at rest the bar is
+   invisible and the page still starts with paper. */
+nav { position:sticky; top:0; z-index:40; padding:var(--s2) 0;
+      background:color-mix(in srgb, var(--paper) 86%, transparent);
+      -webkit-backdrop-filter:blur(14px) saturate(1.6);
+      backdrop-filter:blur(14px) saturate(1.6);
+      transition:box-shadow .3s ease; }
+nav.stuck { box-shadow:0 1px 0 rgba(18,16,14,.05), 0 18px 40px -34px rgba(18,16,14,.9); }
+nav .wrap { display:flex; align-items:center; gap:var(--s2) var(--s4); flex-wrap:wrap; }
+/* The wordmark carries the product's own gesture: the name is marked the way a match is
+   marked. It is the one place the identity is stated, so it is stated at size. */
+.brand { display:inline-flex; align-items:center; font-family:var(--display); font-weight:600;
+         font-size:1.5rem; line-height:1; letter-spacing:-.035em; color:var(--ink);
+         text-decoration:none; margin-right:auto; padding:.3rem 0; }
+.brand span { background-image:linear-gradient(var(--accent-wash), var(--accent-wash));
+              background-repeat:no-repeat; background-position:0 100%;
+              background-size:100% .34em; padding:0 .12em .04em; }
+nav a:not(.brand):not(.cta) { font-size:.92rem; color:var(--dim); text-decoration:none;
+        padding:.4rem 0; transition:color .15s; white-space:nowrap; }
+nav a:not(.brand):not(.cta):hover, nav a[aria-current] { color:var(--ink); }
+/* The action follows you down the page. It hides only while the nav is still over the
+   opening, where the same button is already on screen at full size — so the default is
+   visible, and a page with no script (every page but the front one) shows it correctly
+   without needing one. */
+nav .cta { font-size:.9rem; padding:.62rem 1.15rem; min-height:0;
+           transition:opacity .3s ease, transform .3s ease, background .15s ease; }
+nav.at-top .cta { opacity:0; transform:translateY(-6px); pointer-events:none; }
+@media (max-width: 61rem) { nav .cta { display:none; } }
 
 /* ── type ──────────────────────────────────────────────────────────────────────────── */
 h1 { font-family:var(--display); font-weight:600; margin:0;
@@ -146,11 +183,58 @@ header.hero, .hero { padding:var(--s6) 0 var(--s5); }
 .ghost:hover { color:var(--ink); text-decoration-color:var(--ink); }
 .actions { display:flex; flex-wrap:wrap; align-items:center; gap:var(--s3); margin-top:var(--s4); }
 
+/* ── form controls ─────────────────────────────────────────────────────────────────── */
+/* Everything the operating system draws for us is drawn here instead. A raw <select> and
+   a raw file input in the middle of the instrument were the two loudest pieces of
+   somebody else's design on the page. */
+.field { display:inline-flex; position:relative; }
+.field select {
+  appearance:none; -webkit-appearance:none;
+  font:500 .95rem/1 var(--sans); letter-spacing:-.01em; color:var(--ink);
+  background:var(--white); border:1px solid var(--line); border-radius:var(--r-pill);
+  padding:.85rem 2.9rem .85rem 1.2rem; min-height:48px; cursor:pointer; width:100%;
+  box-shadow:var(--shadow-sm); transition:border-color .15s ease;
+}
+.field select:hover { border-color:var(--dim); }
+/* The chevron, drawn rather than fetched: two borders on a rotated square, so it inherits
+   the ink colour and costs no request. */
+.field::after { content:""; position:absolute; right:1.15rem; top:calc(50% - .28rem);
+                width:.42rem; height:.42rem; pointer-events:none;
+                border-right:1.5px solid var(--dim); border-bottom:1.5px solid var(--dim);
+                transform:rotate(45deg); }
+
+progress { appearance:none; -webkit-appearance:none; display:block; width:100%; height:5px;
+           border:0; border-radius:var(--r-pill); background:var(--wash);
+           margin:var(--s3) 0 0; overflow:hidden; }
+progress::-webkit-progress-bar { background:var(--wash); }
+progress::-webkit-progress-value { background:var(--accent); transition:width .15s linear; }
+progress::-moz-progress-bar { background:var(--accent); }
+
 /* ── surfaces ──────────────────────────────────────────────────────────────────────── */
-.card, .chart-card, .guide-film, .tool, .drop {
+.card, .chart-card, .guide-film, .tool {
   background:var(--white); border:0; border-radius:var(--r); box-shadow:var(--shadow);
 }
 .card { padding:clamp(1.75rem, 4vw, var(--s5)); }
+/* The panel had a background and a shadow and no padding at all, so every line of the
+   scanner — and the entire report it renders — ran edge to edge and out the right side.
+   That single missing declaration is most of what read as "clustered". */
+.tool { padding:clamp(1.25rem, 3vw, var(--s4)); }
+
+/* The dropzone is the one element on the site that earns a border: a drop target has to
+   look like it has an edge you can drop something inside. Dashed, tinted, and it fills
+   with the accent the instant a file is over it. */
+.drop { background:var(--wash); border-radius:var(--r);
+        border:2px dashed color-mix(in srgb, var(--accent) 30%, var(--line));
+        padding:clamp(1.5rem, 4vw, var(--s5)) var(--s3); text-align:center;
+        transition:border-color .2s ease, background .2s ease; }
+.drop.over { border-color:var(--accent); background:var(--accent-soft); }
+.drop:focus-within { border-color:var(--accent); }
+.drop strong { display:block; font-family:var(--display); font-weight:600;
+               font-size:1.15rem; letter-spacing:-.02em; }
+.drop p { margin:var(--s1) auto 0; max-width:44ch; font-size:.92rem; color:var(--dim); }
+.drop .btns { display:flex; flex-wrap:wrap; gap:var(--s2); justify-content:center;
+              margin-top:var(--s3); }
+.drop .samplelink { margin-top:var(--s2); font-size:.9rem; }
 
 /* ── evidence ──────────────────────────────────────────────────────────────────────── */
 .tag, .illus { display:inline-block; font-family:var(--mono); font-size:.7rem;
@@ -159,9 +243,15 @@ header.hero, .hero { padding:var(--s6) 0 var(--s5); }
                border:0; border-radius:var(--r-pill); }
 .specimen, .quote { font-size:clamp(1.15rem, 2vw, 1.5rem); line-height:1.55; max-width:56ch;
                     letter-spacing:-.012em; margin:var(--s3) 0 0; }
+/* The one highlight, and the site's only real gesture: the matched words are struck the
+   way a reader strikes them, not filled the way a form field is. box-decoration-break
+   keeps it intact when a match wraps — without it the span is painted once across the
+   whole run and the second line gets a stray tail. */
 mark, .specimen mark, .quote em {
   font-style:normal; background:linear-gradient(transparent 60%, var(--accent-wash) 60%);
+  background-repeat:no-repeat; background-size:100% 100%;
   color:inherit; border:0; padding-bottom:.05em;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
 }
 .found, .meta { margin-top:var(--s3); font-family:var(--mono); font-size:.78rem;
                 color:var(--dim); border:0; padding:0;
@@ -178,16 +268,22 @@ mark, .specimen mark, .quote em {
              background:var(--ok); flex:none; }
 
 /* ── grids: separated by space, never by rules ─────────────────────────────────────── */
+/* 18rem, not 15: at 15 a 72rem shell fits four tracks, and four tracks of a hundred and
+   fifty words each is a column of single words. Three is the most this measure holds. */
 .steps, .flow, .facts, .grid, .statgrid {
-  display:grid; gap:var(--s4); margin-top:var(--s4);
-  grid-template-columns:repeat(auto-fit, minmax(15rem, 1fr));
+  display:grid; gap:var(--s3); margin-top:var(--s4);
+  grid-template-columns:repeat(auto-fit, minmax(18rem, 1fr));
   border:0;
 }
 .statgrid { grid-template-columns:repeat(auto-fit, minmax(11rem, 1fr)); }
 .step, .fact { padding:0; border:0; }
 .step + .step, .fact + .fact { border:0; padding-left:0; }
-.step .n, .num { font-family:var(--mono); font-size:.78rem; color:var(--accent);
-                 margin-bottom:var(--s2); letter-spacing:.06em; }
+/* The step numeral is the only .num that is coloured. Every figure in every table also
+   carries this class, so the accent — which is supposed to mean "this is evidence" — was
+   painting every digit on the site and meaning nothing. */
+.step .n { font-family:var(--mono); font-size:.72rem; color:var(--dim);
+           margin-bottom:var(--s2); letter-spacing:.14em; text-transform:uppercase; }
+.num { font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
 .step h3 { margin:0 0 var(--s1); }
 .step p { margin:0; color:var(--dim); font-size:1rem; }
 .fact b, .stat b { display:block; font-family:var(--display); font-weight:600;
@@ -195,8 +291,56 @@ mark, .specimen mark, .quote em {
 .fact span, .stat span { display:block; margin-top:var(--s1); font-size:.92rem; color:var(--dim); }
 
 /* ── the film ──────────────────────────────────────────────────────────────────────── */
-.guide-film { overflow:hidden; margin-top:var(--s4); }
-.guide-film video { display:block; width:100%; height:auto; background:var(--wash); }
+/* The intro is a dark film on a paper page, and pasted flat it read as a black rectangle
+   somebody forgot to style. It is now mounted: a deep plate with the film inset in it, so
+   the darkness is the screen rather than a hole in the page. */
+.guide-film { overflow:hidden; margin:var(--s4) auto 0; max-width:54rem; background:var(--ink);
+              padding:clamp(.5rem, 1.4vw, .85rem); border-radius:calc(var(--r) + 6px);
+              box-shadow:0 2px 4px rgba(18,16,14,.06), 0 40px 80px -40px rgba(18,16,14,.55); }
+.guide-film video { display:block; width:100%; height:auto; background:#000;
+                    border-radius:calc(var(--r) - 4px); }
+.guide-film figcaption { margin:var(--s2) .25rem 0; font-family:var(--mono); font-size:.7rem;
+                         letter-spacing:.14em; text-transform:uppercase;
+                         color:color-mix(in srgb, var(--paper) 55%, transparent); }
+
+/* ── motion ────────────────────────────────────────────────────────────────────────── */
+/* Two gestures, both borrowed from what the tool does. Content SETTLES — it arrives from
+   below and stops, the way a reading settles — and the highlight STRIKES: every marked
+   run sweeps left to right, which is the single thing this product does, performed on
+   every page that shows a match.
+   All of it is keyed on `.js`, so a page whose script never ran shows the finished state
+   instead of blank paper, and all of it is inside prefers-reduced-motion: no-preference.
+   screen-scoped as well: print never scrolls, and a print reveal prints empty pages. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .js .reveal { opacity:0; transform:translateY(18px);
+                transition:opacity .7s cubic-bezier(.2,.7,.3,1),
+                           transform .7s cubic-bezier(.2,.7,.3,1); }
+  .js .reveal.in { opacity:1; transform:none; }
+  /* Children stagger behind their parent so a section arrives as a sequence, not a slab. */
+  .js .reveal > * { opacity:0; transform:translateY(10px);
+                    transition:opacity .55s ease-out, transform .55s ease-out; }
+  .js .reveal.in > * { opacity:1; transform:none; }
+  .js .reveal.in > :nth-child(1) { transition-delay:.02s; }
+  .js .reveal.in > :nth-child(2) { transition-delay:.09s; }
+  .js .reveal.in > :nth-child(3) { transition-delay:.16s; }
+  .js .reveal.in > :nth-child(4) { transition-delay:.23s; }
+  .js .reveal.in > :nth-child(n+5) { transition-delay:.3s; }
+
+  /* The strike. Drawn as a background image so its width can animate; it ends on exactly
+     the state a reduced-motion reader gets from the first frame. Opt-in per container —
+     a `mark` outside one keeps the static highlight, so no highlight can be left at zero
+     width by a container that never gets its class. */
+  .js .reveal mark, .js .strike mark {
+    background-image:linear-gradient(transparent 60%, var(--accent-wash) 60%);
+    background-repeat:no-repeat; background-size:0 100%;
+    transition:background-size .6s cubic-bezier(.3,.8,.3,1) .25s; }
+  .js .reveal.in mark, .js .strike.struck mark { background-size:100% 100%; }
+  .js .brand span { background-size:0 .34em;
+                    transition:background-size .7s cubic-bezier(.3,.8,.3,1) .35s; }
+  .js.ready .brand span { background-size:100% .34em; }
+
+  .cta:active, .btn:active { transform:translateY(0) scale(.985); }
+}
 
 /* ── tables (registry) ─────────────────────────────────────────────────────────────── */
 .scroll { overflow-x:auto; }
@@ -220,8 +364,27 @@ pre { font-family:var(--mono); font-size:.8rem; line-height:1.6; background:var(
   max-width:26ch; color:var(--ink);
 }
 
-footer { padding:var(--s6) 0 var(--s5); color:var(--dim); font-size:.92rem; border:0; }
-footer .wrap { display:flex; flex-wrap:wrap; gap:var(--s2) var(--s4); align-items:baseline; }
+/* The footer was `display:flex` over a run of inline prose. Every text node between the
+   tags became its own flex item and took a 2.5rem gap, so a sentence about where the
+   numbers come from was dealt out across the page in pieces, out of reading order. It is
+   a block of text; it is laid out as one. */
+footer { padding:var(--s7) 0 var(--s5); color:var(--dim); font-size:.9rem; border:0;
+         background:var(--wash); margin-top:var(--s6); }
+footer .wrap { display:grid; gap:var(--s4) var(--s5); align-items:start;
+               grid-template-columns:minmax(0,1fr); }
+@media (min-width: 52rem) { footer .wrap { grid-template-columns:1.2fr 1fr 1fr; } }
+footer h5 { font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; font-weight:400;
+            text-transform:uppercase; color:var(--dim); margin:0 0 var(--s2); }
+footer p { margin:0 0 var(--s1); line-height:1.6; }
+footer a { color:var(--dim); text-decoration:underline; text-underline-offset:3px;
+           text-decoration-color:var(--line); transition:color .15s; }
+footer a:hover { color:var(--ink); text-decoration-color:var(--ink); }
+footer .foot-brand { font-family:var(--display); font-weight:600; font-size:1.3rem;
+                     letter-spacing:-.03em; color:var(--ink); margin:0 0 var(--s2); }
+footer code, footer .mono { font-family:var(--mono); font-size:.78rem; color:var(--ink);
+                            overflow-wrap:anywhere; }
+footer ul { list-style:none; margin:0; padding:0; }
+footer li { margin-bottom:.35rem; }
 
 @media (pointer: coarse) { nav a { padding:.7rem 0; } }
 /* Seven links wrapped to three lines on a 390px phone, pushing the headline most of a
