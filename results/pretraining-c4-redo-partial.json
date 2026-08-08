@@ -1,0 +1,235 @@
+{
+  "scanner": "ingot-0.1.0",
+  "defaultN": 10,
+  "legacyN": 13,
+  "corpus": {
+    "name": "c4-en-26shards",
+    "licence": "ODC-BY",
+    "source": "https://huggingface.co/datasets/allenai/c4/resolve/main/en/c4-train.<shard>-of-01024.json.gz",
+    "fetchedAt": "2026-07-28T09:23:12.684Z",
+    "shardCount": 26,
+    "compressedBytes": 8292406400,
+    "uncompressedBytes": 21328472590,
+    "shards": [
+      {
+        "name": "c4-train.00000-of-01024.json.gz",
+        "bytes": 319308785,
+        "sha256": "8ef8d75b0e045dec4aa5123a671b4564466b0707086a7ed1ba8721626dfffbc9"
+      },
+      {
+        "name": "c4-train.00001-of-01024.json.gz",
+        "bytes": 318039285,
+        "sha256": "b945059cd1a343cabe311881b7840a6f0363f570e745a0eff0e687e266f6b55d"
+      },
+      {
+        "name": "c4-train.00002-of-01024.json.gz",
+        "bytes": 319748667,
+        "sha256": "2967dc7e587ced6ecb9ba617ad2d4c44901467969de5bf5b0f5a9e5b70555d75"
+      },
+      {
+        "name": "c4-train.00003-of-01024.json.gz",
+        "bytes": 318564193,
+        "sha256": "b79d9abef5741578929be0d59db9ca652a8276207ef18a944b7a5f11fef5beb6"
+      },
+      {
+        "name": "c4-train.00004-of-01024.json.gz",
+        "bytes": 318579884,
+        "sha256": "cd9f98eac2bc6062f55d9a36bd744cc924a78ea2fd998830e0034e4456f5d014"
+      },
+      {
+        "name": "c4-train.00005-of-01024.json.gz",
+        "bytes": 318003681,
+        "sha256": "8ac5907a54dbc7ab9c14624448c7c3f6afed33af9d0a855f1eae955e62e255b9"
+      },
+      {
+        "name": "c4-train.00006-of-01024.json.gz",
+        "bytes": 318495137,
+        "sha256": "8fd9b9a4b74c9414466b245ebda7db041e7bd8603971de51b5db782bd758aac7"
+      },
+      {
+        "name": "c4-train.00007-of-01024.json.gz",
+        "bytes": 318417273,
+        "sha256": "41dd377a1ba6b72eab0260c39c626fe45ab6b649d42d57b311d3ba21a0337cd0"
+      },
+      {
+        "name": "c4-train.00008-of-01024.json.gz",
+        "bytes": 318131845,
+        "sha256": "64da652c235f089a0b52f6db5883ef5f1e9c31edc4c950332b34dd12439c99a5"
+      },
+      {
+        "name": "c4-train.00009-of-01024.json.gz",
+        "bytes": 318185592,
+        "sha256": "807a548efbb10153c9eff0df5733a97a1b51ab1743242530de1b02a8ea17ace7"
+      },
+      {
+        "name": "c4-train.00010-of-01024.json.gz",
+        "bytes": 319045292,
+        "sha256": "3bd0f6f664069c3bd964ce48ceae60ba47b55b54745a4b00c207bdb3a1926b17"
+      },
+      {
+        "name": "c4-train.00011-of-01024.json.gz",
+        "bytes": 319686980,
+        "sha256": "5baa0c010083459ba58e34b4e93bb758caa878f7db6fba0528921329fa1a6cc5"
+      },
+      {
+        "name": "c4-train.00012-of-01024.json.gz",
+        "bytes": 320119088,
+        "sha256": "fdee7442c06856e2c4b7665cc51978e9011b5e0a2112c30dd15bc9e53818842d"
+      },
+      {
+        "name": "c4-train.00013-of-01024.json.gz",
+        "bytes": 319474856,
+        "sha256": "a4ab3b24087781c3577945492525696e182ffd7ca5265b958f49803a02867ecf"
+      },
+      {
+        "name": "c4-train.00014-of-01024.json.gz",
+        "bytes": 319693210,
+        "sha256": "62215b2451e71b117018ef73570c944aff890624b384c538950b64c37f184c49"
+      },
+      {
+        "name": "c4-train.00015-of-01024.json.gz",
+        "bytes": 318427305,
+        "sha256": "9893c9f413a1223e7b535527829bcd6df3219929fb1abf8f2a114dd8f6ea0919"
+      },
+      {
+        "name": "c4-train.00016-of-01024.json.gz",
+        "bytes": 318785714,
+        "sha256": "bd0ade8b8a57348952ca31c39efdab538f54c852941a225ccd13d0a7170724e3"
+      },
+      {
+        "name": "c4-train.00017-of-01024.json.gz",
+        "bytes": 320134331,
+        "sha256": "4132cfff3f5126d9e783191a5ccc34e5d85938bebf0b8489657805277a227202"
+      },
+      {
+        "name": "c4-train.00018-of-01024.json.gz",
+        "bytes": 318653930,
+        "sha256": "4675ab1d77da3d676d9743dca15bfce8478498f7738f79816a25ed790d28fa46"
+      },
+      {
+        "name": "c4-train.00019-of-01024.json.gz",
+        "bytes": 319468974,
+        "sha256": "1d2f3a6aeb0f6c159295f283d302794cd3eb944cff3fe68691997bb2dc4c7780"
+      },
+      {
+        "name": "c4-train.00020-of-01024.json.gz",
+        "bytes": 319109754,
+        "sha256": "b5f26d832a0ec9b0489a27169d94496f5ea33c7fb046868c565c7b5a2407221b"
+      },
+      {
+        "name": "c4-train.00021-of-01024.json.gz",
+        "bytes": 318514423,
+        "sha256": "428da5a8d4585de16f6b3f30865a5ca7a8d1ddcd3b6002dcc1283368b0c3d60a"
+      },
+      {
+        "name": "c4-train.00022-of-01024.json.gz",
+        "bytes": 318715623,
+        "sha256": "9bc4812ba5e08c0b2d83cd3804129ba3d77cf84ba3d8828159788ee02e155a51"
+      },
+      {
+        "name": "c4-train.00023-of-01024.json.gz",
+        "bytes": 319874293,
+        "sha256": "38843ab4f5c60ed2b9ec0cdc65074eaca454014d5702edd809a266190689d2c3"
+      },
+      {
+        "name": "c4-train.00024-of-01024.json.gz",
+        "bytes": 318105764,
+        "sha256": "4fa0c7ec94445ea57dcecda7864b1346275e711c9820c2c39dbb9fdb95c97674"
+      },
+      {
+        "name": "c4-train.00025-of-01024.json.gz",
+        "bytes": 319122521,
+        "sha256": "0758514fa2e2c133c995c00d5f4abfc14b66582a4eedd0e721bdd95c4632a755"
+      }
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "gsm8k",
+      "path": "data/bench/gsm8k.jsonl",
+      "licence": "MIT",
+      "note": "test split, question text"
+    },
+    {
+      "name": "humaneval",
+      "path": "data/bench/humaneval.jsonl",
+      "licence": "MIT",
+      "note": "prompt: signature + docstring"
+    },
+    {
+      "name": "mmlu",
+      "path": "data/bench/mmlu.jsonl",
+      "licence": "MIT",
+      "note": "test split, question + choices"
+    }
+  ],
+  "complete": false,
+  "results": [
+    {
+      "benchmark": "gsm8k",
+      "corpus": "c4-en-26shards",
+      "n": 10,
+      "itemsTotal": 1319,
+      "itemsHit": 2,
+      "rate": 0.001516300227445034,
+      "totalMatches": 2,
+      "uncheckableItems": 0,
+      "corpusDocs": 9264249,
+      "corpusTokens": 3418685530,
+      "corpusBytes": 21328472590,
+      "corpusHash": "c046ce3c890918b4d68094c438c05321",
+      "elapsedMs": 3126737,
+      "throughputMBs": 6.821319666476586,
+      "droppedGeneric": 0,
+      "linesRead": 9264249,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "gsm8k-1264",
+        "gsm8k-926"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-1264",
+          "corpusDocId": "doc2251421",
+          "corpusOffset": 72,
+          "matchedText": "on the first day and on the third day the",
+          "contextBefore": "to go back.\nIt was very hot and humid. We had rain ",
+          "contextAfter": " heat index was close to 100. But the hogs moved anyway and",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "gsm8k-926",
+          "corpusDocId": "doc4463944",
+          "corpusOffset": 3892,
+          "matchedText": "gallons of water per day.\nHow many gallons of water",
+          "contextBefore": "the average person uses per day?\nThe average resident uses about 100 ",
+          "contextAfter": " an average person will drink in their lifetime?\nIf the average person",
+          "corpusDocFrequency": 1
+        }
+      ]
+    },
+    {
+      "benchmark": "gsm8k",
+      "corpus": "c4-en-26shards",
+      "n": 13,
+      "itemsTotal": 1319,
+      "itemsHit": 0,
+      "rate": 0,
+      "totalMatches": 0,
+      "uncheckableItems": 0,
+      "corpusDocs": 9264249,
+      "corpusTokens": 3418685530,
+      "corpusBytes": 21328472590,
+      "corpusHash": "c046ce3c890918b4d68094c438c05321",
+      "elapsedMs": 3123776,
+      "throughputMBs": 6.827785535838678,
+      "droppedGeneric": 0,
+      "linesRead": 9264249,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [],
+      "samples": []
+    }
+  ]
+}

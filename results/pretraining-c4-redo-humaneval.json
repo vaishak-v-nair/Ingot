@@ -1,0 +1,348 @@
+{
+  "scanner": "ingot-0.1.0",
+  "defaultN": 10,
+  "legacyN": 13,
+  "corpus": {
+    "name": "c4-en-26shards",
+    "licence": "ODC-BY",
+    "source": "https://huggingface.co/datasets/allenai/c4/resolve/main/en/c4-train.<shard>-of-01024.json.gz",
+    "fetchedAt": "2026-07-28T09:23:12.684Z",
+    "shardCount": 26,
+    "compressedBytes": 8292406400,
+    "uncompressedBytes": 21328472590,
+    "shards": [
+      {
+        "name": "c4-train.00000-of-01024.json.gz",
+        "bytes": 319308785,
+        "sha256": "8ef8d75b0e045dec4aa5123a671b4564466b0707086a7ed1ba8721626dfffbc9"
+      },
+      {
+        "name": "c4-train.00001-of-01024.json.gz",
+        "bytes": 318039285,
+        "sha256": "b945059cd1a343cabe311881b7840a6f0363f570e745a0eff0e687e266f6b55d"
+      },
+      {
+        "name": "c4-train.00002-of-01024.json.gz",
+        "bytes": 319748667,
+        "sha256": "2967dc7e587ced6ecb9ba617ad2d4c44901467969de5bf5b0f5a9e5b70555d75"
+      },
+      {
+        "name": "c4-train.00003-of-01024.json.gz",
+        "bytes": 318564193,
+        "sha256": "b79d9abef5741578929be0d59db9ca652a8276207ef18a944b7a5f11fef5beb6"
+      },
+      {
+        "name": "c4-train.00004-of-01024.json.gz",
+        "bytes": 318579884,
+        "sha256": "cd9f98eac2bc6062f55d9a36bd744cc924a78ea2fd998830e0034e4456f5d014"
+      },
+      {
+        "name": "c4-train.00005-of-01024.json.gz",
+        "bytes": 318003681,
+        "sha256": "8ac5907a54dbc7ab9c14624448c7c3f6afed33af9d0a855f1eae955e62e255b9"
+      },
+      {
+        "name": "c4-train.00006-of-01024.json.gz",
+        "bytes": 318495137,
+        "sha256": "8fd9b9a4b74c9414466b245ebda7db041e7bd8603971de51b5db782bd758aac7"
+      },
+      {
+        "name": "c4-train.00007-of-01024.json.gz",
+        "bytes": 318417273,
+        "sha256": "41dd377a1ba6b72eab0260c39c626fe45ab6b649d42d57b311d3ba21a0337cd0"
+      },
+      {
+        "name": "c4-train.00008-of-01024.json.gz",
+        "bytes": 318131845,
+        "sha256": "64da652c235f089a0b52f6db5883ef5f1e9c31edc4c950332b34dd12439c99a5"
+      },
+      {
+        "name": "c4-train.00009-of-01024.json.gz",
+        "bytes": 318185592,
+        "sha256": "807a548efbb10153c9eff0df5733a97a1b51ab1743242530de1b02a8ea17ace7"
+      },
+      {
+        "name": "c4-train.00010-of-01024.json.gz",
+        "bytes": 319045292,
+        "sha256": "3bd0f6f664069c3bd964ce48ceae60ba47b55b54745a4b00c207bdb3a1926b17"
+      },
+      {
+        "name": "c4-train.00011-of-01024.json.gz",
+        "bytes": 319686980,
+        "sha256": "5baa0c010083459ba58e34b4e93bb758caa878f7db6fba0528921329fa1a6cc5"
+      },
+      {
+        "name": "c4-train.00012-of-01024.json.gz",
+        "bytes": 320119088,
+        "sha256": "fdee7442c06856e2c4b7665cc51978e9011b5e0a2112c30dd15bc9e53818842d"
+      },
+      {
+        "name": "c4-train.00013-of-01024.json.gz",
+        "bytes": 319474856,
+        "sha256": "a4ab3b24087781c3577945492525696e182ffd7ca5265b958f49803a02867ecf"
+      },
+      {
+        "name": "c4-train.00014-of-01024.json.gz",
+        "bytes": 319693210,
+        "sha256": "62215b2451e71b117018ef73570c944aff890624b384c538950b64c37f184c49"
+      },
+      {
+        "name": "c4-train.00015-of-01024.json.gz",
+        "bytes": 318427305,
+        "sha256": "9893c9f413a1223e7b535527829bcd6df3219929fb1abf8f2a114dd8f6ea0919"
+      },
+      {
+        "name": "c4-train.00016-of-01024.json.gz",
+        "bytes": 318785714,
+        "sha256": "bd0ade8b8a57348952ca31c39efdab538f54c852941a225ccd13d0a7170724e3"
+      },
+      {
+        "name": "c4-train.00017-of-01024.json.gz",
+        "bytes": 320134331,
+        "sha256": "4132cfff3f5126d9e783191a5ccc34e5d85938bebf0b8489657805277a227202"
+      },
+      {
+        "name": "c4-train.00018-of-01024.json.gz",
+        "bytes": 318653930,
+        "sha256": "4675ab1d77da3d676d9743dca15bfce8478498f7738f79816a25ed790d28fa46"
+      },
+      {
+        "name": "c4-train.00019-of-01024.json.gz",
+        "bytes": 319468974,
+        "sha256": "1d2f3a6aeb0f6c159295f283d302794cd3eb944cff3fe68691997bb2dc4c7780"
+      },
+      {
+        "name": "c4-train.00020-of-01024.json.gz",
+        "bytes": 319109754,
+        "sha256": "b5f26d832a0ec9b0489a27169d94496f5ea33c7fb046868c565c7b5a2407221b"
+      },
+      {
+        "name": "c4-train.00021-of-01024.json.gz",
+        "bytes": 318514423,
+        "sha256": "428da5a8d4585de16f6b3f30865a5ca7a8d1ddcd3b6002dcc1283368b0c3d60a"
+      },
+      {
+        "name": "c4-train.00022-of-01024.json.gz",
+        "bytes": 318715623,
+        "sha256": "9bc4812ba5e08c0b2d83cd3804129ba3d77cf84ba3d8828159788ee02e155a51"
+      },
+      {
+        "name": "c4-train.00023-of-01024.json.gz",
+        "bytes": 319874293,
+        "sha256": "38843ab4f5c60ed2b9ec0cdc65074eaca454014d5702edd809a266190689d2c3"
+      },
+      {
+        "name": "c4-train.00024-of-01024.json.gz",
+        "bytes": 318105764,
+        "sha256": "4fa0c7ec94445ea57dcecda7864b1346275e711c9820c2c39dbb9fdb95c97674"
+      },
+      {
+        "name": "c4-train.00025-of-01024.json.gz",
+        "bytes": 319122521,
+        "sha256": "0758514fa2e2c133c995c00d5f4abfc14b66582a4eedd0e721bdd95c4632a755"
+      }
+    ]
+  },
+  "benchmarks": [
+    {
+      "name": "gsm8k",
+      "path": "data/bench/gsm8k.jsonl",
+      "licence": "MIT",
+      "note": "test split, question text"
+    },
+    {
+      "name": "humaneval",
+      "path": "data/bench/humaneval.jsonl",
+      "licence": "MIT",
+      "note": "prompt: signature + docstring"
+    },
+    {
+      "name": "mmlu",
+      "path": "data/bench/mmlu.jsonl",
+      "licence": "MIT",
+      "note": "test split, question + choices"
+    }
+  ],
+  "complete": false,
+  "results": [
+    {
+      "benchmark": "humaneval",
+      "corpus": "c4-en-26shards",
+      "n": 10,
+      "itemsTotal": 164,
+      "itemsHit": 6,
+      "rate": 0.036585365853658534,
+      "totalMatches": 15,
+      "uncheckableItems": 0,
+      "corpusDocs": 9264249,
+      "corpusTokens": 3418685530,
+      "corpusBytes": 21328472590,
+      "corpusHash": "c046ce3c890918b4d68094c438c05321",
+      "elapsedMs": 3425915,
+      "throughputMBs": 6.225628070165198,
+      "droppedGeneric": 115,
+      "linesRead": 9264249,
+      "linesSkipped": 0,
+      "contaminatedItemIds": [
+        "HumanEval-101",
+        "HumanEval-107",
+        "HumanEval-115",
+        "HumanEval-21",
+        "HumanEval-78",
+        "HumanEval-87"
+      ],
+      "samples": [
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-87",
+          "corpusDocId": "doc1717807",
+          "corpusOffset": 356,
+          "matchedText": "1 -2 -3 -4 5 6 -1 -2 -3 4",
+          "contextBefore": "FILTER RESULTS Brands. 1; 2; 3; 4 | NEXT.\n-1 -2 3 4 ",
+          "contextAfter": " 1914 19 21 1914 22 29 30 — (1926-1915) 33 35 (1918",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc4141975",
+          "corpusOffset": 1514,
+          "matchedText": "digits are 0, 1, 2, 3, 4, 5, 6, 7, 8",
+          "contextBefore": "we only need ten digits to represent every possible number. The ten ",
+          "contextAfter": " and 9. Base ten goes back to when the system was first",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc4141975",
+          "corpusOffset": 1591,
+          "matchedText": "are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E",
+          "contextBefore": "as the base instead of ten. The digits in the hexadecimal system ",
+          "contextAfter": " and F. The digits in the hexadecimal system are 0, 1, 2",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc4141975",
+          "corpusOffset": 1615,
+          "matchedText": "are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E",
+          "contextBefore": "B, C, D, E and F. The digits in the hexadecimal system ",
+          "contextAfter": " and F. It has only recently been agreed that the letters A",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc5063373",
+          "corpusOffset": 428,
+          "matchedText": "are 0, 1, 2, 3, 4, 5, 6, 7, 8",
+          "contextBefore": "Turing opinion. 6995483 can far be come as 699548310. anchor 10 application ",
+          "contextAfter": ", and 9. 4, 5, 6, 7, 8, 9, 10, 11, 12, and",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "doc5164336",
+          "corpusOffset": 194,
+          "matchedText": "are 1,2,3,4,5,6,7,8,9",
+          "contextBefore": "you’re graded on a 10-point scale, the only possible values ",
+          "contextAfter": ", and 10.\nAges on birthday cards. Birthday cards only come in years",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "doc6455831",
+          "corpusOffset": 330,
+          "matchedText": "are 1, 2, 3, 4, 5, 6, 7, 8, 9, 11",
+          "contextBefore": "its interpretation of numbers. A Numerology chart consists of eleven numbers which ",
+          "contextAfter": ", and 22. . Number 16 might mean restlessness and problems related to personal",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-78",
+          "corpusDocId": "doc6784629",
+          "corpusOffset": 24,
+          "matchedText": "A natural number greater than 1 that is not a",
+          "contextBefore": "than 1 that has no positive divisors other than 1 and itself. ",
+          "contextAfter": " prime number is called a composite number.\ne.g. 2, 3, 5",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-101",
+          "corpusDocId": "doc7090668",
+          "corpusOffset": 2530,
+          "matchedText": "one, two, three, four, five, six, one, two, three, four, five six",
+          "contextBefore": "counted like one, two, three, four, five, six, one - four, five, six, ",
+          "contextAfter": ". And it's the same like when I improvise; this beat remains the",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "doc7465931",
+          "corpusOffset": 322,
+          "matchedText": "1,2,3,4,5,6,7,8,9,11",
+          "contextBefore": "shown on Hamilton Airport Zoning Plan No. 25-009-81-120, sheets ",
+          "contextAfter": " and 12, dated June 21, 1983 is an imaginary surface located at",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-87",
+          "corpusDocId": "doc7727874",
+          "corpusOffset": 2440,
+          "matchedText": "1-2-3-4-5-6-1-2-3-4",
+          "contextBefore": "1-2-3-4-5-6-7-8. Next he gave us ",
+          "contextAfter": "-5-6. We did this easily, so he divided the circle of",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-115",
+          "corpusDocId": "doc7878483",
+          "corpusOffset": 689,
+          "matchedText": "0 0. 1 1 1 1 0 1 1 1",
+          "contextBefore": "Aps for 000 00 lincoln ls w lower billet p SPM 01 ",
+          "contextAfter": " 1 1 1 1 1 1. Lite Source LS 0SS Majesty 1",
+          "corpusDocFrequency": 1
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-107",
+          "corpusDocId": "doc8166198",
+          "corpusOffset": 416,
+          "matchedText": "1,2,3,4,5,6,7,8,9,11",
+          "contextBefore": "a home and also in mobile numbers.\nNumerology involves 12 numbers – 0,",
+          "contextAfter": " and 22. 11 and 22 are Master Numbers which have some special",
+          "corpusDocFrequency": 3
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-101",
+          "corpusDocId": "doc8180645",
+          "corpusOffset": 862,
+          "matchedText": "One, TWO, (three, four, five) SIX. One, TWO, (three, four, five) SIX",
+          "contextBefore": "hand, the lower notes played by the left hand rose in importance. ",
+          "contextAfter": ". Were they the melody? Even if in the left hand?\nHe forgot",
+          "corpusDocFrequency": 2
+        },
+        {
+          "tier": "exact",
+          "benchmarkItemId": "HumanEval-21",
+          "corpusDocId": "doc8710350",
+          "corpusOffset": 43,
+          "matchedText": "0.0, 0.25, 0.5, 0.75, 1.0",
+          "contextBefore": "0.4, 0.6, 0.8, 1.0. Now they report as ",
+          "contextAfter": ". This is more intuitive and thus should make the function easier to",
+          "corpusDocFrequency": 1
+        }
+      ]
+    }
+  ]
+}

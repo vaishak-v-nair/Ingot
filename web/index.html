@@ -33,15 +33,14 @@
   .cta-sent .dot { margin-right: .45rem; }
   .cta-sent code { font-family: var(--mono); color: var(--ink); font-size: .82rem; }
   .expect { margin: 1.4rem 0 0; }
-  .expect summary { font-size: .86rem; color: var(--dim); cursor: pointer; }
-  .expect summary:hover { color: var(--ink); }
+  .expect .aside-label { margin-bottom: var(--s2); }
   .expect dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .9rem;
                margin: .9rem 0 0; font-size: .86rem; max-width: 52ch; }
   .expect dt { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em;
                text-transform: uppercase; color: var(--dim); padding-top: .18rem; }
   .expect dd { margin: 0; }
   /* ---------- the scanner ---------- */
-  .scan-head { max-width: 58ch; margin-bottom: var(--s4); }
+  .scan-head { max-width: 58ch; margin-bottom: var(--s3); }
   .scan-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -.025em;
                   margin: .55rem 0 0; max-width: 26ch; }
   /* start, not stretch — the same rule as every other grid on this site. Stretching the
@@ -76,12 +75,12 @@
      room above them, a reading measure, matches on their own surfaces. Inside the panel
      with no padding, these headings collided with the paragraph above them and every line
      ran off the right edge. */
-  #out { margin-top: var(--s5); }
+  #out { margin-top: var(--s4); }
   #out:empty { margin-top: 0; }
   #out > .wrap { width: 100%; }
   #out h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.028em;
             font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.15; max-width: 26ch;
-            margin: var(--s5) 0 var(--s2); }
+            margin: var(--s4) 0 var(--s2); }
   #out h3:first-child { margin-top: 0; }
   #out p { max-width: 62ch; color: var(--dim); }
   #out p.note { font-size: .86rem; }
@@ -98,13 +97,13 @@
      the offer goes first: on a phone the ask matters more than the exhibit. */
   /* Flex at every size so `order` actually applies: as a plain block it does nothing, and
      the exhibit stayed above the offer on a phone — 898px, still past the fold. */
-  .opening { display: flex; flex-direction: column; padding: var(--s3) 0 var(--s5); }
+  .opening { display: flex; flex-direction: column; padding: var(--s2) 0 var(--s4); }
   .opening .exhibit, .opening .claim { padding: 0; margin: 0; border: 0; }
   .opening .claim { order: -1; }
-  .opening .exhibit { margin-top: var(--s4); }
+  .opening .exhibit { margin-top: var(--s3); }
   @media (min-width: 68rem) {
     .opening { display: grid; grid-template-columns: 1fr 1.1fr; gap: var(--s5);
-               align-items: center; }
+               align-items: start; }
     .opening .exhibit { margin-top: 0; }
     .opening .exhibit { background: var(--white); border-radius: var(--r);
                         box-shadow: var(--shadow); padding: var(--s4); }
@@ -204,7 +203,7 @@
      rules rather than a panel: an instrument marks a reading, it does not frame it. */
   .landmark { font-family: var(--display); font-weight: 600; color: var(--ink);
               font-size: clamp(1.5rem, 3.8vw, 2.4rem); line-height: 1.16; letter-spacing: -.02em;
-              max-width: 36ch; margin: 2.2rem 0 1.5rem; padding: 1.5rem 0 1.6rem;
+              max-width: 36ch; margin: var(--s4) 0 var(--s3); padding: 0;
                }
   /* Three facts, divided by rules rather than fenced into cards. Three bordered boxes in a
      row is the single most recognisable generated-page layout there is, and these three
@@ -212,7 +211,7 @@
      ever decoration around content that already had structure. */
   /* 24rem, so four facts land as 2 x 2 rather than 3 + 1. Three tracks of a four-item grid
      leaves an orphan on its own row, which reads as a card somebody forgot to fill. */
-  .cards { display: grid; gap: var(--s3); margin-top: var(--s4); border: 0;
+  .cards { display: grid; gap: var(--s3); margin-top: var(--s3); border: 0;
            grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
            align-items: start; }
   .card { padding: var(--s3) var(--s3) var(--s4); }
@@ -229,12 +228,12 @@
   ul.plain { list-style: none; padding: 0; margin: 0; counter-reset: refusal;
               }
   ul.plain li { counter-increment: refusal; position: relative;
-                padding: 1.1rem 0 1.1rem 2.9rem; 
+                padding: .7rem 0 .7rem 2.9rem; 
                 font-size: .92rem; color: var(--dim); }
   /* The numeral is dim, not red. --ember is the refusal colour and these four entries are
      Ingot's own standards, not the machine declining to answer. */
   ul.plain li::before { content: counter(refusal, decimal-leading-zero);
-                        position: absolute; left: 0; top: 1.18rem;
+                        position: absolute; left: 0; top: .78rem;
                         font-family: var(--mono); font-size: .78rem; color: var(--dim); }
   ul.plain b { color: var(--ink); display: block; margin-bottom: .2rem; font-size: .97rem; }
   /* The guidance film is a figure in the record, not an embed floating in prose: a 2px
@@ -242,17 +241,25 @@
   .guide-film { margin: var(--s4) 0 0; border: 0; border-radius: var(--r);
                overflow: hidden; box-shadow: var(--shadow); }
   
-  /* Deep prose folds behind a ruled disclosure: the expert layer is preceded, never deleted.
-     A hairline and a mono summary — not a widget box. */
-  details.more { margin: 1.5rem 0 0;  }
-  details.more summary { cursor: pointer; list-style: none; display: flex; align-items: center;
-                         gap: .6rem; font-family: var(--mono); font-size: .72rem;
-                         letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
-                         padding: .85rem 0; }
-  details.more summary::-webkit-details-marker { display: none; }
-  details.more summary::before { content: "+"; font-size: .95rem; line-height: 1; flex: none; }
-  details.more[open] summary::before { content: "\2212"; }
-  details.more > .sub:last-child, details.more > .scroll:last-child { margin-bottom: .4rem; }
+  /* The expert layer, visible. This was eight <details> — the caveats, the retraction, the
+     decoder, the transcript, the two tests that ruled contamination out — every one of them
+     a click nobody makes, on a page whose whole argument is that it shows you everything.
+     A site that hides its own limits behind a disclosure is doing the thing it accuses
+     other people's scorecards of doing. The label keeps the mono register the summary had,
+     so the hierarchy survives; the content is simply there. */
+  .more { margin: var(--s3) 0 0; }
+  .aside-label { font-family: var(--mono); font-size: .68rem; letter-spacing: .16em;
+                 text-transform: uppercase; color: var(--dim); margin: 0 0 var(--s1); }
+  .more > .sub, .more > p { font-size: .95rem; }
+  .more > * + * { margin-top: .7rem; }
+  /* The transcript is seven short paragraphs of the same thirty-seven seconds the player
+     above it holds. One column it is a wall beside a video; two columns it is a column of
+     text beside a video, which is what it is. */
+  @media (min-width: 52rem) {
+    .transcript { columns: 2; column-gap: var(--s5); }
+    .transcript .aside-label { column-span: all; }
+    .transcript p { break-inside: avoid; margin: 0 0 .7rem; }
+  }
   tr.win td { background: color-mix(in srgb, var(--hot) 9%, transparent); }
   /* Data rows warm faintly under the pointer. Rows that mix th and td are labels rather
      than records, and stay still. */
@@ -426,8 +433,8 @@
       <button class="linklike" id="copy-mail" type="button">copy it</button>.
     </p>
 
-    <details class="expect">
-      <summary>What happens after you send it</summary>
+    <div class="expect">
+      <p class="aside-label">What happens after you send it</p>
       <dl>
         <dt>what you send</dt><dd>a public link to something you wrote. Nothing unpublished.</dd>
         <dt>what comes back</dt><dd>the matching text if there is any, the dataset it sits in, and the command to reproduce it yourself</dd>
@@ -435,7 +442,7 @@
         <dt>what is kept</dt><dd>nothing. The report is yours; no copy is published without your say-so.</dd>
       </dl>
       <p class="samplelink"><a href="sample-report.html" target="_blank" rel="noopener">See a sample report &rarr;</a> — the real thing, opened from disk with no network.</p>
-    </details>
+    </div>
   </div>
   <p><span class="promise"><span class="dot"></span>nothing is uploaded &middot; press F12 and watch the network stay empty</span></p>
 </section>
@@ -467,8 +474,8 @@
       </video>
       <figcaption>Ingot &middot; 0:37 &middot; captions on by default</figcaption>
     </figure>
-    <details class="more transcript">
-      <summary>Read it instead — the full transcript</summary>
+    <div class="more transcript">
+      <p class="aside-label">Read it instead — the full transcript</p>
       <p class="sub">What&rsquo;s inside AI training data? Your words? A benchmark&rsquo;s
       exam questions?</p>
       <p class="sub">Until now, every answer was a score. A percentage. Trust us.</p>
@@ -481,7 +488,7 @@
       <p class="sub">Nine million documents scanned. Every published number gated in CI —
       and every report ends with a receipt anyone can re-run.</p>
       <p class="sub">Ask it yourself — in your browser, or one command.</p>
-    </details>
+    </div>
   </div>
 </section>
 
@@ -593,8 +600,8 @@
     <!-- Folded on the founder's tune pass 2026-08-02: open, the table read as one more
          block of documentation to a stranger. The decoder ring survives — one click in,
          under a summary that says exactly what it holds. -->
-    <details class="more">
-      <summary>six words this page keeps using</summary>
+    <div class="more">
+      <p class="aside-label">six words this page keeps using</p>
       <div class="scroll">
         <table>
           <tr><th>term</th><th>plain meaning</th></tr>
@@ -606,7 +613,7 @@
           <tr><td class="num">canonical</td><td>famous text the whole world quotes — it matches, but it is not leakage</td></tr>
         </table>
       </div>
-    </details>
+    </div>
   </div>
 </section>
 
@@ -641,13 +648,13 @@
   21.4 GB of gzipped C4 shards on disk · GSM8K at n=10 · 51 minutes wall clock
   decompression, JSON.parse, hashing and match bookkeeping all included
   reproduce with: node scripts/pretraining-scan.ts</pre>
-    <details class="more">
-      <summary>Why this number replaced a faster one</summary>
+    <div class="more">
+      <p class="aside-label">Why this number replaced a faster one</p>
       <p class="sub">This said <em>37.1 MB/sec, 20 GB in 9.0 minutes</em> until we scanned a real
       corpus. That figure is the scan kernel — tokenize, roll, look up — over text already read and
       already parsed, and quoting it as a scanning rate dropped most of the actual work. The kernel
       number is still the right one for judging optimisation; it was the wrong one to put here.</p>
-    </details>
+    </div>
 
     <h2 style="margin-top:2.5rem">The field's 13-gram default is wrong</h2>
     <p class="sub">How many identical words in a row should count as a match? Everyone uses 13,
@@ -668,8 +675,8 @@
     unscannable</strong> — items shorter than 13 tokens can never match at all. At n=10 that is
     0.3%, edited copies are caught at 81.5% against 69.6%, and the cost is two false positives per
     thousand that you can read and dismiss in a second.</p>
-    <details class="more">
-      <summary>The standard error, a retraction, and the caveats</summary>
+    <div class="more">
+      <p class="aside-label">The standard error, a retraction, and the caveats</p>
       <p class="sub">The 81.5% against 69.6% gap is real at 300 planted items, where the standard
       error is about 2.3 points. An earlier version of this table claimed 100% against 3.5% — an
       artifact of a test fixture that deleted words on a fixed lattice, which decided in advance
@@ -677,7 +684,7 @@
       because a tool that audits other people's numbers cannot quietly restate its own.</p>
       <p class="sub">Caveats: one corpus pair, both 2023-era, and edited copies simulated by random
       word dropping rather than a model rewriting text. Real paraphrase will be harder.</p>
-    </details>
+    </div>
   </div>
 </section>
 
@@ -737,8 +744,8 @@
     numbers this project had to retract, is in
     <a href="https://github.com/vaishak-v-nair/Ingot/blob/main/docs/silent-failures.md">three
     ways contamination scanning silently fails</a>.</p>
-    <details class="more">
-      <summary>How we ruled contamination out — two tests</summary>
+    <div class="more">
+      <p class="aside-label">How we ruled contamination out — two tests</p>
       <p class="sub">The standard defence does not save you. Document-frequency filtering discarded
       757 matches at this scale and <strong>0</strong> at 356,317 documents — same filter, same
       threshold, so it only engages once the corpus is enormous. Even then the survivors are canonical,
@@ -751,7 +758,7 @@
       other 275 are undetermined, not leaked: a control of nine unmistakably canonical items scored
       <strong>1 of 9</strong> against that reference, so absence from it carries no information.
       Presence is evidence; absence is a lead.</p>
-    </details>
+    </div>
   </div>
 </section>
 
@@ -776,8 +783,8 @@
          the ones who never open a repository — were exactly the ones who never met them.
          check-published-numbers.ts now asserts each phrase in BOTH surfaces, so the two
          cannot drift apart again the way they did here. -->
-    <details class="more">
-      <summary>What a clean result does not prove</summary>
+    <div class="more">
+      <p class="aside-label">What a clean result does not prove</p>
       <p class="sub"><b>Canonical is not the same as harmless.</b> A test item written from a
       public web page can sit in a training corpus as ordinary web text: nobody leaked it, and a
       model trained on that corpus still saw it. The canonicality label says where text came
@@ -789,7 +796,7 @@
       lowercased tokens with punctuation stripped. For prose the difference is cosmetic; for
       code it is not — a HumanEval match is a run of identifiers and words, with operators and
       structure invisible.</p>
-    </details>
+    </div>
   </div>
 </section>
 
@@ -1491,9 +1498,10 @@ function render(report, file, isSample) {
       ? ` — the first ${exact.droppedSamples.length} of ${exact.droppedGeneric}; the rest are counted,
       their text not retained`
       : '';
-    html += `<details class="more"><summary>dropped as ordinary language — read them${capNote}</summary>
+    html += `<div class="more">
+      <p class="aside-label">dropped as ordinary language — read them${capNote}</p>
       ${exact.droppedSamples.map(hitRow).join('')}
-    </details>`;
+    </div>`;
   }
 
   if (uncheckable > 0) {

@@ -161,9 +161,9 @@ strong, b { font-weight:500; }
 code, .mono { font-family:var(--mono); font-size:.86em; }
 
 /* ── section rhythm — the whole point ──────────────────────────────────────────────── */
-section { padding:var(--s6) 0; border:0; }
+section { padding:var(--s4) 0; border:0; }
 section.band { background:var(--wash); }
-header.hero, .hero { padding:var(--s6) 0 var(--s5); }
+header.hero, .hero { padding:var(--s5) 0 var(--s4); }
 
 /* ── actions ───────────────────────────────────────────────────────────────────────── */
 .cta, .btn.primary {
@@ -189,7 +189,7 @@ header.hero, .hero { padding:var(--s6) 0 var(--s5); }
 .ghost { color:var(--dim); text-decoration:underline; text-underline-offset:4px;
          text-decoration-color:var(--line); }
 .ghost:hover { color:var(--ink); text-decoration-color:var(--ink); }
-.actions { display:flex; flex-wrap:wrap; align-items:center; gap:var(--s3); margin-top:var(--s4); }
+.actions { display:flex; flex-wrap:wrap; align-items:center; gap:var(--s3); margin-top:var(--s3); }
 
 /* ── form controls ─────────────────────────────────────────────────────────────────── */
 /* Everything the operating system draws for us is drawn here instead. A raw <select> and
@@ -284,7 +284,7 @@ mark, .specimen mark, .quote em {
    whole job is to be read carefully. Height follows content now. A ragged bottom edge of a
    line or two reads as text; a hole never reads as anything but a mistake. */
 .steps, .flow, .facts, .grid, .statgrid {
-  display:grid; gap:var(--s3); margin-top:var(--s4);
+  display:grid; gap:var(--s3); margin-top:var(--s3);
   grid-template-columns:repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   align-items:start;
   border:0;
@@ -308,7 +308,7 @@ mark, .specimen mark, .quote em {
 /* The intro is a dark film on a paper page, and pasted flat it read as a black rectangle
    somebody forgot to style. It is now mounted: a deep plate with the film inset in it, so
    the darkness is the screen rather than a hole in the page. */
-.guide-film { overflow:hidden; margin:var(--s4) auto 0; max-width:54rem; background:var(--ink);
+.guide-film { overflow:hidden; margin:var(--s3) auto 0; max-width:54rem; background:var(--ink);
               padding:clamp(.5rem, 1.4vw, .85rem); border-radius:calc(var(--r) + 6px);
               box-shadow:0 2px 4px rgba(18,16,14,.06), 0 40px 80px -40px rgba(18,16,14,.55); }
 .guide-film video { display:block; width:100%; height:auto; background:#000;
@@ -372,7 +372,7 @@ pre { font-family:var(--mono); font-size:.8rem; line-height:1.6; background:var(
 
 /* ── the pull quote ────────────────────────────────────────────────────────────────── */
 .punch, .landmark {
-  margin:var(--s5) 0; padding:0; border:0;
+  margin:var(--s4) 0; padding:0; border:0;
   font-family:var(--display); font-weight:600;
   font-size:clamp(1.5rem, 3.2vw, 2.2rem); line-height:1.25; letter-spacing:-.028em;
   max-width:26ch; color:var(--ink);
@@ -382,8 +382,8 @@ pre { font-family:var(--mono); font-size:.8rem; line-height:1.6; background:var(
    tags became its own flex item and took a 2.5rem gap, so a sentence about where the
    numbers come from was dealt out across the page in pieces, out of reading order. It is
    a block of text; it is laid out as one. */
-footer { padding:var(--s7) 0 var(--s5); color:var(--dim); font-size:.9rem; border:0;
-         background:var(--wash); margin-top:var(--s6); }
+footer { padding:var(--s5) 0 var(--s4); color:var(--dim); font-size:.9rem; border:0;
+         background:var(--wash); margin-top:var(--s5); }
 footer .wrap { display:grid; gap:var(--s4) var(--s5); align-items:start;
                grid-template-columns:minmax(0,1fr); }
 @media (min-width: 52rem) { footer .wrap { grid-template-columns:1.2fr 1fr 1fr; } }
@@ -401,14 +401,48 @@ footer ul { list-style:none; margin:0; padding:0; }
 footer li { margin-bottom:.35rem; }
 
 @media (pointer: coarse) { nav a { padding:.7rem 0; } }
+
+/* ── the phone ─────────────────────────────────────────────────────────────────────────
+   Not a shrink of the desktop page. The spacing scale is a physical measure, so a step
+   that reads as generous across 1440px of paper reads as an empty screen across 390 —
+   --s5 above and below every section is 112px of nothing on a device where the whole
+   viewport is 844. Every step below is one notch down, the type is one notch down, and
+   the touch targets are one notch UP, which is the part a pure shrink gets backwards. */
+@media (max-width: 48rem) {
+  body { font-size:17px; }
+  section { padding:var(--s3) 0; }
+  header.hero, .hero { padding:var(--s4) 0 var(--s3); }
+  .steps, .flow, .facts, .grid, .statgrid { gap:var(--s2); margin-top:var(--s3); }
+  .card { padding:var(--s3); }
+  .tool { padding:var(--s3); }
+  .drop { padding:var(--s4) var(--s2); }
+  .guide-film { padding:.35rem; margin-top:var(--s3); }
+  .punch, .landmark { margin:var(--s3) 0; font-size:clamp(1.35rem, 6vw, 1.9rem); }
+  footer { padding:var(--s4) 0 var(--s3); margin-top:var(--s4); }
+  footer .wrap { gap:var(--s3); }
+  pre { font-size:.72rem; padding:var(--s2); }
+  th, td { padding:.6rem .7rem .6rem 0; }
+  /* A record that scrolls sideways needs to look like it does. */
+  .scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+}
+
 /* Seven links wrapped to three lines on a 390px phone, pushing the headline most of a
-   screen down. Tighter type and gap fits them in two without hiding anything: a nav that
-   hides links on mobile is a nav that decides for the visitor which pages matter. */
+   screen down. Tighter type and gap fits them without hiding anything: a nav that drops
+   links on mobile is a nav that decides for the visitor which pages matter. */
 @media (max-width: 34rem) {
-  nav { padding:var(--s3) 0 var(--s2); }
-  nav .wrap { gap:.4rem var(--s3); }
-  nav a { font-size:.88rem; padding:.35rem 0; }
-  .brand { width:100%; margin-bottom:.2rem; }
+  nav { padding:var(--s2) 0 .6rem; }
+  nav .wrap { gap:.25rem var(--s3); }
+  nav a:not(.brand) { font-size:.84rem; padding:.3rem 0; }
+  .brand { width:100%; margin-bottom:.15rem; font-size:1.35rem; }
+  /* One thumb, one column. Two pill buttons side by side at 342px leaves each of them
+     narrower than the words inside it. */
+  .btns, .actions { flex-direction:column; align-items:stretch; gap:var(--s2); }
+  .btns .btn, .btns .cta, .actions .btn, .actions .cta { width:100%; }
+  .cta, .btn.primary { padding:1rem 1.4rem; font-size:.98rem; }
+  .wrap { width:min(72rem, 100% - 1.5rem); }
+  .specimen, .quote { font-size:1.05rem; }
+  .assurance, .promise, .stamp { align-items:flex-start; }
+  .dot, .pip { margin-top:.42rem; }
 }
 @media print {
   :root { --paper:#fff; --white:#fff; --ink:#000; --dim:#444; --wash:#f4f4f4; }

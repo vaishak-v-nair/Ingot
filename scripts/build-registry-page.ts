@@ -265,8 +265,8 @@ function canonSection(): string {
     <ul>
 ${sources}
     </ul>
-    <details class="more">
-      <summary>The control set, and why absence proves nothing</summary>
+    <div class="more">
+      <p class="aside-label">The control set, and why absence proves nothing</p>
       <p>Nine items nobody believes leaked — famous speeches, founding documents — hand-labelled to
       measure the test's negative power, not sampled from it. ${canon.controlSet.confirmed} of ${canon.controlSet.total}
       appeared in the reference corpus at all:</p>
@@ -277,7 +277,7 @@ ${controls}
       </table>
       </div>
       <p>${esc(canon.caveat)}</p>
-    </details>
+    </div>
   </div>
 </section>`;
 }
@@ -361,8 +361,8 @@ ${table}
     otherwise — and they also say the fine-tuning set carries the training questions, which is
     worth knowing before quoting a GSM8K number for any model tuned on it.</p>
 ${exhibits}
-    <details class="more">
-      <summary>Every flagged test question beside the train question found with it</summary>
+    <div class="more">
+      <p class="aside-label">Every flagged test question beside the train question found with it</p>
       <div class="scroll">
       <table>
         <tr><th>flagged test item</th><th>train-split question, verbatim in its documents</th></tr>
@@ -371,16 +371,16 @@ ${siblings}
       </div>
       <p>Texts clipped for the page; full questions and document lists are in
       results/sft-slimorca-train-check.json.</p>
-    </details>
-    <details class="more">
-      <summary>How the triage measures a leak — and the artifact it almost published</summary>
+    </div>
+    <div class="more">
+      <p class="aside-label">How the triage measures a leak — and the artifact it almost published</p>
       <p>For every flagged item: the longest common token run against each document its evidence
       names, as a fraction of the item. A leak reproduces most of itself; boilerplate reproduces
       the phrase and stops. The verdicts also require <em>excess</em> — tokens beyond the flagging
       ${sft.defaultN}-gram — because every flagged item carries ${sft.defaultN}/length coverage by
       construction, and on its first run coverage alone labelled three short items "leaked" on
       exactly that floor. Thresholds and per-item numbers: results/sft-slimorca-triage.json.</p>
-    </details>
+    </div>
   </div>
 </section>`;
 }
@@ -458,14 +458,12 @@ const html = `<!doctype html>
   /* No local mark rule: site.css owns the highlight for every page. The copy that used to
      live here drew a flat fill while the front page drew a struck line — the same gesture,
      rendered two ways, on two pages of one product. */
-  /* Depth folds, it does not delete — the same ruled disclosure as the front page. */
-  details.more {  margin-top: 1.2rem; }
-  details.more summary { cursor: pointer; list-style: none; font-family: var(--mono);
-    font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--dim);
-    padding: .7rem 0; }
-  details.more summary::-webkit-details-marker { display: none; }
-  details.more summary::before { content: "+"; margin-right: .5rem; color: var(--gold); }
-  details.more[open] summary::before { content: "\\2212"; }
+  /* Depth is shown, not folded. The three disclosures here held the control set, the
+     train-question table and the triage artifact — the parts of this record that decide
+     whether to believe the rest of it. */
+  .more { margin-top: var(--s3); }
+  .aside-label { font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .16em; color: var(--dim); margin: 0 0 .5rem; }
   /* Motion, under the same contract as the rest of the site. */
   /* screen-scoped: print rendering never scrolls, so a reveal print can see leaves
      every below-fold section as blank paper. */
