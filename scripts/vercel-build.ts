@@ -70,6 +70,13 @@ run('scripts/build-web.ts');
 step('building the registry page');
 run('scripts/build-registry-page.ts');
 
+// The published sample is the real renderer's output. Rebuilding it here is what stops
+// the page a visitor is shown as an example from drifting away from the report they would
+// actually be sent — it was hand-made once and then hand-edited, and nothing would have
+// said so. It refuses rather than writing an unlabelled sample.
+step('building the sample report');
+run('scripts/build-sample-report.ts');
+
 // Below here, nothing builds. Everything refuses.
 step('gate: the site is complete and makes no third-party request');
 run('scripts/check-site.ts');

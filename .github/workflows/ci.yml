@@ -169,6 +169,22 @@ jobs:
       - name: Build the registry page
         run: node scripts/build-registry-page.ts
 
+      # web/sample-report.html is committed, unlike the registry page, because it is what a
+      # visitor is shown as an example of the report they would be sent. It was made by hand
+      # once and then edited by hand, so it could drift from the renderer and nothing would
+      # say so. This rebuilds it and refuses any difference: the published example is the
+      # real artifact or it is not published.
+      - name: The published sample report is the renderer's output
+        run: |
+          node scripts/build-sample-report.ts
+          if ! git diff --quiet -- web/sample-report.html; then
+            echo "web/sample-report.html is not what scripts/build-sample-report.ts produces."
+            echo "Run 'node scripts/build-sample-report.ts' and commit the result — do not"
+            echo "edit that file by hand."
+            git diff --stat -- web/sample-report.html
+            exit 1
+          fi
+
       # The step above proves the results files still reproduce. This one proves the PROSE
       # still matches those files. They are different failures: a re-run that moves a number
       # leaves every document quoting the old one, and nothing caught that until now. The

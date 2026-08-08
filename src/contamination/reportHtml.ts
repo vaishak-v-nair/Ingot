@@ -137,13 +137,15 @@ ${idList(shortIds)}`
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingot — ${esc(report.benchmark)} in ${esc(report.corpus)}</title>
 <style>
-  /* Cleanroom Instrument, as specified in DESIGN.md — the same tokens, radius and colour
-     semantics as the site. This document was left behind by the 2026-08-01 redesign and
-     kept the archived warm-paper-and-gold palette, 14px radii and card surfaces for two
-     releases, which meant the one artifact that actually leaves the building looked
-     nothing like the product that produced it.
+  /* PAPER, the system in web/site.css — same ground, same ink, same one accent, same
+     spacing scale, same 16px radius, same struck highlight. This is the only artifact that
+     leaves the building, and it spent two systems looking like neither of them: it was
+     warm-paper-and-gold while the site was dark graphite, then dark graphite while the
+     site turned to paper. It follows the site now, and the three rules PAPER is built on
+     apply here too — space separates rather than lines, every gap is a step on one scale,
+     and content that needs setting apart sits on a surface rather than inside a fence.
 
-     Two deliberate departures, both forced by this file's older and stronger constraint —
+     Three deliberate departures, all forced by this file's older and stronger constraint —
      it must open correctly from an email attachment, on a machine with no network, years
      from now:
 
@@ -152,61 +154,109 @@ ${idList(shortIds)}`
           into a document whose job is evidence. The stack below keeps the register —
           neo-grotesque UI face, real mono for hashes — without a byte of payload.
        2. No color-mix(). A report read in 2031 by whatever browser is to hand should not
-          depend on a 2023 colour function to render its evidence legibly. */
+          depend on a 2023 colour function to render its evidence legibly. Every value
+          below is a literal.
+       3. Light only, following the site's decision of 2026-08-07. A designed dark inverse
+          is a second document to keep true; an inferred one is a document nobody looked
+          at. The print block below is the one variant that is genuinely different, and it
+          exists because these get printed. */
   *, *::before, *::after { box-sizing: border-box; }
   :root {
-    color-scheme: dark;
-    --ink: #E8EAEC; --paper: #0C0E0F; --dim: #82878C; --line: #2A2E31;
-    --brand: #9BA1A6; --sig: #F59E0B; --ok: #4ADE80; --bad: #F87171;
+    color-scheme: light;
+    --paper: #FBFAF8; --white: #FFFFFF; --ink: #12100E; --dim: #6F6A63;
+    --line: #E7E3DC; --wash: #F3F0EA;
+    --accent: #D4541E; --accent-wash: #FBD9C7; --accent-soft: #FCEFE8;
+    --ok: #1F6B3E; --bad: #B3261E; --bad-soft: #FBEDEC;
+    --s1: .5rem; --s2: 1rem; --s3: 1.5rem; --s4: 2.5rem; --s5: 3.5rem; --s6: 5rem;
+    --r: 16px;
+    --shadow: 0 1px 2px rgba(18,16,14,.04), 0 12px 32px -16px rgba(18,16,14,.16);
     --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
     --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
-  @media (prefers-color-scheme: light) {
-    :root { color-scheme: light;
-            --ink: #16181A; --paper: #F4F5F4; --dim: #5D6165; --line: #D9DBDA;
-            --brand: #43474B; --sig: #B45309; --ok: #15803D; --bad: #B91C1C; }
-  }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
-  .wrap { max-width: 54rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  .brand { font-family: var(--mono); font-size: .74rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); }
-  h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.15; margin: .5rem 0 .3rem;
-       letter-spacing: -.02em; font-weight: 600; }
-  .sub { color: var(--dim); margin: 0 0 2rem; font-size: .95rem; }
-  h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim);
-       margin: 2.4rem 0 .7rem; font-weight: 600; }
-  p { max-width: 62ch; }
-  /* Hairline rules, never a card. An instrument marks a reading; it does not frame it. */
-  .verdict { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.6rem 0; }
-  .verdict.refused { border-color: var(--bad); }
-  .big { font-family: var(--mono); font-size: 2.8rem; line-height: 1; font-weight: 600; }
-  /* Colour is testimony. Green is the only green and means verified-clean; amber means a
-     finding that has to be read; red is refusals and errors only, never a verdict. A count
-     of matches used to render red, which told the reader "error" about a measurement. */
-  .big.clean { color: var(--ok); } .big.dirty { color: var(--sig); } .big.refused { color: var(--bad); }
-  .label { color: var(--dim); font-size: .76rem; text-transform: uppercase; letter-spacing: .1em; margin-top: .45rem; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+         font: 400 17px/1.6 var(--sans); letter-spacing: -.005em; }
+  .wrap { max-width: 58rem; margin: 0 auto; padding: var(--s6) var(--s3); }
+  /* The wordmark carries the product's own gesture — the name is marked the way a match
+     is marked. Same mark as the site's nav, drawn without the site's fonts. */
+  .brand { display: inline-block; font-weight: 700; font-size: 1.35rem; line-height: 1;
+           letter-spacing: -.035em; color: var(--ink);
+           background-image: linear-gradient(var(--accent-wash), var(--accent-wash));
+           background-repeat: no-repeat; background-position: 0 100%;
+           background-size: 100% .3em; padding: 0 .12em .06em; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.08; margin: var(--s3) 0 0;
+       letter-spacing: -.035em; font-weight: 700; max-width: 20ch; }
+  .sub { color: var(--dim); margin: var(--s2) 0 var(--s5); font-size: .95rem; }
+  /* Real headings, not labels. These were .78rem uppercase grey, which made the section
+     that holds the evidence quieter than the evidence's own filenames. */
+  h2 { font-size: 1.3rem; line-height: 1.25; letter-spacing: -.025em; color: var(--ink);
+       margin: var(--s5) 0 var(--s2); font-weight: 700; max-width: 26ch; }
+  p { max-width: 64ch; }
+  /* A surface, not a pair of rules. The verdict is the answer the reader opened the file
+     for: the figure at the left, what it means beside it. */
+  .verdict { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow);
+             padding: var(--s4); display: grid; gap: .3rem var(--s4);
+             grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .verdict .big { grid-row: span 2; align-self: center; }
+  .verdict .label { align-self: end; }
+  .verdict p { margin: 0; max-width: 58ch; }
+  /* The one place a colour fills a surface. A refusal is the machine declining to answer,
+     and it must not be possible to skim past it as though it were a low number. */
+  .verdict.refused { background: var(--bad-soft); }
+  .big { font-family: var(--mono); font-size: clamp(2.6rem, 6vw, 3.6rem); line-height: .95;
+         font-weight: 400; letter-spacing: -.045em; }
+  /* Colour is testimony. Green is the only green and means verified-clean; the accent
+     marks findings that have to be read; red is refusals and errors only, never a verdict.
+     A count of matches used to render red, which told the reader "error" about a
+     measurement. */
+  .big.clean { color: var(--ok); } .big.dirty { color: var(--accent); } .big.refused { color: var(--bad); }
+  .label { color: var(--dim); font-size: .74rem; text-transform: uppercase; letter-spacing: .12em; }
   .scroll { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
-  th, td { text-align: left; padding: .5rem .7rem
-           .5rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 600; white-space: nowrap; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: .8rem 1rem .8rem 0; vertical-align: top; }
+  /* One rule per row, and only between rows — a table is the one thing space cannot
+     divide, because the eye has to track across it. */
+  tr + tr th, tr + tr td { border-top: 1px solid var(--line); }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim);
+       font-weight: 500; white-space: nowrap; }
   td { font-family: var(--mono); word-break: break-word; }
-  .hit { border-left: 2px solid var(--line); padding: .1rem 0 .1rem 1rem; margin: 0 0 1.1rem; }
-  .hit code { font-family: var(--mono); font-size: .76rem; color: var(--dim); }
-  .quote { margin: .45rem 0 0; font-size: .93rem; }
-  /* An underline rather than a fill: --sig is a signal, and DESIGN.md says it is never a
-     fill. It also survives being printed in greyscale, which a highlight does not. */
-  mark { background: transparent; color: inherit; border-bottom: 2px solid var(--sig); }
-  pre { font-family: var(--mono); font-size: .76rem; border-top: 1px solid var(--line);
-        border-bottom: 1px solid var(--line); padding: 1rem 0; overflow-x: auto;
+  .hit { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow);
+         padding: var(--s3); margin: 0 0 var(--s2); }
+  .hit code { font-family: var(--mono); font-size: .74rem; color: var(--dim); letter-spacing: .02em; }
+  .quote { margin: var(--s2) 0 0; font-size: 1rem; line-height: 1.65; }
+  /* The struck highlight, the same gesture the site performs: the matched words marked
+     the way a reader marks them. On paper it becomes an underline instead — see the print
+     block, where a pale wash prints as nothing legible and a rule prints as a rule. */
+  /* background-color: transparent is load-bearing. A <mark> carries a yellow UA background
+     by default, and setting only background-image leaves that yellow showing through the
+     gradient's transparent top 60% — the evidence in every report came out highlighter
+     yellow, which is not this product's colour and is not any colour it chose. */
+  mark { background-color: transparent;
+         background-image: linear-gradient(transparent 60%, var(--accent-wash) 60%);
+         background-repeat: no-repeat; background-size: 100% 100%;
+         color: inherit; padding-bottom: .05em;
+         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  pre { font-family: var(--mono); font-size: .78rem; line-height: 1.6; background: var(--wash);
+        border-radius: var(--r); padding: var(--s3); overflow-x: auto;
         white-space: pre-wrap; word-break: break-word; }
-  .note, .ids { color: var(--dim); font-size: .86rem; }
+  .note, .ids { color: var(--dim); font-size: .88rem; }
   .ids { font-family: var(--mono); word-break: break-word; }
-  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .82rem; }
+  /* Used by web/sample-report.html, which is this renderer's output published as a page.
+     A sample report that is not labelled a sample is a fabricated finding. */
+  .illustration { display: inline-block; font-family: var(--mono); font-size: .68rem;
+                  letter-spacing: .15em; text-transform: uppercase; color: var(--accent);
+                  background: var(--accent-soft); border-radius: 999px;
+                  padding: .4rem .75rem; margin: var(--s3) 0 0; }
+  footer { margin-top: var(--s6); color: var(--dim); font-size: .85rem; }
   @media print {
-    :root { color-scheme: light; --paper: #fff; --ink: #000; --dim: #444; --line: #bbb;
-            --brand: #333; --sig: #8a5200; --ok: #0f5c26; --bad: #8f1515; }
+    :root { --paper: #fff; --white: #fff; --ink: #000; --dim: #444; --line: #bbb;
+            --wash: #f4f4f4; --accent: #8a3410; --ok: #0f5c26; --bad: #8f1515;
+            --bad-soft: #fff; --shadow: none; }
     body { font-size: 11pt; }
-    .hit, .verdict, pre { break-inside: avoid; }
+    .verdict, .hit { border: 1px solid #ccc; box-shadow: none; }
+    .verdict.refused { border-color: #8f1515; border-width: 2px; }
+    /* A 12% wash prints as an indistinguishable grey and takes the evidence with it. */
+    mark { background-image: none; border-bottom: 2px solid #8a3410; }
+    .hit, .verdict, pre, table { break-inside: avoid; }
   }
 </style>
 </head>
@@ -221,7 +271,7 @@ ${idList(shortIds)}`
       ? `<div class="verdict refused">
     <div class="big refused">refused</div>
     <div class="label">this corpus was not scanned</div>
-    <p style="margin:.9rem 0 0">${
+    <p>${
       (report.load?.totalLines ?? 0) === 0
         ? 'The file is empty — there were no lines to read.'
         : `None of its ${num(report.load?.totalLines ?? 0)} line(s) could be read as a JSONL record
@@ -231,7 +281,7 @@ ${idList(shortIds)}`
       : `<div class="verdict">
     <div class="big ${clean ? 'clean' : 'dirty'}">${num(exact.itemsHit)}</div>
     <div class="label">of ${num(exact.itemsTotal)} ${esc(nounFor(exact.itemsTotal))} appear in this corpus</div>
-    <p style="margin:.9rem 0 0">${
+    <p>${
       clean
         ? 'No verbatim overlap was found. That is a result rather than the absence of one: every item that could be checked was checked, and the ones that could not are named below.'
         : 'Read the matches below before concluding anything. Canonical text with one natural phrasing looks identical to leakage in any count, and only the words tell you which this is.'

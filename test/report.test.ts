@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { NgramIndex } from '../src/contamination/ngramIndex.ts';
@@ -37,29 +37,52 @@ async function reportWith(options: { itemNoun?: { one: string; many: string }; h
   return scanCorpus(index, corpus);
 }
 
-test('the delivered report obeys the design system', async () => {
-  // DESIGN.md: radius 0, no cards, hairline rules, and the palette adopted 2026-08-01.
-  // This document kept the archived warm-paper-and-gold look for two releases after the
-  // site left it behind, which meant the artifact and the product that made it did not
-  // look related.
+test('the delivered report wears the same palette as the site', async () => {
+  // The defect this exists to prevent has now happened twice. The report was
+  // warm-paper-and-gold while the site was graphite, and then graphite while the site
+  // turned to paper — each time for releases, and each time the one artifact that leaves
+  // the building looked unrelated to the product that made it.
+  //
+  // Asserting literal hex values is what let it happen twice: they were right on the day
+  // they were written and nothing tied them to anything. This reads web/site.css and
+  // requires the report to name the same values, so the next redesign of the site fails
+  // this test until the report follows it.
+  const site = readFileSync(new URL('../web/site.css', import.meta.url), 'utf8');
   const html = renderContaminationReport(await reportWith({ hit: true }));
 
-  assert.equal(/border-radius/.test(html), false, 'radius is 0: an instrument has machined edges');
-  assert.match(html, /#0C0E0F/, 'current ground colour');
-  assert.equal(/#fbfaf7|#9a6a00|#16150f/i.test(html), false, 'archived palette must be gone');
+  for (const name of ['paper', 'ink', 'dim', 'line', 'wash', 'accent', 'accent-wash', 'ok', 'bad']) {
+    const declared = site.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1];
+    assert.ok(declared, `web/site.css declares --${name}`);
+    assert.match(
+      html,
+      new RegExp(`--${name}:\\s*${declared}`, 'i'),
+      `the report's --${name} is the site's ${declared}`,
+    );
+  }
+  // Both retired systems, by their most distinctive values: Cleanroom's graphite ground
+  // and the forensic-editorial paper and gold that preceded it.
+  assert.equal(/#0C0E0F|#fbfaf7|#9a6a00|#16150f/i.test(html), false, 'no retired palette');
   assert.equal(/color-mix/.test(html.replace(/\/\*[\s\S]*?\*\//g, '')), false, 'no color-mix outside comments');
 });
 
-test('colour is testimony: findings are amber, red is only for refusals', async () => {
-  // DESIGN.md 2026-08-01: "Green only for verified-clean; amber for findings; red only for
-  // refusals." A count of matches is a measurement, and rendering it red told the reader
-  // "error" about a number that is the entire point of the scan.
+test('colour is testimony: findings take the accent, red is only for refusals', async () => {
+  // Green only for verified-clean; the accent for findings that have to be read; red only
+  // for refusals. A count of matches is a measurement, and rendering it red told the
+  // reader "error" about the number that is the entire point of the scan.
   const html = renderContaminationReport(await reportWith({ hit: true }));
-  assert.match(html, /\.big\.dirty \{ color: var\(--sig\)/);
+  assert.match(html, /\.big\.dirty \{ color: var\(--accent\)/);
   assert.match(html, /\.big\.refused \{ color: var\(--bad\)/);
   assert.match(html, /\.big\.clean \{ color: var\(--ok\)/);
-  // --sig is a signal and never a fill, so the evidence mark is an underline.
-  assert.match(html, /mark \{ background: transparent/);
+  // The site's struck highlight, and the same gesture on the same words. The explicit
+  // background-color is not redundant: <mark> ships a yellow UA background, and a rule that
+  // sets only background-image leaves that yellow showing through the gradient's
+  // transparent top — which is how every match in every report came out highlighter yellow
+  // the first time this was repapered.
+  assert.match(html, /mark \{ background-color: transparent;/);
+  assert.match(html, /background-image: linear-gradient\(transparent 60%, var\(--accent-wash\) 60%\)/);
+  // On paper it becomes a rule: a 12% wash prints as an indistinguishable grey and takes
+  // the evidence with it, which is the one thing this document may not lose.
+  assert.match(html, /mark \{ background-image: none; border-bottom: 2px solid/);
 });
 
 test('the report makes no external request', async () => {
