@@ -42,18 +42,15 @@
   .expect dd { margin: 0; }
   /* ---------- the scanner ---------- */
   .scan-head { max-width: 58ch; margin-bottom: var(--s4); }
-  .scan-head h3 { font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -.025em;
-                  margin: .55rem 0 0; }
-  /* stretch, not start: the receipt is naturally taller than the controls, and aligned to
-     the top it left two hundred pixels of nothing under the instrument. The panel grows to
-     meet it and the dropzone takes the slack. */
+  .scan-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -.025em;
+                  margin: .55rem 0 0; max-width: 26ch; }
+  /* start, not stretch — the same rule as every other grid on this site. Stretching the
+     panel to the receipt's height only moved the hole: first into a 400px dashed dropzone,
+     then into 150px of blank white above the readout. The panel is as tall as the
+     instrument is; the receipt beside it is as tall as the receipt is. */
   .scan-grid { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 1fr);
-               align-items: stretch; }
-  .tool { display: flex; flex-direction: column; }
-  /* The readout sits at the foot of the instrument, so the height the panel inherits from
-     the receipt beside it is spent on the reading rather than on an empty dashed box —
-     which is what growing the dropzone into it produced. */
-  #status { margin-top: auto; padding-top: var(--s3); }
+               align-items: start; }
+  #status { padding-top: var(--s3); }
   /* The rail needs a real margin to be a margin. Below this it is hidden, and nothing is
      lost: every figure in it also appears in the body of the page. */
   .rail { display: none; }
@@ -82,10 +79,10 @@
   #out { margin-top: var(--s5); }
   #out:empty { margin-top: 0; }
   #out > .wrap { width: 100%; }
-  #out h2 { font-family: var(--display); font-weight: 600; letter-spacing: -.028em;
+  #out h3 { font-family: var(--display); font-weight: 600; letter-spacing: -.028em;
             font-size: clamp(1.35rem, 2.6vw, 1.85rem); line-height: 1.15; max-width: 26ch;
             margin: var(--s5) 0 var(--s2); }
-  #out h2:first-child { margin-top: 0; }
+  #out h3:first-child { margin-top: 0; }
   #out p { max-width: 62ch; color: var(--dim); }
   #out p.note { font-size: .86rem; }
   #out .verdict { margin: 0 0 var(--s4); }
@@ -126,6 +123,11 @@
   #out .verdict .big { grid-row: span 2; align-self: center; }
   #out .verdict .label { margin: 0; align-self: end; }
   #out .verdict p { margin: 0; max-width: 58ch; }
+  /* The download row spans both tracks, under the answer it belongs to. Space divides it
+     from the verdict above — there is no rule here, the same as everywhere else. */
+  #out .verdict-take { grid-column: 1 / -1; margin-top: var(--s3); }
+  #out .verdict-take .btns { margin: 0; }
+  #out .verdict-take p { margin: var(--s2) 0 0; font-size: .86rem; max-width: 52ch; }
   @media (max-width: 40rem) {
     #out .verdict { grid-template-columns: minmax(0, 1fr); }
     #out .verdict .big { grid-row: auto; }
@@ -172,7 +174,7 @@
   /* The assay strip. Four ruled cells, no box: the rules do the dividing, the way columns
      are divided in a printed record rather than fenced into cards. Rule above is 2px ink so
      the strip reads as a stamped header and not another table. */
-  .assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  .assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
            
            margin: 0 0 1.6rem; gap: 0; }
   .assay > div { padding: 1.05rem 1.2rem 1rem 0; }
@@ -191,7 +193,11 @@
   /* letter-spacing:0 and weight 400, not 640: the -.02em and the heavy weight were tuned
      for a grotesque. Instrument Serif is narrow and has no 640, so a synthetic bold was
      being drawn and then tightened on top of it. */
-  section h3 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0; margin: .6rem 0 .5rem; font-weight: 400; }
+  /* Every top-level section of this page is an h2, the same rank as the film — they were
+     h3 under an h1 with a single h2 between them, which is an outline a screen reader
+     announces as a nesting that does not exist. The scale is unchanged; only the level is. */
+  section h2 { font-size: clamp(1.35rem, 3.2vw, 1.95rem); letter-spacing: 0;
+               margin: .6rem 0 .5rem; font-weight: 400; max-width: 30ch; }
   /* The single permitted break in the section metronome — see the comment at its only use.
      Sized between a section heading (1.95rem ceiling) and the page title (3.4rem), so it
      reads as the loudest sentence on the page without competing with the title. Hairline
@@ -204,12 +210,17 @@
      row is the single most recognisable generated-page layout there is, and these three
      were the page's clearest example of it. The rules do the dividing; the boxes were only
      ever decoration around content that already had structure. */
+  /* 24rem, so four facts land as 2 x 2 rather than 3 + 1. Three tracks of a four-item grid
+     leaves an orphan on its own row, which reads as a card somebody forgot to fill. */
   .cards { display: grid; gap: var(--s3); margin-top: var(--s4); border: 0;
-           grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
-  .card { padding: var(--s3); }
+           grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+           align-items: start; }
+  .card { padding: var(--s3) var(--s3) var(--s4); }
   .card + .card { border: 0; padding-left: var(--s3); }
-  .card b { display: block; font-family: var(--mono); font-size: 1.6rem; letter-spacing: -.03em; line-height: 1.1; }
-  .card span { display: block; margin-top: .55rem; font-size: .85rem; color: var(--dim); line-height: 1.5; }
+  .card b { display: block; font-family: var(--mono); font-size: 1.5rem; letter-spacing: -.03em;
+            line-height: 1; }
+  .card span { display: block; margin-top: var(--s2); font-size: .92rem; color: var(--dim);
+               line-height: 1.55; max-width: 46ch; }
   /* The refusals as a numbered record. Four uniform bordered boxes were the one generic
      moment left on the page; DESIGN.md had them flagged as an open item since the type
      landed. The ember now lives in the numeral, so the eye finds each entry without a
@@ -261,7 +272,7 @@
      page, see all of it. */
   .rail { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow-sm);
           padding: var(--s3); }
-  .rail h4 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
+  .rail h3 { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em;
              text-transform: uppercase; color: var(--gold); font-weight: 400; margin: 0 0 .9rem; }
   /* A ledger: label left, figure right, so the numbers form a column the eye can run down
      without reading the labels again. */
@@ -430,6 +441,50 @@
 </section>
 </div>
 
+<!-- The film is the second thing on the page, not the seventh. It was moved below the
+     scanner because a black plate is the wrong thing to meet before the working
+     instrument — but mounted in a band it reads as a screen rather than as a hole, and
+     buried under five thousand pixels of record it was a film nobody found. A visitor who
+     wants thirty-seven seconds before touching anything now gets them. -->
+<section class="film band">
+  <div class="wrap reveal">
+    <span class="kicker">Watch</span>
+    <h2>Thirty-seven seconds on what this is.</h2>
+    <p class="sub">Voiced, and nothing plays or downloads until you press play &mdash; the
+    network panel stays empty on load, which is the whole claim this site makes.</p>
+    <!-- Captions and a transcript, both. A product whose entire argument is "we show you
+         the words" cannot ship thirty-seven seconds of speech with no words. The track is
+         timed from the composition's own frame starts; the transcript below needs no
+         timing and serves the larger group — people who would rather read this than
+         watch it, and anyone whose autoplay-blocked, muted, or metered connection makes
+         the video the wrong way to get the argument. -->
+    <figure class="guide-film">
+      <video controls preload="none" playsinline
+             poster="media/intro-poster.jpg" width="1920" height="1080">
+        <source src="media/ingot-intro.mp4" type="video/mp4">
+        <track kind="captions" src="media/ingot-intro.vtt" srclang="en"
+               label="English" default>
+      </video>
+      <figcaption>Ingot &middot; 0:37 &middot; captions on by default</figcaption>
+    </figure>
+    <details class="more transcript">
+      <summary>Read it instead — the full transcript</summary>
+      <p class="sub">What&rsquo;s inside AI training data? Your words? A benchmark&rsquo;s
+      exam questions?</p>
+      <p class="sub">Until now, every answer was a score. A percentage. Trust us.</p>
+      <p class="sub">Ingot answers differently. It shows you the words.</p>
+      <p class="sub">Drop a training corpus. The scan runs — and every overlap is shown
+      word for word. Like this exam question, found inside twenty-one gigabytes of web
+      text.</p>
+      <p class="sub">And what leaves your machine? Zero bytes. Not a policy — your browser
+      enforces it.</p>
+      <p class="sub">Nine million documents scanned. Every published number gated in CI —
+      and every report ends with a receipt anyone can re-run.</p>
+      <p class="sub">Ask it yourself — in your browser, or one command.</p>
+    </details>
+  </div>
+</section>
+
 <div class="page">
 <main class="col">
 
@@ -443,7 +498,7 @@
   <div class="wrap">
     <div class="scan-head reveal">
       <p class="kicker">Proof</p>
-      <h3>The scanner is running on this page right now</h3>
+      <h2>The scanner is running on this page right now</h2>
       <p class="sub">It read a corpus in this tab, on your CPU, and nothing left the machine.
       The same engine runs your check. <strong>Evaluating a model instead?</strong> Drop your
       own training data below — any size, it streams.</p>
@@ -483,7 +538,7 @@
            unorganised more than any single element on it. -->
       <aside class="rail" id="rail" aria-label="Receipt">
         <div id="rail-live"></div>
-        <h4>Registry &middot; C4</h4>
+        <h3>Registry &middot; C4</h3>
         <dl>
           <dt>corpus</dt><dd>c4-en, 26 shards</dd>
           <dt>size</dt><dd>21.33 GB</dd>
@@ -493,7 +548,7 @@
           <dt>scanner</dt><dd>ingot-0.1.0</dd>
           <dt class="wide">corpus hash</dt><dd class="hash">c046ce3c890918b4d68094c438c05321</dd>
         </dl>
-        <h4>Flagged</h4>
+        <h3>Flagged</h3>
         <dl>
           <dt>mmlu</dt><dd>342 / 14042</dd>
           <dt>humaneval</dt><dd>6 / 164</dd>
@@ -518,7 +573,7 @@
 <section id="plain">
   <div class="wrap">
     <div class="kicker">What is this?</div>
-    <h3>One mountain of text, two questions</h3>
+    <h2>One mountain of text, two questions</h2>
     <p class="sub">An AI learns from a mountain of text scraped from the web — its
     <em>training data</em>. Two questions follow. Did <em>your</em> words end up in the
     mountain? And were the exam questions the AI is graded on — its <em>benchmarks</em> —
@@ -555,30 +610,10 @@
   </div>
 </section>
 
-<!-- The film sits here, after the instrument and its plain-words decode, because a black
-     video plate is the wrong thing to meet before you have met the working scanner. It is
-     a band rather than a section: the ground changes, so the page has one place where you
-     stop reading and watch. -->
-<section class="film band">
-  <div class="wrap reveal">
-    <span class="kicker">Watch</span>
-    <h2>Thirty-seven seconds on what this is.</h2>
-    <p class="sub">Voiced, and nothing plays or downloads until you press play &mdash; the
-    network panel stays empty on load, which is the whole claim this site makes.</p>
-    <figure class="guide-film">
-      <video controls preload="none" playsinline
-             poster="media/intro-poster.jpg" width="1920" height="1080">
-        <source src="media/ingot-intro.mp4" type="video/mp4">
-      </video>
-      <figcaption>Ingot &middot; 0:37 &middot; sound on</figcaption>
-    </figure>
-  </div>
-</section>
-
 <section id="trust">
   <div class="wrap">
     <div class="kicker">Why the answer is trustworthy</div>
-    <h3>Your corpus never leaves the machine</h3>
+    <h2>Your corpus never leaves the machine</h2>
     <p class="sub">Not a policy — an architecture. There is no upload path: your file is read,
     hashed and scanned inside this tab. Open the network panel and watch it stay empty.</p>
     <div class="cards">
@@ -596,7 +631,7 @@
 <section id="method">
   <div class="wrap">
     <div class="kicker">Method</div>
-    <h3>Index the benchmark, stream the corpus once</h3>
+    <h2>Index the benchmark, stream the corpus once</h2>
     <p class="sub">Ingot memorises the exam — every ten-word run it contains — then reads your
     file once, checking each ten-word run that streams past. One pass, no matter how many
     questions. lm-evaluation-harness indexes the corpus instead, and reports nine days on
@@ -614,7 +649,7 @@
       number is still the right one for judging optimisation; it was the wrong one to put here.</p>
     </details>
 
-    <h3 style="margin-top:2.5rem">The field's 13-gram default is wrong</h3>
+    <h2 style="margin-top:2.5rem">The field's 13-gram default is wrong</h2>
     <p class="sub">How many identical words in a row should count as a match? Everyone uses 13,
     because GPT-3 did in 2020 — and we could find no re-derivation since. So we ran 8 through 13
     over a 1,000-item benchmark with 300 planted copies:</p>
@@ -649,7 +684,7 @@
 <section id="findings">
   <div class="wrap">
     <div class="kicker">The registry</div>
-    <h3>Three benchmarks against 21 GB of C4</h3>
+    <h2>Three benchmarks against 21 GB of C4</h2>
     <p class="sub">We ran the scanner ourselves: three public exams against C4, a public snapshot
     of web text. Every shard's URL and SHA-256 is published, so every number reproduces.</p>
     <!-- The provenance of a result, stated before the result. An ingot is a bar of metal
@@ -723,7 +758,7 @@
 <section>
   <div class="wrap">
     <div class="kicker">Discipline</div>
-    <h3>What Ingot refuses to do</h3>
+    <h2>What Ingot refuses to do</h2>
     <p class="sub">Each of these was a defect first — caught by reading the output instead of
     trusting it, or by running the tool the way a stranger would.
     All 20 are written up in <code>docs/measurements.md</code>.</p>
@@ -770,7 +805,7 @@
       TypeScript directly.</p>
     </div>
     <div>
-      <h5>Pages</h5>
+      <h2>Pages</h2>
       <ul>
         <li><a href="registry.html">Registry — every published run</a></li>
         <li><a href="for-eval-teams.html">For eval teams</a></li>
@@ -780,7 +815,7 @@
       </ul>
     </div>
     <div>
-      <h5>Provenance</h5>
+      <h2>Provenance</h2>
       <p>Every number on this page comes from <code>results/</code> and reproduces with
       <code>node scripts/contamination-validate.ts</code>,
       <code>node scripts/pretraining-scan.ts</code> and
@@ -1175,7 +1210,7 @@ const railLive = $('rail-live');
 
 function railScanning(file, docs, tokens, bytes) {
   railLive.innerHTML = `
-    <h4>Scanning</h4>
+    <h3>Scanning</h3>
     <dl class="ticking">
       <dt>file</dt><dd>${esc(file.name)}</dd>
       <dt>read</dt><dd>${(bytes / 1e6).toFixed(0)} / ${(file.size / 1e6).toFixed(0)} MB</dd>
@@ -1189,7 +1224,7 @@ function railResult(report, file) {
   const exact = report.tiers.find((t) => t.tier === 'exact');
   const r = report.receipt;
   railLive.innerHTML = `
-    <h4>Your scan</h4>
+    <h3>Your scan</h3>
     <dl>
       <dt>file</dt><dd>${esc(file.name)}</dd>
       <dt>benchmark</dt><dd>${esc(report.benchmark)}</dd>
@@ -1379,14 +1414,27 @@ function render(report, file, isSample) {
     <div class="verdict">
       <div class="big ${clean ? 'clean' : 'dirty'}">${hitCount}</div>
       <div class="label">${clean ? 'benchmark items found in your data' : `of ${exact.itemsTotal.toLocaleString()} benchmark items appear in your data`}</div>
-      <p style="margin:.9rem 0 0">${
+      <p>${
         clean
           ? 'No verbatim overlap found. That is a real result, not an absence of one: every item that could be checked was checked.'
           : 'Read the matches below before concluding anything. Some overlaps are canonical facts with one natural phrasing rather than leakage.'
       }</p>
+      <!-- The artifact travels with the verdict. It used to be its own section three
+           screens below, past the whole record, which meant the one thing a reader can
+           actually keep was the last thing they could reach. A scan that only exists in
+           this tab is not evidence, so the file that fixes that is offered at the moment
+           there is a result to put in it. -->
+      <div class="verdict-take">
+        <div class="btns">
+          <button class="btn primary" id="dl-html" type="button">Download report (HTML)</button>
+          <button class="btn" id="dl-json" type="button">Download data (JSON)</button>
+        </div>
+        <p class="muted">Both are built here, on your machine, from the result below. The
+        HTML one is self-contained and opens with no network at all.</p>
+      </div>
     </div>
 
-    <h2>What was checked</h2>
+    <h3>What was checked</h3>
     <div class="scroll"><table>
       <tr><th>benchmark</th><td class="num">${esc(report.benchmark)}, ${exact.itemsTotal.toLocaleString()} items at n=${report.n}</td></tr>
       <tr><th>your file</th><td class="num">${esc(file.name)} · ${report.corpusDocs.toLocaleString()} docs</td></tr>
@@ -1397,7 +1445,7 @@ function render(report, file, isSample) {
     </table></div>`;
 
   if (exact.hits.length > 0) {
-    html += `<h2>Evidence — judge it yourself</h2>`;
+    html += `<h3>Evidence — judge it yourself</h3>`;
     // The first match is rendered as the specimen, at display scale, because the passage is
     // the product. The rest follow as a compact record: forty matches at display scale is
     // not evidence, it is a scroll.
@@ -1449,23 +1497,14 @@ function render(report, file, isSample) {
   }
 
   if (uncheckable > 0) {
-    html += `<h2>Not checked</h2><p class="muted">${uncheckable} benchmark item${uncheckable === 1 ? ' is' : 's are'}
+    html += `<h3>Not checked</h3><p class="muted">${uncheckable} benchmark item${uncheckable === 1 ? ' is' : 's are'}
       shorter than ${report.n} tokens, so nothing could ever match ${uncheckable === 1 ? 'it' : 'them'}.
       A clean result that stayed silent about that would be hiding the part of the benchmark nobody looked at.</p>`;
   }
 
   const r = report.receipt;
   html += `
-    <h2>Take it with you</h2>
-    <p class="muted">A scan that only exists in this tab is not evidence. Both files are built
-    here, on your machine, from the result you are looking at — the HTML one is self-contained
-    and opens with no network at all.</p>
-    <div class="btns" style="justify-content:flex-start">
-      <button class="btn primary" id="dl-html" type="button">Download report (HTML)</button>
-      <button class="btn" id="dl-json" type="button">Download data (JSON)</button>
-    </div>
-
-    <h2>Receipt — reproduce this without asking us</h2>
+    <h3>Receipt — reproduce this without asking us</h3>
     <p class="muted">Everything needed to re-derive this exact result on your own machine. The
     corpus hash is computed the same way on the command line, so the two reports name the
     same bytes.</p>

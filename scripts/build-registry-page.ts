@@ -143,7 +143,7 @@ const hitBlock = (s: Sample, corpusDocs?: number): string => `    <div class="hi
 
 const evidence = registry.results
   .filter((r) => r.n === DEFAULT_N && r.samples.length > 0)
-  .map((r) => `    <h4>${esc(r.benchmark)} in ${esc(r.corpus)}</h4>\n${r.samples.map((s) => hitBlock(s)).join('\n')}`)
+  .map((r) => `    <h3 class="ev">${esc(r.benchmark)} in ${esc(r.corpus)}</h3>\n${r.samples.map((s) => hitBlock(s)).join('\n')}`)
   .join('\n');
 
 const cross = (registry.crossCorpus ?? [])
@@ -194,7 +194,7 @@ const ptEvidence = ptRows
     const cap = r.benchmark === 'mmlu' ? 6 : r.benchmark === 'humaneval' ? 4 : r.samples.length;
     const shown = curate(r.samples, cap);
     const held = `${r.totalMatches} matches, ${r.samples.length} retained under the evidence cap, ${shown.length} shown — the full retained set is in results/pretraining-c4.json`;
-    return `    <h4>${esc(r.benchmark)} — ${esc(held)}</h4>\n${shown.map((s) => hitBlock(s, ptDocs)).join('\n')}`;
+    return `    <h3 class="ev">${esc(r.benchmark)} — ${esc(held)}</h3>\n${shown.map((s) => hitBlock(s, ptDocs)).join('\n')}`;
   })
   .join('\n');
 
@@ -426,7 +426,7 @@ const html = `<!doctype html>
   section { padding: 2.5rem 0;  }
   h2 { font-family: var(--display); font-weight: 600;
        font-size: clamp(1.2rem, 3vw, 1.6rem); margin: 0 0 .5rem; letter-spacing: -.01em; }
-  h4 { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+  h3.ev { font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
        color: var(--dim); margin: 1.6rem 0 .6rem; font-weight: 600; }
   p { color: var(--dim); max-width: 60ch; }
   p.plain { color: var(--ink); }
@@ -438,7 +438,7 @@ const html = `<!doctype html>
   /* The corpus facts, stamped before the results — the same assay strip the front page
      uses. A reader judging a claim should see what it was measured on without parsing a
      paragraph. */
-  dl.assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  dl.assay { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
              gap: .9rem 1.4rem; margin: 1.2rem 0 1.4rem; padding: .9rem 0;
               }
   dl.assay div { display: grid; gap: .15rem; align-content: start; }
@@ -604,7 +604,7 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
       <p>${esc(registry.scanner)} &middot; Apache-2.0</p>
     </div>
     <div>
-      <h5>Pages</h5>
+      <h2>Pages</h2>
       <ul>
         <li><a href="index.html">The scanner</a></li>
         <li><a href="for-eval-teams.html">For eval teams</a></li>
@@ -613,7 +613,7 @@ ${cross ? `    <p>Independence across corpora is the stronger signal, and it sha
       </ul>
     </div>
     <div>
-      <h5>Provenance</h5>
+      <h2>Provenance</h2>
       <p>Generated from results/registry.json${pretrain ? ', results/pretraining-c4.json' : ''}${canon ? ', results/canonicality.json' : ''}${sft ? ', results/sft-slimorca.json and its triage and train-check companions' : ''}.</p>
       <p>Do not edit this page by hand — rebuild it with
       <code>node scripts/build-registry-page.ts</code>.</p>

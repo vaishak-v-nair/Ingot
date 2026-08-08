@@ -10,6 +10,8 @@ const TYPES: Record<string, string> = {
   '.jsonl': 'application/x-ndjson',
   '.woff2': 'font/woff2',
   '.jpg': 'image/jpeg',
+  '.mp4': 'video/mp4',
+  '.vtt': 'text/vtt',
   '.gz': 'application/octet-stream',
 };
 

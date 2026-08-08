@@ -1,0 +1,49 @@
+WEBVTT
+
+NOTE
+Captions for media/ingot-intro.mp4.
+
+The text is video/ingot-intro/SCRIPT.md verbatim. The timings are the composition's own
+frame starts from video/ingot-intro/index.html (data-start), which are the cumulative
+voice-clip durations in video/ingot-intro/audio_meta.json — not the planned budget in
+SCRIPT.md, which runs to 51s against a finished cut of 37.47s. Two long lines are split
+inside their own frame, proportionally by character count, so no cue crosses a frame
+boundary or outlives its audio.
+
+Written by hand once. If the film is ever recut, this file is wrong and the transcript
+under the player is wrong with it — both come from the same script, so check both.
+
+00:00:00.000 --> 00:00:04.928
+What's inside AI training data?
+Your words? A benchmark's exam questions?
+
+00:00:04.928 --> 00:00:08.533
+Until now, every answer was a score.
+A percentage. Trust us.
+
+00:00:08.533 --> 00:00:11.221
+Ingot answers differently.
+It shows you the words.
+
+00:00:11.221 --> 00:00:16.119
+Drop a training corpus. The scan runs —
+and every overlap is shown word for word.
+
+00:00:16.119 --> 00:00:20.352
+Like this exam question, found inside
+twenty-one gigabytes of web text.
+
+00:00:20.352 --> 00:00:24.981
+And what leaves your machine? Zero bytes.
+Not a policy — your browser enforces it.
+
+00:00:24.981 --> 00:00:26.932
+Nine million documents scanned.
+
+00:00:26.932 --> 00:00:32.661
+Every published number gated in CI — and every
+report ends with a receipt anyone can re-run.
+
+00:00:32.661 --> 00:00:35.306
+Ask it yourself — in your browser,
+or one command.

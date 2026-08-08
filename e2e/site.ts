@@ -26,6 +26,10 @@ export async function assembleSite(): Promise<{ dir: string; planted: string }> 
   cpSync('web/fonts', join(dir, 'fonts'), { recursive: true });
   mkdirSync(join(dir, 'media'), { recursive: true });
   cpSync('web/media/intro-poster.jpg', join(dir, 'media', 'intro-poster.jpg'));
+  // The captions, but not the 4 MB film: <track> is fetched on load even with
+  // preload="none", so leaving it out here made every scenario fail on a 404 that the
+  // real site does not have. The mp4 itself is only fetched on play, which no test does.
+  cpSync('web/media/ingot-intro.vtt', join(dir, 'media', 'ingot-intro.vtt'));
 
   const items = Array.from({ length: 20 }, (_, i) => ({ id: `e2e-${i}`, text: words(40, 90000 + i) }));
   const index = NgramIndex.build('e2e', items, { n: 10 });

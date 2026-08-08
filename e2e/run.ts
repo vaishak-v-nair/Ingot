@@ -72,7 +72,7 @@ check('S1 network stays on this machine', offsite.length === 0, offsite.join(' '
 await sleep(1300); // count-up (650ms) settles before the number is read
 check('S1 exactly one item flagged', (await browser.eval<string>(`document.querySelector('#out .big')?.textContent`)) === '1');
 check('S1 specimen rendered', await browser.eval<boolean>(`!!document.querySelector('#out .hit--lead mark')`));
-check('S1 rail becomes the receipt', (await browser.eval<string>(`document.querySelector('#rail-live h4')?.textContent`)) === 'Your scan');
+check('S1 rail becomes the receipt', (await browser.eval<string>(`document.querySelector('#rail-live h3')?.textContent`)) === 'Your scan');
 const s1Hash = await browser.eval<string>(`document.querySelector('#rail-live dd.hash')?.textContent ?? ''`);
 check('S1 rail carries a corpus hash', s1Hash.length === 32, s1Hash);
 check(

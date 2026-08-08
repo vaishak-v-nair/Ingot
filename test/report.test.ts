@@ -50,7 +50,7 @@ test('the delivered report wears the same palette as the site', async () => {
   const site = readFileSync(new URL('../web/site.css', import.meta.url), 'utf8');
   const html = renderContaminationReport(await reportWith({ hit: true }));
 
-  for (const name of ['paper', 'ink', 'dim', 'line', 'wash', 'accent', 'accent-wash', 'ok', 'bad']) {
+  for (const name of ['paper', 'ink', 'dim', 'line', 'wash', 'accent', 'accent-ink', 'accent-wash', 'ok', 'bad']) {
     const declared = site.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1];
     assert.ok(declared, `web/site.css declares --${name}`);
     assert.match(

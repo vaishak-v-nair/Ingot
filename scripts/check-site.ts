@@ -50,6 +50,9 @@ const REQUIRED = [
   'web/og.png',
   'web/media/ingot-intro.mp4',
   'web/media/intro-poster.jpg',
+  // Named here so the captions cannot silently go missing. A <track> whose file 404s
+  // fails open — the video plays with no captions and nothing says so.
+  'web/media/ingot-intro.vtt',
 ];
 
 process.stdout.write('\n  checking the built site\n\n');

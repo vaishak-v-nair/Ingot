@@ -39,6 +39,14 @@
   --line:#E7E3DC;       /* rare, and never structural */
   --wash:#F3F0EA;       /* a tint, for bands that need to recede */
   --accent:#D4541E;     /* evidence and action. Nothing else. */
+  /* The same accent, darkened until it is legible as text.
+     #D4541E is 3.96:1 on paper and 4.13:1 on white — it clears WCAG AA for LARGE type and
+     fails it for everything else, and it was being used at .7rem on the ILLUSTRATION tag,
+     on "32 words, verbatim", on the numbered refusals and on white-on-accent badges. This
+     one is 5.20:1 on paper, 5.42:1 on white and 4.81:1 on --accent-soft.
+     Rule: --accent for fills, borders, rings and display-size numerals; --accent-ink for
+     any accent-coloured TEXT below 24px, and for any surface with small text on it. */
+  --accent-ink:#B84413;
   --accent-soft:#FCEFE8;
   --accent-wash:#FBD9C7;
   --ok:#1F6B3E;
@@ -238,7 +246,7 @@ progress::-moz-progress-bar { background:var(--accent); }
 
 /* ── evidence ──────────────────────────────────────────────────────────────────────── */
 .tag, .illus { display:inline-block; font-family:var(--mono); font-size:.7rem;
-               letter-spacing:.15em; text-transform:uppercase; color:var(--accent);
+               letter-spacing:.15em; text-transform:uppercase; color:var(--accent-ink);
                background:var(--accent-soft); padding:.4rem .75rem;
                border:0; border-radius:var(--r-pill); }
 .specimen, .quote { font-size:clamp(1.15rem, 2vw, 1.5rem); line-height:1.55; max-width:56ch;
@@ -256,7 +264,7 @@ mark, .specimen mark, .quote em {
 .found, .meta { margin-top:var(--s3); font-family:var(--mono); font-size:.78rem;
                 color:var(--dim); border:0; padding:0;
                 display:flex; flex-wrap:wrap; gap:var(--s1) var(--s3); }
-.found b, .meta b { color:var(--accent); font-weight:400; }
+.found b, .meta b { color:var(--accent-ink); font-weight:400; }
 
 /* ── the assurance line ────────────────────────────────────────────────────────────── */
 .assurance, .promise, .stamp {
@@ -269,13 +277,19 @@ mark, .specimen mark, .quote em {
 
 /* ── grids: separated by space, never by rules ─────────────────────────────────────── */
 /* 18rem, not 15: at 15 a 72rem shell fits four tracks, and four tracks of a hundred and
-   fifty words each is a column of single words. Three is the most this measure holds. */
+   fifty words each is a column of single words. Three is the most this measure holds.
+   align-items:start is the important one. A grid row stretches every cell to the tallest,
+   so a five-line card beside a fifteen-line card was a surface with four hundred and fifty
+   pixels of nothing inside it — the biggest single hole on the site, and on the page whose
+   whole job is to be read carefully. Height follows content now. A ragged bottom edge of a
+   line or two reads as text; a hole never reads as anything but a mistake. */
 .steps, .flow, .facts, .grid, .statgrid {
   display:grid; gap:var(--s3); margin-top:var(--s4);
-  grid-template-columns:repeat(auto-fit, minmax(18rem, 1fr));
+  grid-template-columns:repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  align-items:start;
   border:0;
 }
-.statgrid { grid-template-columns:repeat(auto-fit, minmax(11rem, 1fr)); }
+.statgrid { grid-template-columns:repeat(auto-fit, minmax(min(11rem, 100%), 1fr)); }
 .step, .fact { padding:0; border:0; }
 .step + .step, .fact + .fact { border:0; padding-left:0; }
 /* The step numeral is the only .num that is coloured. Every figure in every table also
@@ -373,7 +387,7 @@ footer { padding:var(--s7) 0 var(--s5); color:var(--dim); font-size:.9rem; borde
 footer .wrap { display:grid; gap:var(--s4) var(--s5); align-items:start;
                grid-template-columns:minmax(0,1fr); }
 @media (min-width: 52rem) { footer .wrap { grid-template-columns:1.2fr 1fr 1fr; } }
-footer h5 { font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; font-weight:400;
+footer h2 { font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; font-weight:400;
             text-transform:uppercase; color:var(--dim); margin:0 0 var(--s2); }
 footer p { margin:0 0 var(--s1); line-height:1.6; }
 footer a { color:var(--dim); text-decoration:underline; text-underline-offset:3px;

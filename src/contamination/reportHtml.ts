@@ -165,7 +165,7 @@ ${idList(shortIds)}`
     color-scheme: light;
     --paper: #FBFAF8; --white: #FFFFFF; --ink: #12100E; --dim: #6F6A63;
     --line: #E7E3DC; --wash: #F3F0EA;
-    --accent: #D4541E; --accent-wash: #FBD9C7; --accent-soft: #FCEFE8;
+    --accent: #D4541E; --accent-ink: #B84413; --accent-wash: #FBD9C7; --accent-soft: #FCEFE8;
     --ok: #1F6B3E; --bad: #B3261E; --bad-soft: #FBEDEC;
     --s1: .5rem; --s2: 1rem; --s3: 1.5rem; --s4: 2.5rem; --s5: 3.5rem; --s6: 5rem;
     --r: 16px;
@@ -243,7 +243,7 @@ ${idList(shortIds)}`
   /* Used by web/sample-report.html, which is this renderer's output published as a page.
      A sample report that is not labelled a sample is a fabricated finding. */
   .illustration { display: inline-block; font-family: var(--mono); font-size: .68rem;
-                  letter-spacing: .15em; text-transform: uppercase; color: var(--accent);
+                  letter-spacing: .15em; text-transform: uppercase; color: var(--accent-ink);
                   background: var(--accent-soft); border-radius: 999px;
                   padding: .4rem .75rem; margin: var(--s3) 0 0; }
   footer { margin-top: var(--s6); color: var(--dim); font-size: .85rem; }
